@@ -2,131 +2,127 @@
 # v0.19.25
 
 #> [frontmatter]
-#> chapter = 2
-#> section = 2
-#> order = 2
-#> image = "https://raw.githubusercontent.com/fonsp/Pluto.jl/580ab811f13d565cc81ebfa70ed36c84b125f55d/demo/plutodemo.gif"
-#> title = "Add Pluto notebooks"
-#> tags = ["module2", "track_julia", "track_material", "Pluto", "PlutoUI"]
+#> homework_number = "1"
+#> order = "2.5"
+#> title = "Periodic orbits"
+#> tags = ["module2", "homeworks"]
 #> layout = "layout.jlhtml"
+#> description = "Proof of periodic orbits"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 055ef0df-8ab8-4e54-a476-89d521f29ee0
+# ╔═╡ 75b9bee9-7d03-4c90-b828-43e9e946517b
 using PlutoTeachingTools, PlutoUI
 
-# ╔═╡ 4f643fd4-1e8d-4304-961b-a30a37a58de3
-TableOfContents()
-
-# ╔═╡ acdd466e-14f5-11ee-1921-93e6c67d7ec4
+# ╔═╡ e022e3ce-15d1-11ee-2c26-a506ce7d9895
 md"""
-## Add Pluto notebooks
+# Sample Homework
 
-[Pluto.jl](https://plutojl.org/) is a revolutionary text-editor for reactive and interactive programming.
-
-To start creating a Pluto notebook, open a terminal and launch Julia, then do
-
-```julia
-using Pluto; Pluto.run()
-```
-
-This will launch a Pluto session, where you can write your notebook.
-
-To add the front-matter, you can use Plut FrontmatterGUI, as the following short video clip shows.
-
-$(danger(md"For pluto notebooks, you will need to set layout to layout.jlhtml"))
+This notebook showcases some of the features of [`PlutoTeachingTools.jl`](https://github.com/JuliaPluto/PlutoTeachingTools.jl) and how to use these to write homework assignment in Pluto.
 """
 
-# ╔═╡ 832a1b2f-42dc-4a5d-9389-9f8f35a1759b
-html"""
-<video controls="controls" width="800" height="600" name="Video Name">
-  <source src="https://user-images.githubusercontent.com/6933510/207080363-b912d591-f6f6-4522-a6fe-701e5ab04f0b.mov">
-</video>"""
+# ╔═╡ 2504b43f-f435-4dc6-8fe1-ce2df23ccfc1
+tip(md"""For a deeper tour of `PlutoTeachingTools.jl`, check their [documentation](https://juliapluto.github.io/PlutoTeachingTools.jl/example.html)""")
 
-# ╔═╡ 8656f15c-a603-45f6-8ac6-4941580830e8
-md"""## Pluto 101
+# ╔═╡ 98c25807-6acd-4d79-8b6d-a335f7d8395a
+md"""
+## Useful functionalities
 
-Pluto is a notebook for Julia! It is **reactive**, **lightweight** and has **powerful interactivity tools**. This will allow you to make your lesson material more engaging for students. Here are a few highlights of Pluto. 
+`PlutoTeachingTools.jl` has some functions like `correct`, `still_missing`, here a few demoes
+"""
 
-$(tip(md" To learn more, check out [Pluto featured notebooks](https://featured.plutojl.org/), the JuliaCon video at the beginning of this notebook, or the presentations at [PlutoCon 2021](https://www.youtube.com/playlist?list=PLP8iPy9hna6T5sNOTeGdiqygHe_09geEW)."))
-### Writing code in Pluto
+# ╔═╡ 4a6009fb-337e-4246-a086-a1571915bfef
+correct()
 
-In Pluto code is written in cells, to add some code, simply create a new cell and type in. Each cell should contain 1 julia expression (function definition, if-statement, variable assignment, etc.).
+# ╔═╡ 48090c34-8972-4ace-b9fc-d34fb609c4f9
+still_missing()
 
-```julia
-if rand() > 0.5
-  "hi"
+# ╔═╡ 71f176dd-27d7-4856-be4f-23c2a8815f24
+keep_working()
+
+# ╔═╡ 520d73e9-0a29-4a00-9812-307e80cc061c
+keep_working(md"you can also give custom text to the boxes")
+
+# ╔═╡ c52bc95d-d195-48c9-92f2-fa6970387940
+hint(md"this is a hint, hover the box to unblur the text")
+
+# ╔═╡ f31da618-dd0c-4adb-a8ba-924a5722848c
+md"""
+## Exercise 1: a simple exercise
+
+Replace missing with the value `1`.
+"""
+
+# ╔═╡ 0d208bc6-88fa-43b8-9b33-a6453ec23a71
+x = missing
+
+# ╔═╡ 60c02a2a-1ea6-4629-842e-a00e45673ef1
+if ismissing(x)
+	still_missing()
+elseif x == 1 && x isa Int
+	correct()
+elseif x == 1 && !(x isa Int)
+	b1 = almost(md"""Your variable has the right value, but it's not quite the right answer. Read carefully the instructions""")
+	b2 = hint(md"""What type should the value of x be?""")
+	md"""
+	$b1
+	$b2
+	"""
 else
-  "there"
+	keep_working(md"""That is not the right answer! Keep trying!""")
 end
-```
 
-or
+# ╔═╡ 110bcb95-04c2-4e5c-94ef-3c402eabf235
+md"""
+here is a short demo of how it looks like when the student tries to solve the exercise
+"""
 
-```julia
-a = 1
-```
+# ╔═╡ 18014fde-b056-42f1-9dc8-f0b935a8630c
+Resource("https://user-images.githubusercontent.com/49938764/249749643-8cc12de3-2b50-4182-b95d-686c2c18332c.mov", :width => 500, :autoplay => "", :loop => "")
 
-or
+# ╔═╡ 9f1cc6fd-d3ac-41a1-a761-897f421ce2f0
+md"""
+## Exercise 2
 
-```julia
-function f()
- return rand() ^ 2
+Write a function called `myfun` that takes as input an integer and returns its square.
+
+Define a variable called `y` and assign `myfun(3)` to it.
+"""
+
+# ╔═╡ d56b3483-c1c8-4f31-929f-3d6e2b1124f4
+let
+if !@isdefined(myfun)
+	func_not_defined(:myfun)
+else
+	test_values = [1, 2, 3, 4, 5]
+	msg1 = correct()
+	for t in test_values
+		if myfun(t) != t^2
+			msg1 = keep_working(md"Test failed for input $t, expected $(t^2), but got $(myfun(t))")
+			break
+		end
+	end
+	msg1
 end
-```
+end
 
-**However**, multiple expressions in the same cell are not allowed, for example
+# ╔═╡ 10fc3ffd-e4ec-40ab-b645-769d376794fe
+if !@isdefined(y)
+	var_not_defined(:y)
+elseif y == 9
+	correct()
+else
+	keep_working(md"Evaluated expression y = $y is incorrect.")
+end
 
-```julia
-a = 1
-b = 2
-a + b
-```
-
-cannot be written in the same cell. You have two alternatives
-
-1. Split it into multiple cells (recommended to make reactivity better).
-2. Wrap your staments inside a `begin ... end` or `let ... end` block. The difference is that the latter introduces a local scope, hence variables defined inside `let` are not visibles from outside.
-
-### Reactivity
-
-Pluto is reactive! This means that if you define a variable `a` in a cell, when you edit the variable value, all cells depending on that variable are automatically re-evaluated. A few notes
-
-1. As mentioned above, better to have a single variable assignment per cell, this will make the dependency graph slimmer and reactivity smoother.
-2. Code modifying a given variable should be in the same cell, i.e. you cannot have two cells modifying the same variable.
-
-Here is a summarizing demo
-
-"""
-
-# ╔═╡ ba9f13cc-bf18-4589-9e89-3d5c869e158f
-Resource("https://raw.githubusercontent.com/fonsp/Pluto.jl/580ab811f13d565cc81ebfa70ed36c84b125f55d/demo/plutodemo.gif", :width => 350)
-
-# ╔═╡ d97ae81e-fd53-4b0a-a990-abf173b0c1ab
+# ╔═╡ 9e18fc7b-758a-4a63-8550-e04296cbea04
 md"""
-### Built-in environment
-
-Pluto is designed with reproducibility in mind! 
-
-To use packages registered in the Julia general registry, just type `using MyPackage` in some cells, as done at the beginning of this notebook. Pluto will automatically download the package!
-
-The `Project.toml` and `Manifest.toml` (what Julia uses to record all libraries, their versions and dependencies) are stored inside the notebook, making it fully batteries included!
-
-$(Resource("https://user-images.githubusercontent.com/6933510/134823403-fbb79d7f-dd3e-4712-b5d5-b48ad0770f13.gif", :width => 400))
+and here is a quick demo of the exercise in action
 """
 
-# ╔═╡ 177b8901-68ad-4319-b4fa-28fb30f3a731
-md"""
-### Interactivity
-
-Pluto has great support to make your notebooks interactive! It allows you to associate variables with sliders and buttons that you can use to interactively change the result of the code.
-
-![](https://user-images.githubusercontent.com/6933510/136196607-16207911-53be-4abb-b90e-d46c946e6aaf.gif)
-
-
-The easiest way to harness the power of Pluto interactivity is to use [PlutoUI.jl](https://github.com/juliapluto/PlutoUI.jl), which is showcased in the [next lecture](https://juliapluto.github.io/mod2_add_material/plutoui_showcase/).
-"""
+# ╔═╡ 2fde68f8-7705-4e6f-84e4-27d720e7ab95
+Resource("https://user-images.githubusercontent.com/49938764/249748007-d0b2d773-6b21-49d4-89db-ad737af510fe.mov", :width => 500, :autoplay => "", :loop => "")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -494,13 +490,24 @@ version = "17.4.0+0"
 """
 
 # ╔═╡ Cell order:
-# ╠═055ef0df-8ab8-4e54-a476-89d521f29ee0
-# ╠═4f643fd4-1e8d-4304-961b-a30a37a58de3
-# ╟─acdd466e-14f5-11ee-1921-93e6c67d7ec4
-# ╟─832a1b2f-42dc-4a5d-9389-9f8f35a1759b
-# ╟─8656f15c-a603-45f6-8ac6-4941580830e8
-# ╟─ba9f13cc-bf18-4589-9e89-3d5c869e158f
-# ╟─d97ae81e-fd53-4b0a-a990-abf173b0c1ab
-# ╟─177b8901-68ad-4319-b4fa-28fb30f3a731
+# ╠═75b9bee9-7d03-4c90-b828-43e9e946517b
+# ╟─e022e3ce-15d1-11ee-2c26-a506ce7d9895
+# ╟─2504b43f-f435-4dc6-8fe1-ce2df23ccfc1
+# ╟─98c25807-6acd-4d79-8b6d-a335f7d8395a
+# ╠═4a6009fb-337e-4246-a086-a1571915bfef
+# ╠═48090c34-8972-4ace-b9fc-d34fb609c4f9
+# ╠═71f176dd-27d7-4856-be4f-23c2a8815f24
+# ╠═520d73e9-0a29-4a00-9812-307e80cc061c
+# ╠═c52bc95d-d195-48c9-92f2-fa6970387940
+# ╟─f31da618-dd0c-4adb-a8ba-924a5722848c
+# ╠═0d208bc6-88fa-43b8-9b33-a6453ec23a71
+# ╠═60c02a2a-1ea6-4629-842e-a00e45673ef1
+# ╟─110bcb95-04c2-4e5c-94ef-3c402eabf235
+# ╟─18014fde-b056-42f1-9dc8-f0b935a8630c
+# ╟─9f1cc6fd-d3ac-41a1-a761-897f421ce2f0
+# ╠═d56b3483-c1c8-4f31-929f-3d6e2b1124f4
+# ╠═10fc3ffd-e4ec-40ab-b645-769d376794fe
+# ╟─9e18fc7b-758a-4a63-8550-e04296cbea04
+# ╟─2fde68f8-7705-4e6f-84e4-27d720e7ab95
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
