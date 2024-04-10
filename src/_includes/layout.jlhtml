@@ -2,7 +2,7 @@ $(begin
     import Pluto
     "The contents of `<head>` from a Pluto HTML export."
     const pluto_head = let
-        default = Pluto.generate_html(; 
+        default = Pluto.generate_html(;
             pluto_cdn_root=Pluto.PLUTO_VERSION < v"0.19" ? "https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@9ca70c36/frontend/" : nothing)
         m = match(r"<head.*?>(.*)</head>"s, default)
         reduce([
@@ -15,16 +15,16 @@ $(begin
             replace(s, r => "")
         end |> HTML
     end
-    
+
     f(x,y) = get(page.output.frontmatter, x, y)
-    
+
     function section_number(frontmatter)
         ch = get(frontmatter, "chapter", nothing)
         se = get(frontmatter, "section", nothing)
-        
+
         isnothing(ch) || isnothing(se) ? nothing : "$(ch).$(se)"
     end
-    
+
     nothing
 end)<html lang="en">
 <head>
@@ -114,16 +114,16 @@ $(pluto_head)
                     let
                         input = other_page.input
                         output = other_page.output
-                        
+
                         number = section_number(output.frontmatter)
-                        
+
                         name = get(output.frontmatter, "title", basename(input.relative_path))
                         desc = get(output.frontmatter, "description", nothing)
                         tags = get(output.frontmatter, "tags", String[])
                         active = page.url == other_page.url
-                        
+
                         homework_number = get(output.frontmatter, "homework_number", nothing)
-                        
+
                         href = root_url * "/" * other_page.url
 
                         class = [
@@ -131,7 +131,7 @@ $(pluto_head)
                             homework_number === nothing ? "lecture" : "homework",
                             ("tag_$(replace(x, " "=>"_"))" for x in tags)...,
                         ]
-                        
+
                         if homework_number === nothing
                             @htl("""<li class=$(class)><a href=$(href) title=$(desc)><span class="entry-number">$(number)</span> $(name)</a></li>""")
                         else
@@ -176,7 +176,7 @@ $(pluto_head)
                 <h1>$(
                     f("title", basename(page.input.relative_path))
                 )</h1>
-                
+
                 $(!isempty(f("youtube_id", "")) ? @htl("""
                 <div class="video">
 
@@ -188,12 +188,6 @@ $(pluto_head)
                 """) : nothing)
             </div>"""))
         $(content)
-        <div class="page-foot">
-            <div class="copyright">
-                <a href="$(metadata["course_info"]["repo"])"><b>Edit this page on <img class="github-logo" src="https://unpkg.com/ionicons@5.1.2/dist/svg/logo-github.svg"></b></a><br>
-                Website based on the MIT course <a href="https://computationalthinking.mit.edu"><em><b>Computational Thinking</b>, a live online Julia/Pluto textbook</em></a> and built with <a href="https://plutojl.org/">Pluto.jl</a> and the <a href="https://julialang.org">Julia programming language</a>.
-            </div>
-        </div>
         </div>
     </div>
 </body>

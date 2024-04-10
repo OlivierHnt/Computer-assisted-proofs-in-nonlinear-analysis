@@ -4,10 +4,10 @@
 #> [frontmatter]
 #> homework_number = "1"
 #> order = "2.5"
-#> title = "sample homework"
-#> tags = ["module2", "track_julia", "track_material", "homeworks", "pluto", "PlutoTeachingTools"]
+#> title = "Periodic orbits"
+#> tags = ["module2", "homeworks"]
 #> layout = "layout.jlhtml"
-#> description = "sample howework"
+#> description = "Proof of periodic orbits"
 
 using Markdown
 using InteractiveUtils

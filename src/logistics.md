@@ -13,5 +13,3 @@ main a img {
 </style>
 
 # Course logistics
-
-Describe here the logistics of your class.

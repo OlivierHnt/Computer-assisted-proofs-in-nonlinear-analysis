@@ -1,15 +1,11 @@
 Dict(
-    "title" => @htl("Computational thinking <strong>website template</strong>"),
+    "title" => @htl("<strong>Computer-assisted proofs in nonlinear analysis</strong>"),
 
-    # # add a disclaimer to the course webpage. Remove it if you dont want to include it.
-    "disclaimer" => md"""
-    This template will allow you to build a website like the **Computational thinking with Julia** class tought at MIT.
-    Use it to harness the power of Julia and Pluto in your own teaching and enhance students learning experience.
-    """,
+#     "disclaimer" => md"""
+#     """,
 
-    # Highlights the key features of your class to make it more engaging. Remove it if you dont want to include it.
     "highlights" => [
-        Dict("name" => "Easy to customise", 
+        Dict("name" => "Easy to customise",
              "text" => md"Let the template automate all of the website development and infrastructure, so that you can focus on the most important thing:
              **easily develop your lesson materials!**",
              "img" => "https://user-images.githubusercontent.com/6933510/168320383-a401459b-97f5-41df-bc7b-ebe76e4886cc.png"
