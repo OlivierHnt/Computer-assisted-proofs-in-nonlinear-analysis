@@ -3,11 +3,11 @@
 
 #> [frontmatter]
 #> homework_number = "1"
-#> order = "2.5"
+#> order = "3.5"
 #> title = "Periodic orbits"
 #> tags = ["module2", "homeworks"]
 #> layout = "layout.jlhtml"
-#> description = "Proof of periodic orbits"
+#> description = "Periodic orbits"
 
 using Markdown
 using InteractiveUtils

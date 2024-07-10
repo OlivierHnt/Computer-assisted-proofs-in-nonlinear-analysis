@@ -1,10 +1,10 @@
 ---
 title: "Periodic orbits"
-order: 1
+order: 3
 chapter: 2
-section: 1
+section: 2
 layout: "md.jlmd"
-tags: ["module2", "track_ode"]
+tags: ["module2"]
 ---
 
-## Something about periodic orbits for ODEs...
+## Jan Bouwe's section

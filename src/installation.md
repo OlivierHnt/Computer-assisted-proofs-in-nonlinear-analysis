@@ -7,7 +7,7 @@ layout: "md.jlmd"
 
 $(
     begin
-        # these special elements will automatically update to read the latest Julia version. See the JavaScript snippet at the bottom of this page to see how it works!
+        # these special elements will automatically update to read the latest Julia version (cf. the JavaScript snippet at the bottom of this page)
 
         version = html"<auto-julia-version>1.10.0</auto-julia-version>"
         pkg_version = html"<auto-julia-version short>1.10</auto-julia-version>"
@@ -16,51 +16,41 @@ $(
     end
 )
 
-# Install Julia & RadiiPolynomial
-
 ## Step 1: Install Julia
 
-Go to [https://julialang.org/downloads](https://julialang.org/downloads) and download the current stable release, using the correct version for your operating system (Linux x86, Mac, Windows, etc).
+Download the current stable release of Julia on [https://julialang.org/downloads](https://julialang.org/downloads), using the correct version for your operating system (Linux x86, Mac, Windows, etc).
 
-## Step 2: Run Julia
+## Step 2: Install RadiiPolynomial
 
-After installing, **make sure that you can run Julia**. On some systems, this means searching for the Julia program installed on your computer; in others, it means running the command `julia` in a terminal.
+Next we will install [RadiiPolynomial](https://github.com/OlivierHnt/RadiiPolynomial.jl), the library for computer-assisted proofs that we will be using during the course. RadiiPolynomial is a Julia package designed for computer-assisted proofs relying on spectral methods and the contraction mapping theorem.
 
-*Make sure that you are able to launch Julia before proceeding!*
+Open the **Julia REPL**. This is the command-line interface to Julia: there you type a command, and when you press ENTER, it runs, and you see the result.
 
-## Step 3: Install RadiiPolynomial
-
-Next we will install [RadiiPolynomial](https://github.com/OlivierHnt/RadiiPolynomial.jl), the library for computer-assisted proofs that we will be using during the course. RadiiPolynomial is a Julia package designed for rigorous spectral methods.
-
-Open the **Julia REPL**. This is the command-line interface to Julia, similar to the previous screenshot.
-There you type a command, and when you press ENTER, it runs, and you see the result.
-
-To install RadiiPolynomial, we want to run a _package manager command_. To switch from _Julia_ mode to _Pkg_ mode, type `]` (closing square bracket) at the `julia>` prompt:
+To install RadiiPolynomial, we want to run a _package manager command_. To switch from _Julia mode_ to _Pkg mode_, type `]` (closing square bracket) at the <code><span style="color: #399746;">julia></span></code> prompt:
 
 <pre><code>
-julia> ]
+<span style="color: #399746;">julia></span> ]
 
-(&#64;v$(pkg_version)) pkg>
+<span style="color: #1f83ff;">(&#64;v$(pkg_version)) pkg></span>
 </code></pre>
 
-The line turns blue and the prompt changes to `pkg>`, telling you that you are now in _package manager mode_. This mode allows you to do operations on **packages** (also called libraries).
+The line turns blue and the prompt changes to <code><span style="color: #1f83ff;">pkg></span></code>, telling you that you are now in _package manager mode_. This mode allows you to do operations on **packages** (also called libraries).
 
-Then, run the following (case sensitive) command to *add* (install) the package to your system by downloading it from the internet (you should only need to do this *once* for each installation of Julia):
+Run the following (case sensitive) command to *add* (install) the package to your system by downloading it from the internet (you should only need to do this *once* for each installation of Julia):
 
 <pre><code>
-(&#64;v$(pkg_version)) pkg> add RadiiPolynomial
-</code></pre>
+<span style="color: #1f83ff;">(&#64;v$(pkg_version)) pkg></span> add RadiiPolynomial
+</code>
+</pre>
 
-You can now close the terminal.
+## Step 3: Running RadiiPolynomial
 
-## Step 4: Running RadiiPolynomial
+To use the RadiiPolynomial library, type the following command in the REPL:
 
-Repeat the following steps whenever you want to work on a project.
-
-Start the Julia REPL, like you did during the setup. In the REPL, type:
-```julia
-julia> using RadiiPolynomial
-```
+<pre><code>
+<span style="color: #399746;">julia></span> using RadiiPolynomial
+</code>
+</pre>
 
 
 

@@ -6,7 +6,7 @@ Dict(
     "authors" => [
         "Olivier Hénot" => "https://olivierhnt.github.io/"
     ],
-    "institution" => "",
+    "institution" => "RadiiPolynomial",
     "institution_logo" => "logo.png",
     "repo" => "https://github.com/OlivierHnt/Computer-assisted-proofs-in-nonlinear-analysis"
 )

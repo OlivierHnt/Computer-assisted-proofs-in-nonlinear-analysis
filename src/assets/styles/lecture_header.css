@@ -15,7 +15,8 @@
 
 .lecture-header,
 .lecture-header h1 {
-    font-family: Vollkorn, serif;
+    /* font-family: 'Righteous'; */
+    font-family: 'Truculenta';
     font-weight: 700;
     font-feature-settings: "lnum", "pnum";
 }

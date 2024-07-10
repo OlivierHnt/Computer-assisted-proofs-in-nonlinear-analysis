@@ -1,4 +1,0 @@
-[
-    "ode" => "ODEs",
-    "pde" => "PDEs"
-]

@@ -19,7 +19,7 @@ else
     <div class="subjectscontainer wide">
       <h1>Highlights</h1>
       <div class="contain">
-      $(highlights)      
+      $(highlights)
       </div>
     </div>
     """)
