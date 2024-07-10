@@ -86,11 +86,16 @@ pre {
     tab-size: 4;
     white-space: pre-wrap;
     word-break: break-word;
+    border: 1px solid #FF6666; /* FF99CC */
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 14px;
 }
 
 pre,
 code {
     font-family: var(--system-fonts-mono);
+    /* font-family: 'Julia Mono', monospace; */
 }
 
 /* images and videos max out at full width */
@@ -307,7 +312,7 @@ body.binder:not(.offer_binder) {
 }
 
 /* Another strategy: leave the header in place but make the export menu hidden when it is not opened. */
-/* 
+/*
 header.show_export aside#export {
     visibility: initial;
 }
