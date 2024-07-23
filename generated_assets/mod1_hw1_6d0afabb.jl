@@ -1,68 +1,37 @@
 ### A Pluto.jl notebook ###
-# v0.19.43
+# v0.19.45
 
 #> [frontmatter]
-#> homework_number = "3"
+#> homework_number = "1"
 #> order = "1.5"
-#> title = "Rigorous computation of an eigenpair"
+#> title = "Operator norms"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
-end
-
 # ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
 using PlutoUI, Plots, RadiiPolynomial, PlutoTeachingTools
 
-# ╔═╡ c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
+# ╔═╡ 15be0e8a-408b-4db2-af7e-15261f54238e
 md"""
-**1.** Consider a matrix $M$, and an approximate eigenpair $(\bar{\lambda},\bar{u})$ of $M$. Assuming the corresponding exact eigenvalue $\lambda$ is simple, define a suitable $F=0$ problem, and derive the bounds needed to apply the Newton-Kantorovich theorem in that context.
+**1.** Consider the 1-norm on $\mathbb{R}^d$: $\Vert x\Vert_1 = \sum_{i=1}^d \vert x_i\vert$, and let $A$ be a $d\times d$ matrix of real numbers. Show that the operator norm induced by the 1-norm can be expressed as
+$\begin{align}
+\left\Vert A\right\Vert_1 = \max_{1\leq j\leq d} \sum_{i=1}^d \vert A_{i,j}\vert.
+\end{align}$
 """
 
-# ╔═╡ 7748e568-afc9-43cc-b2bd-5a231d86f455
-hint(md"The *natural* zero finding problem is $G(\lambda,u) = (M-\lambda I)u$, but it has one too many unknowns. This is consistent with the fact that zeros of $G$ are not isolated (one can always rescale the eigenvector). Therefore, a suitable zero finding problem needs to incorporate a normalization condition, for instance:
-
-$\begin{align}
-F(\lambda,u) =
-\begin{pmatrix}
-\langle u,\bar{u} \rangle -1 \\
-(M-\lambda I)u
-\end{pmatrix}.
-\end{align}$
-")
-
-# ╔═╡ cab728f1-9ff5-4bdd-8101-5c39718c4d53
+# ╔═╡ 24407233-72ba-4341-84ec-c1a1148c3ff0
 md"""
-**2.** For any positive integer $N$, the Wilkinson matrix $W_{2N+1}$ is the following $(2N+1)\times(2N+1)$ tridiagonal matrix:
+**2.** Let us generalize this result to infinite dimensional spaces (this will be useful for later parts of the tutorial). Consider a sequences of positive weights $\omega_k$, $k\in\mathbb{N}$, and the sequence space
 
 $\begin{align}
-W_{2N+1} =
-\begin{pmatrix}
-N & 1 & & & & & \\
-1 & N-1 & 1 & & & & \\
- & 1 & \ddots & \ddots & & & \\
- & & \ddots & 0 & \ddots & & \\
- & & & \ddots & \ddots & 1 & \\
- & & & & 1 & N-1 & 1 \\
- & & & & & 1 & N
-\end{pmatrix}
+\ell^1_\omega = \left\{ x \in \mathbb{R}^{\mathbb{N}},\ \Vert x\Vert_\omega := \sum_{i\in\mathbb{N}} \vert x_i\vert \omega_i < \infty \right\}.
 \end{align}$
 
-Rigorously enclose all eigenpairs of $W_7$.
+Given an *infinite matrix* $A=\left(A_{i,j}\right)_{i,j\in\mathbb{N}}$ representing a linear operator on $\ell^1_\omega$, derive a formula for the operator norm of $A$.
 """
-
-# ╔═╡ d61514c3-3b0e-4658-8b31-de9f9514a9c3
-# We should probably provide them with some code to get numerical eigenpairs, and maybe also some code for W_{2N+1}
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1252,69 +1221,8 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╟─7fc40507-eda3-474d-a454-04e9173a7adb
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
-# ╟─15e00db2-dc62-43a5-9114-f734ce372003
-# ╟─c33dc650-3f94-11ef-398a-8bbc4a2b69b8
-# ╟─2fe25b56-0fcc-41a0-b74a-2bd650c387d5
-# ╟─05df1902-b4b8-4fd7-ab91-ad01f4fa413e
-# ╟─2653b081-ac49-4ccc-afa6-3d6253d93ed7
-# ╟─730eeed9-a736-48df-a853-94f45dedd836
-# ╟─e3be34b1-bc05-49f5-884d-78886f7a9509
-# ╟─6a625351-cadf-4d51-b30a-ef070ca23552
-# ╟─8b779da9-46e2-442d-af54-5ad0284e7b84
-# ╟─c352e6d8-fd3d-4070-8bdf-4c98ae555b69
-# ╟─6eeb3554-a50c-4f3d-b676-95368021204c
-# ╟─94e323ed-5e13-413b-8bcb-1909dd6e14a5
-# ╟─accd6469-25c3-40d7-959b-5663d560437c
-# ╟─542de1ab-1b8b-49c8-8960-704c2351407a
-# ╟─23923d27-9905-4f26-8ef5-53f183d290da
-# ╟─66ca51ad-0f2e-4f3c-8dd0-e66649b224d9
-# ╟─f7d40916-2d5b-47f2-9fe9-6635363978ae
-# ╟─21711cc5-dc6b-4aed-8783-383f718b121a
-# ╠═2d68d26d-6e10-407f-8227-515ddadd9599
-# ╠═78f17262-7ffc-4d74-835c-f17863817b9a
-# ╟─c359bec8-4a1a-4e34-9f56-1f70f4fa5cbe
-# ╠═c44fd902-7655-43b5-82cc-53c2ecc4f77b
-# ╠═4c15bb79-2591-4f2a-9243-ff811de70df7
-# ╟─97fcd17c-9710-4753-89f5-9d592a33d0b1
-# ╟─c41f292d-b61a-4386-90ca-358d2c3faaea
-# ╠═f8eab26f-c893-4d2e-b4e8-6b59f33cbc9c
-# ╠═556163e0-80d2-4f4e-b198-b8e0922438db
-# ╟─97fadca1-fcf9-46b8-aa07-c615ca0deb7f
-# ╟─6d50e443-73fa-4f76-a445-36dad18f9669
-# ╟─3b9a0bac-b7a0-47c5-87b9-7e4224532b05
 # ╟─15be0e8a-408b-4db2-af7e-15261f54238e
 # ╟─24407233-72ba-4341-84ec-c1a1148c3ff0
-# ╟─718fd030-4316-4a15-ae9b-19ed6afc1885
-# ╟─aff38e1d-416c-472b-81ea-820d7430dded
-# ╟─f283c615-fcde-4752-8d02-fafaa0e73b7d
-# ╠═3b098d28-5fc8-4463-a59b-08bca638d5be
-# ╟─7b944744-628c-4ac9-8528-6dc19789ddb0
-# ╠═fdd9fd8b-a3df-455d-bfe8-321723f5c566
-# ╟─8b9a0f39-21f0-4288-bb2b-a594d6712292
-# ╟─3d27e2d3-e5e8-4e95-9294-23e416608b6a
-# ╟─03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
-# ╠═4ac782db-4d32-4bf8-bddf-cc8f8b5e6217
-# ╟─803b494b-c397-41aa-a6a2-0f7dbb098b8d
-# ╟─c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
-# ╟─7748e568-afc9-43cc-b2bd-5a231d86f455
-# ╟─cab728f1-9ff5-4bdd-8101-5c39718c4d53
-# ╠═d61514c3-3b0e-4658-8b31-de9f9514a9c3
-# ╟─81b991e1-8ad6-4675-b4f3-8b8f774231ce
-# ╟─81ed6d83-622f-46ac-b0c3-0fae0c8ef378
-# ╟─6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
-# ╟─05ad3f54-e92c-4ab5-b276-aa7763ba36b3
-# ╟─82a5527f-0661-4a32-b758-5708bb184968
-# ╟─e34560b8-93af-4f5b-8e4f-f5c48ef29d3c
-# ╟─ebd74ce5-c039-404c-a0b3-1d41b16492a7
-# ╟─45e10c91-f161-43a5-9c9e-5b4dca6a8e53
-# ╟─b0590931-8d44-47b9-9153-00da2a418b00
-# ╟─d01c5817-c4b6-4502-81f6-51ae5715117b
-# ╟─6488427e-9e34-46ef-a581-1768a8856234
-# ╟─bc052916-db0e-43a2-bbb0-76b917d6f638
-# ╟─3686e5b2-daac-470d-b9e3-4bd5706e5894
-# ╟─1da3287d-333e-4801-8bf2-13041d45ccc8
-# ╟─afef60df-375e-439b-a973-ee36439731f2
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
