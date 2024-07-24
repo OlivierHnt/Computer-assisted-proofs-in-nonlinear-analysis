@@ -66,12 +66,13 @@ $(pluto_head)
                     <h2><span>$(metadata["course_info"]["course_subtitle"])</span></h2>
                 </div>
                 <div class="authors">
-                    by $(let
+                    by<br>$(let
                         authors = metadata["course_info"]["authors"]
                         nauthors = length(authors)
                         map(enumerate(authors)) do (i, (author_name, author_link))
-                            sep = i == nauthors ? "" : ", "
-                            @htl("""<a href="$(author_link)">$(author_name)</a>$(sep)""")
+                            sep = i == nauthors ?
+                                @htl("""<a href="$(author_link)" target="_blank">$(author_name)</a>""") :
+                                @htl("""<a href="$(author_link)" target="_blank">$(author_name)</a>,<br>""")
                         end
                     end)
                 </div>
