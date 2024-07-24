@@ -108,7 +108,7 @@ $(pluto_head)
                         if homework_number === nothing
                             @htl("""<li class=$(class)><a href=$(href) title=$(desc)><span class="entry-number">$(number)</span> $(name)</a></li>""")
                         else
-                            @htl("""<li class=$(class)><a href=$(href) title=$(desc)><span class="entry-number">Homework $(homework_number):</span> $(name)</a></li>""")
+                            @htl("""<li class=$(class)><a href=$(href) title=$(desc)><span class="entry-number">Exercise $(homework_number):</span> $(name)</a></li>""")
                         end
                     end for other_page in collections[section_id].pages
                 ])
@@ -140,7 +140,7 @@ $(pluto_head)
         <div id="pages-content">
            $(isempty(f("title", "")) ? nothing : @htl("""<div class="lecture-header" >
                 $(if !isempty(f("homework_number", ""))
-                @htl("""<p class="number">Homework $(f("homework_number", ""))</p>""")
+                @htl("""<p class="number">Exercise $(f("homework_number", ""))</p>""")
                 elseif !isempty(f("chapter", "")) && !isempty(f("section", ""))
                 @htl("""<p class="number">Section $(f("chapter", "-")).$(f("section", "-"))</p>""")
                 else

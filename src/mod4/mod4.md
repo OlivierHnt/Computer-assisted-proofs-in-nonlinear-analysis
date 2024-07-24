@@ -1,10 +1,9 @@
 ---
 title: "Invariant manifolds of equilibria"
-order: 4
-chapter: 2
-section: 3
+order: 1
+chapter: 4
 layout: "md.jlmd"
-tags: ["module2"]
+tags: ["module4"]
 ---
 
 ## Jean-Philippe's section

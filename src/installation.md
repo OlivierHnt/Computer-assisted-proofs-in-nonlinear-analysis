@@ -43,15 +43,6 @@ Run the following (case sensitive) command to *add* (install) the package to you
 </code>
 </pre>
 
-## Step 3: Running RadiiPolynomial
-
-To use the RadiiPolynomial library, type the following command in the REPL:
-
-<pre><code>
-<span style="color: #399746;">julia></span> using RadiiPolynomial
-</code>
-</pre>
-
 
 
 

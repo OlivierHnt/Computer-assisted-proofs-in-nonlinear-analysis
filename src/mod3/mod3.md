@@ -1,10 +1,9 @@
 ---
 title: "Periodic orbits"
-order: 3
-chapter: 2
-section: 2
+order: 1
+chapter: 4
 layout: "md.jlmd"
-tags: ["module2"]
+tags: ["module3"]
 ---
 
 ## Jan Bouwe's section

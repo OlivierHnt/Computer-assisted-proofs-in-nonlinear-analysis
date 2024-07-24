@@ -1,10 +1,10 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.19.43
 
 #> [frontmatter]
 #> chapter = 1
-#> order = "1"
-#> title = "Finite Dimensions"
+#> order = 1
+#> title = "Lecture notes: Finite-dimensional problems"
 #> tags = ["module1"]
 #> layout = "layout.jlhtml"
 
@@ -40,19 +40,16 @@ md"""
 
 Consider the sequence defined by
 
-```math
-\begin{equation}
-\tag{1.1}\label{eq:logistic}
+$\begin{align}
 x_{n+1} = \mu x_n (1-x_n),
-\end{equation}
-```
+\end{align}$
 
 where $\mu$ is a parameter in $[0,4]$ and the initial condition $x_0$ is in $[0,1]$.
 """
 
 # ╔═╡ 2fe25b56-0fcc-41a0-b74a-2bd650c387d5
 md"""
-The slider below can be used to vary the value of $\mu$. Equation $\eqref{eq:logistic}$
+The slider below can be used to vary the value of $\mu$.
 """
 
 # ╔═╡ 05df1902-b4b8-4fd7-ab91-ad01f4fa413e
@@ -76,7 +73,7 @@ begin
 end
 
 # ╔═╡ e3be34b1-bc05-49f5-884d-78886f7a9509
-Markdown.MD(Markdown.Admonition("tip", "Theorem [Ref]", [md"Let $f:[0,1]\to[0,1]$ be continuous, and consider the dynamical system defined by $x_{n+1} = f(x_n)$. If there exist an orbit of period 3, i.e. $x_0$ in $[0,1]$ such that $x_0\neq x_1\neq x_2$ and $x_3=x_0$, then the system is *chaotic*. In particular, there exists orbits of any period."]))
+Markdown.MD(Markdown.Admonition("tip", "Theorem", [md"Let $f:[0,1]\to[0,1]$ be continuous, and consider the dynamical system defined by $x_{n+1} = f(x_n)$. If there exists an orbit of period 3, i.e. $x_0$ in $[0,1]$ such that $x_0\neq x_1\neq x_2$ and $x_3=x_0$, then the system is *chaotic*.  In particular, there exist orbits of any period.[^Sha64][^LY75]"]))
 
 # ╔═╡ 6a625351-cadf-4d51-b30a-ef070ca23552
 md"""
@@ -112,7 +109,7 @@ $\begin{align}
 It there exists $r>0$ such that
 
 $\begin{align}
-Y + \int_0^r Z(s) \mathrm{d}s &\leq r \\
+Y + \int_0^r Z(s) \mathrm{d}s &\leq r  \\
 Z(r) &< 1,
 \end{align}$
 
@@ -122,7 +119,7 @@ then $T$ has a unique fixed point $x^*$ such that $\Vert x^* - \bar{x} \Vert \le
 # ╔═╡ 94e323ed-5e13-413b-8bcb-1909dd6e14a5
 Markdown.MD(Markdown.Admonition("note", "Remarks",
 [md"""
-- The bound $Z$ is actually only needed locally, i.e. we only need $Z(s)$ for $s\leq r$. Therefore, one can fix a priori some $r^*>0$, and only ask for $Z$ to be defined on $[0,r^*]$ and to satisfy $\Vert DT(x) \Vert \leq Z(\Vert x-\bar{x}\Vert)$ for all $x$ in $X$ such that $\Vert x-\bar{x}\Vert \leq r^*$. Of course, we are then only allowed to consider $r\in(0,r^*]$.
+- The bound $Z$ is actually only needed locally, i.e. we only need $Z(s)$ for $s\leq r$. Therefore, one can fix a priori some $r^*>0$, and weaken then assumption by only asking for $Z$ to be defined on $[0,r^*]$ and to satisfy $\Vert DT(x) \Vert \leq Z(\Vert x-\bar{x}\Vert)$ for all $x$ in $X$ such that $\Vert x-\bar{x}\Vert \leq r^*$. Of course, we are then only allowed to consider $r\in(0,r^*]$.
 - In practice, studying carefully how $\Vert DT(x)$ depends on $\Vert x-\bar{x}\Vert$ allows us to get better bounds. However, we can sometimes get away with crude estimates. That is, we derive a constant $Z^*$ such that $\Vert DT(x) \Vert \leq Z^*$ for all $x$ in $X$ such that $\Vert x-\bar{x}\Vert \leq r^*$, and then use $Z(s) = Z^*$ for all $s\leq r^*$. The conditions on $r$ then simplify, and, if $Z^*<1$, we can take any $r\geq \frac{Y}{1-Z^*}$.
 """]))
 
@@ -158,7 +155,7 @@ then $F$ has a unique zero $x^*$ such that $\Vert x^* - \bar{x} \Vert \leq r$.
 
 # ╔═╡ 23923d27-9905-4f26-8ef5-53f183d290da
 md"""
-This corollary is a simplified version of the Newton-Kantorovich Theorem [Ref]. Many slight variations can be found in the literature, and are used in many many CAPs [^1].
+This corollary is a simplified version of the Newton-Kantorovich Theorem [^Ort68]. Many slight variations can be found in the literature, and are used in many many CAPs (see for instance [^BL15] [^NPW19] and the references therein).
 """
 
 # ╔═╡ 66ca51ad-0f2e-4f3c-8dd0-e66649b224d9
@@ -168,9 +165,9 @@ md"""
 
 # ╔═╡ f7d40916-2d5b-47f2-9fe9-6635363978ae
 md"""
-When we want to use the Newton-Kantorovich theorem with $\bar{x}$ being an approximate solution obtained using the computer, we also need to use the computer to evaluate quantities like $\Vert F(\bar{x}) \Vert $ and get the required bounds $Y$ and $Z$. However, by default the computer will evaluate $\Vert F(\bar{x}) \Vert$ using floating-point arithmetic, and the output will contain rounding errors. In particular, if we set $Y = \Vert F(\bar{x}) \Vert$ on the compputer, we in fact do not know whether $Y$ actually satifies the assumption of the Newton-Kantorovich theorem or not.
+When we want to use the Newton-Kantorovich theorem with $\bar{x}$ being an approximate solution obtained using the computer, we also need to use the computer to evaluate quantities like $\Vert F(\bar{x}) \Vert $ and get the required bounds $Y$ and $Z$. However, by default the computer will evaluate $\Vert F(\bar{x}) \Vert$ using floating-point arithmetic, and the output will contain rounding errors. In particular, if we set $Y = \Vert F(\bar{x}) \Vert$ on the computer, we in fact do not know whether $Y$ actually satifies the assumption of the Newton-Kantorovich theorem or not.
 
-Interval arithmetic gives us a way to control rounding errors and to get guaranteed results from the computer. We only give a brief description of interval arithmetic here, and refer to [Refs] for more comprehensive treatments.
+Interval arithmetic gives us a way to control rounding errors and to get guaranteed results from the computer. We only give a brief description of interval arithmetic here, and refer to [^Moo79] [^Tuc11] for more comprehensive treatments.
 """
 
 # ╔═╡ 21711cc5-dc6b-4aed-8783-383f718b121a
@@ -203,7 +200,7 @@ The rules of interval arithmetic then ensure that this property is preserved whe
 
 # ╔═╡ c41f292d-b61a-4386-90ca-358d2c3faaea
 md"""
-Similarly, if the variable `c` is an interval $[\underline{c},\overline{c}]$, and we do `d = exp(c)`, we would like to get for `d` an interval containing $\{\exp(c),\  d\in[\underline{d},\overline{d}]\}$. Usual arithmetic operations, as well as implementations of basic functions like `exp`, `log`, etc, complying with these rules are provided in interval arithmetic libraries. [Refs]
+Similarly, if the variable `c` is an interval $[\underline{c},\overline{c}]$, and we do `d = exp(c)`, we would like to get for `d` an interval containing $\{\exp(c),\  d\in[\underline{d},\overline{d}]\}$. Usual arithmetic operations, as well as implementations of basic functions like `exp`, `log`, etc, complying with these rules are provided in interval arithmetic libraries. We make use of the Julia library [IntervalArithmetic](https://github.com/JuliaIntervals/IntervalArithmetic.jl) in this tutorial, but there are many other interval arithmetic librairies, in different languages, like [Arb](https://arblib.org/) or [Intlab](https://www.tuhh.de/ti3/rump/intlab/).
 """
 
 # ╔═╡ f8eab26f-c893-4d2e-b4e8-6b59f33cbc9c
@@ -221,7 +218,13 @@ Markdown.MD(Markdown.Admonition("note", "Remarks",
 # ╔═╡ b8d56ba6-01da-4604-8dad-3e63ec203fd4
 md"""
 ## References
-[^1]: A. Hungria, J.-P. Lessard and J. D. Mireles James, Rigorous numerics for analytic solutions of differential equations: the radii polynomial approach, *Mathematics of Computation*, **85** (2016), 1427-1459
+[^BL15]: J. B. van den Berg and J.-P. Lessard. Rigorous numerics in dynamics. *Notices Amer. Math. Soc., 62(9), 2015.
+[^LY75]: T.-Y. Li and J. A. Yorke. Period Three Implies Chaos. *The American Mathematical Monthly*, 82(10):985--992, 1975.
+[^Moo79]: R. E. Moore. *Methods and applications of interval analysis*. SIAM, 1979
+[^Ort68]: J. M. Ortega. The Newton-Kantorovich theorem. *The American Mathematical Monthly*, 75(6):658--660, 1968.
+[^NPW19]: M. T. Nakao, M. Plum, and Y. Watanabe. *Numerical Verification Methods and Computer-Assisted Proofs for Partial Differential Equations*. Springer Singapore, 2019.
+[^Sha64]: A. N. Sharkowskii. Co-existence of the cycles of a continuous mapping of the line into itself. *Ukrainian Math. J.*, 16(1), 1964.
+[^Tuc11]: W. Tucker. *Validated numerics: a short introduction to rigorous computations*. Princeton University Press, 2011.
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -243,7 +246,7 @@ RadiiPolynomial = "~0.8.12"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.2"
 manifest_format = "2.0"
 project_hash = "7925f9f6cada232762e2f631a25cadf231226208"
 
@@ -300,9 +303,9 @@ version = "0.7.5"
 
 [[deps.ColorSchemes]]
 deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "PrecompileTools", "Random"]
-git-tree-sha1 = "b5278586822443594ff615963b0c09755771b3e0"
+git-tree-sha1 = "4b270d6465eb21ae89b732182c20dc165f8bf9f2"
 uuid = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
-version = "3.26.0"
+version = "3.25.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
@@ -341,7 +344,7 @@ weakdeps = ["Dates", "LinearAlgebra"]
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.1+0"
+version = "1.1.0+0"
 
 [[deps.ConcurrentUtilities]]
 deps = ["Serialization", "Sockets"]
@@ -459,16 +462,16 @@ uuid = "0656b61e-2033-5cc2-a64a-77c0f6c09b89"
 version = "3.4.0+0"
 
 [[deps.GR]]
-deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Preferences", "Printf", "Qt6Wayland_jll", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "p7zip_jll"]
-git-tree-sha1 = "629693584cef594c3f6f99e76e7a7ad17e60e8d5"
+deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Preferences", "Printf", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "p7zip_jll"]
+git-tree-sha1 = "3e527447a45901ea392fe12120783ad6ec222803"
 uuid = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
-version = "0.73.7"
+version = "0.73.6"
 
 [[deps.GR_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Cairo_jll", "FFMPEG_jll", "Fontconfig_jll", "FreeType2_jll", "GLFW_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pixman_jll", "Qt6Base_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "a8863b69c2a0859f2c2c87ebdc4c6712e88bdf0d"
+git-tree-sha1 = "182c478a179b267dd7a741b6f8f4c3e0803795d6"
 uuid = "d2c73de3-f751-5644-a686-071e5b155ba9"
-version = "0.73.7+0"
+version = "0.73.6+0"
 
 [[deps.Gettext_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "XML2_jll"]
@@ -929,24 +932,6 @@ git-tree-sha1 = "492601870742dcd38f233b23c3ec629628c1d724"
 uuid = "c0090381-4147-56d7-9ebc-da0b1113ec56"
 version = "6.7.1+1"
 
-[[deps.Qt6Declarative_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Qt6Base_jll", "Qt6ShaderTools_jll"]
-git-tree-sha1 = "e5dd466bf2569fe08c91a2cc29c1003f4797ac3b"
-uuid = "629bc702-f1f5-5709-abd5-49b8460ea067"
-version = "6.7.1+2"
-
-[[deps.Qt6ShaderTools_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Qt6Base_jll"]
-git-tree-sha1 = "1a180aeced866700d4bebc3120ea1451201f16bc"
-uuid = "ce943373-25bb-56aa-8eca-768745ed7b5a"
-version = "6.7.1+1"
-
-[[deps.Qt6Wayland_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Qt6Base_jll", "Qt6Declarative_jll"]
-git-tree-sha1 = "729927532d48cf79f49070341e1d918a65aba6b0"
-uuid = "e99dba38-086e-5de3-a5b1-6e4c66e897c3"
-version = "6.7.1+1"
-
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
@@ -1082,9 +1067,9 @@ deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[deps.TranscodingStreams]]
-git-tree-sha1 = "96612ac5365777520c3c5396314c8cf7408f436a"
+git-tree-sha1 = "60df3f8126263c0d6b357b9a1017bb94f53e3582"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
-version = "0.11.1"
+version = "0.11.0"
 weakdeps = ["Random", "Test"]
 
     [deps.TranscodingStreams.extensions]
@@ -1115,9 +1100,9 @@ version = "0.4.1"
 
 [[deps.Unitful]]
 deps = ["Dates", "LinearAlgebra", "Random"]
-git-tree-sha1 = "d95fe458f26209c66a187b1114df96fd70839efd"
+git-tree-sha1 = "dd260903fdabea27d9b6021689b3cd5401a57748"
 uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
-version = "1.21.0"
+version = "1.20.0"
 
     [deps.Unitful.extensions]
     ConstructionBaseUnitfulExt = "ConstructionBase"
@@ -1390,9 +1375,9 @@ version = "1.6.43+1"
 
 [[deps.libvorbis_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Ogg_jll", "Pkg"]
-git-tree-sha1 = "490376214c4721cdaca654041f635213c6165cb3"
+git-tree-sha1 = "b910cb81ef3fe6e78bf6acee440bda86fd6ae00c"
 uuid = "f27f6e37-5d2b-51aa-960f-b287f2bc3b7a"
-version = "1.3.7+2"
+version = "1.3.7+1"
 
 [[deps.mtdev_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1432,7 +1417,7 @@ version = "1.4.1+1"
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
-# ╟─c33dc650-3f94-11ef-398a-8bbc4a2b69b8
+# ╠═c33dc650-3f94-11ef-398a-8bbc4a2b69b8
 # ╟─2fe25b56-0fcc-41a0-b74a-2bd650c387d5
 # ╟─05df1902-b4b8-4fd7-ab91-ad01f4fa413e
 # ╟─2653b081-ac49-4ccc-afa6-3d6253d93ed7
