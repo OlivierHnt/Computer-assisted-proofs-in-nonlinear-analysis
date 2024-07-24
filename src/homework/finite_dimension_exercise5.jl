@@ -11,8 +11,11 @@
 using Markdown
 using InteractiveUtils
 
+# ╔═╡ 9099f41e-6239-4f7f-a3ec-82e7d4787f8f
+using PlutoTeachingTools
+
 # ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial, PlutoTeachingTools
+using RadiiPolynomial
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""<style>
@@ -95,7 +98,7 @@ RadiiPolynomial = "~0.8.12"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.2"
+julia_version = "1.10.4"
 manifest_format = "2.0"
 project_hash = "6b5a1c65b08c1cb67df2036186b2c2a085cfc3db"
 
@@ -136,7 +139,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.0+0"
+version = "1.1.1+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -487,6 +490,7 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
+# ╟─9099f41e-6239-4f7f-a3ec-82e7d4787f8f
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╟─45e10c91-f161-43a5-9c9e-5b4dca6a8e53
 # ╟─b0590931-8d44-47b9-9153-00da2a418b00

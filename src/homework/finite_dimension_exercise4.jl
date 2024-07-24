@@ -64,7 +64,7 @@ PlutoTeachingTools = "~0.2.15"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.2"
+julia_version = "1.10.4"
 manifest_format = "2.0"
 project_hash = "b873fd5571111b4c454c95ca5fa58b75bfb4ab46"
 
@@ -99,7 +99,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.0+0"
+version = "1.1.1+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -417,7 +417,7 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
+# ╟─2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╟─81ed6d83-622f-46ac-b0c3-0fae0c8ef378
 # ╟─6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
 # ╟─05ad3f54-e92c-4ab5-b276-aa7763ba36b3

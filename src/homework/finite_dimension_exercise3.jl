@@ -11,8 +11,11 @@
 using Markdown
 using InteractiveUtils
 
+# ╔═╡ 70740a99-ec98-45c8-ba8f-06d63dd396b0
+using PlutoTeachingTools
+
 # ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial, PlutoTeachingTools, LinearAlgebra
+using RadiiPolynomial, LinearAlgebra
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""<style>
@@ -104,7 +107,7 @@ RadiiPolynomial = "~0.8.12"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.2"
+julia_version = "1.10.4"
 manifest_format = "2.0"
 project_hash = "49d29ae341b6f6390131461e857efcdfb8528a3c"
 
@@ -145,7 +148,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.0+0"
+version = "1.1.1+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -188,9 +191,9 @@ version = "0.9.5"
 
 [[deps.IOCapture]]
 deps = ["Logging", "Random"]
-git-tree-sha1 = "8b72179abc660bfab5e28472e019392b97d0985c"
+git-tree-sha1 = "b6d6bfdd7ce25b0f9b2f6b3dd56b2673a66c8770"
 uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
-version = "0.2.4"
+version = "0.2.5"
 
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
@@ -226,9 +229,9 @@ version = "0.21.4"
 
 [[deps.JuliaInterpreter]]
 deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "a6adc2dcfe4187c40dc7c2c9d2128e326360e90a"
+git-tree-sha1 = "5d3a5a206297af3868151bb4a2cf27ebce46f16d"
 uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.9.32"
+version = "0.9.33"
 
 [[deps.LaTeXStrings]]
 git-tree-sha1 = "50901ebc375ed41dbf8058da26f9de442febbbec"
@@ -237,9 +240,9 @@ version = "1.3.1"
 
 [[deps.Latexify]]
 deps = ["Format", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "OrderedCollections", "Requires"]
-git-tree-sha1 = "e0b5cd21dc1b44ec6e64f351976f961e6f31d6c4"
+git-tree-sha1 = "5b0d630f3020b82c0775a51d05895852f8506f50"
 uuid = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
-version = "0.16.3"
+version = "0.16.4"
 
     [deps.Latexify.extensions]
     DataFramesExt = "DataFrames"
@@ -285,9 +288,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.LoweredCodeUtils]]
 deps = ["JuliaInterpreter"]
-git-tree-sha1 = "eeaedcf337f33c039f9f3a209a8db992deefd7e9"
+git-tree-sha1 = "0b898aba6cb0b01fb96245fa5375accb651a241a"
 uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "2.4.8"
+version = "3.0.0"
 
 [[deps.MIMEs]]
 git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
@@ -408,9 +411,9 @@ version = "1.3.0"
 
 [[deps.Revise]]
 deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "Pkg", "REPL", "Requires", "UUIDs", "Unicode"]
-git-tree-sha1 = "85ddd93ea15dcd8493400600e09104a9e94bb18d"
+git-tree-sha1 = "677b65e17aeb6b4a0be1982e281ec03b0f55155c"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.5.15"
+version = "3.5.16"
 
 [[deps.RoundingEmulator]]
 git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
@@ -496,6 +499,7 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
+# ╟─70740a99-ec98-45c8-ba8f-06d63dd396b0
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╟─c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
 # ╟─7748e568-afc9-43cc-b2bd-5a231d86f455
