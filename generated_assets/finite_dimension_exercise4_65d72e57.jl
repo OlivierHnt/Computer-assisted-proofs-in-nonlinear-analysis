@@ -2,9 +2,9 @@
 # v0.19.45
 
 #> [frontmatter]
-#> homework_number = 3
+#> homework_number = 4
 #> order = 1.5
-#> title = "Rigorous computation of an eigenpair"
+#> title = "Rigorous inverse of a matrix"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
 
@@ -12,7 +12,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial, PlutoTeachingTools, LinearAlgebra
+using PlutoTeachingTools
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""<style>
@@ -24,89 +24,49 @@ main {
 }
 """
 
-# ╔═╡ c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
+# ╔═╡ 81ed6d83-622f-46ac-b0c3-0fae0c8ef378
 md"""
-**1.** Consider a matrix $M$, and an approximate eigenpair $(\bar{\lambda},\bar{u})$ of $M$. Assuming the corresponding exact eigenvalue $\lambda$ is simple, define a suitable $F=0$ problem, and derive the bounds needed to apply the Newton-Kantorovich theorem in that context.
+In this exercise, we consider a matrix $M$, and a numerically computed approximate inverse $\bar{X}$ of $M$. Our goal will be to guarantee a posteriori that $M$ is indeed invertible, and to provide a computable error bound between $M^{-1}$ and $\bar{X}$, for any submultiplicative matrix norm (i.e., such that $\Vert A B\Vert \leq \Vert A\Vert \Vert B \Vert$).
 """
 
-# ╔═╡ 7748e568-afc9-43cc-b2bd-5a231d86f455
-Foldable("Need a hint?",
-md"The *natural* zero finding problem is $G(\lambda,u) = (M-\lambda I)u$, but it has one too many unknowns. This is consistent with the fact that zeros of $G$ are not isolated (one can always rescale the eigenvector). Therefore, a suitable zero finding problem needs to incorporate a normalization condition, for instance:
+# ╔═╡ 6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
+md"""
+**1.** Denoting $\delta = \Vert I - M\bar{X}\Vert$, and assuming $\delta<1$, show that $M$ is invertible and
 
 $\begin{align}
-F(\lambda,u) =
-\begin{pmatrix}
-\langle u,\bar{u} \rangle -1 \\
-(M-\lambda I)u
-\end{pmatrix}.
+\Vert M^{-1} - \bar{X} \Vert \leq \frac{\delta}{1-\delta} \Vert B\Vert.
 \end{align}$
-"
+"""
+
+# ╔═╡ 05ad3f54-e92c-4ab5-b276-aa7763ba36b3
+Foldable("Need a hint?",
+	md"Write $\left(M\bar{X}\right)^{-1}$ as $\left(I + M\bar{X}-I\right)^{-1}$, and mutliply to the left by $\bar{X}$ in order to get a power series expansion of $M^{-1}$"
 )
 
-# ╔═╡ cab728f1-9ff5-4bdd-8101-5c39718c4d53
+# ╔═╡ 82a5527f-0661-4a32-b758-5708bb184968
 md"""
-**2.** For any positive integer $N$, the Wilkinson matrix $W_{N}$ is the following $(2N+1)\times(2N+1)$ tridiagonal matrix:
-
-$\begin{align}
-W_{N} =
-\begin{pmatrix}
-N & 1 & & & & & \\
-1 & N-1 & 1 & & & & \\
- & 1 & \ddots & \ddots & & & \\
- & & \ddots & 0 & \ddots & & \\
- & & & \ddots & \ddots & 1 & \\
- & & & & 1 & N-1 & 1 \\
- & & & & & 1 & N
-\end{pmatrix}
-\end{align}$
-
-We provide below approximate eigenvalues and eigenvectors of $W_3$. Rigorously enclose all eigenpairs of $W_3$.
+**2.** Try to obtain a similar estimate using an appropriate zero-finding problem and the Newton-Kantorovich approach.
 """
 
-# ╔═╡ d61514c3-3b0e-4658-8b31-de9f9514a9c3
-# We should probably provide them with some code to get numerical eigenpairs, and maybe also some code for W_{2N+1}
-function W(N)
-	M = zeros(2N+1, 2N+1)
-	for i = 1:2N+1
-		M[i,i] = abs(N - i + 1)
-		if i+1 ≤ 2N+1
-			M[i,i+1] = 1
-		end
-		if i-1 ≥ 1
-			M[i,i-1] = 1
-		end
-	end
-	return M
-end
-
-# ╔═╡ 1bba510b-be86-44b0-a3c9-419b3b6ada37
-N = 3
-
-# ╔═╡ fe0054f0-4fd5-489f-9fcb-3af086876699
-W(N)
-
-# ╔═╡ 3509fe96-4a83-461f-8fed-23343d74dc8c
-eigenvalues, eigenvectors = eigen(W(N))
+# ╔═╡ e34560b8-93af-4f5b-8e4f-f5c48ef29d3c
+Foldable("Need a hint?",md"You may consider $F(X) = MX-I$ (or $F(X) = XM-I$).")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
-RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
 PlutoTeachingTools = "~0.2.15"
-RadiiPolynomial = "~0.8.12"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.2"
+julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "49d29ae341b6f6390131461e857efcdfb8528a3c"
+project_hash = "b873fd5571111b4c454c95ca5fa58b75bfb4ab46"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -124,12 +84,6 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
-[[deps.CRlibm_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "e329286945d0cfc04456972ea732551869af1cfc"
-uuid = "4e9b3aee-d8a1-5a3d-ad8b-7d824db253f0"
-version = "1.0.1+0"
-
 [[deps.CodeTracking]]
 deps = ["InteractiveUtils", "UUIDs"]
 git-tree-sha1 = "c0216e792f518b39b22212127d4a84dc31e4e386"
@@ -145,7 +99,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.0+0"
+version = "1.1.1+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -188,35 +142,13 @@ version = "0.9.5"
 
 [[deps.IOCapture]]
 deps = ["Logging", "Random"]
-git-tree-sha1 = "8b72179abc660bfab5e28472e019392b97d0985c"
+git-tree-sha1 = "b6d6bfdd7ce25b0f9b2f6b3dd56b2673a66c8770"
 uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
-version = "0.2.4"
+version = "0.2.5"
 
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
-
-[[deps.IntervalArithmetic]]
-deps = ["CRlibm_jll", "MacroTools", "RoundingEmulator"]
-git-tree-sha1 = "433b0bb201cd76cb087b017e49244f10394ebe9c"
-uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-version = "0.22.14"
-
-    [deps.IntervalArithmetic.extensions]
-    IntervalArithmeticDiffRulesExt = "DiffRules"
-    IntervalArithmeticForwardDiffExt = "ForwardDiff"
-    IntervalArithmeticRecipesBaseExt = "RecipesBase"
-
-    [deps.IntervalArithmetic.weakdeps]
-    DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
-    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
-    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-
-[[deps.JLLWrappers]]
-deps = ["Artifacts", "Preferences"]
-git-tree-sha1 = "7e5d6779a1e09a36db2a7b6cff50942a0a7d0fca"
-uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
-version = "1.5.0"
 
 [[deps.JSON]]
 deps = ["Dates", "Mmap", "Parsers", "Unicode"]
@@ -237,9 +169,9 @@ version = "1.3.1"
 
 [[deps.Latexify]]
 deps = ["Format", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "OrderedCollections", "Requires"]
-git-tree-sha1 = "e0b5cd21dc1b44ec6e64f351976f961e6f31d6c4"
+git-tree-sha1 = "5b0d630f3020b82c0775a51d05895852f8506f50"
 uuid = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
-version = "0.16.3"
+version = "0.16.4"
 
     [deps.Latexify.extensions]
     DataFramesExt = "DataFrames"
@@ -385,12 +317,6 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
-[[deps.RadiiPolynomial]]
-deps = ["IntervalArithmetic", "LinearAlgebra", "Printf", "Reexport", "SparseArrays"]
-git-tree-sha1 = "89f57ab86310e5ca7009cb236441505ba6b3242a"
-uuid = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
-version = "0.8.12"
-
 [[deps.Random]]
 deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
@@ -411,11 +337,6 @@ deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibG
 git-tree-sha1 = "85ddd93ea15dcd8493400600e09104a9e94bb18d"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
 version = "3.5.15"
-
-[[deps.RoundingEmulator]]
-git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
-uuid = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
-version = "0.2.1"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -496,13 +417,11 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
-# ╟─c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
-# ╟─7748e568-afc9-43cc-b2bd-5a231d86f455
-# ╟─cab728f1-9ff5-4bdd-8101-5c39718c4d53
-# ╠═d61514c3-3b0e-4658-8b31-de9f9514a9c3
-# ╠═1bba510b-be86-44b0-a3c9-419b3b6ada37
-# ╠═fe0054f0-4fd5-489f-9fcb-3af086876699
-# ╠═3509fe96-4a83-461f-8fed-23343d74dc8c
+# ╟─2661bfc9-e398-41ed-87d9-c78f05da64cb
+# ╟─81ed6d83-622f-46ac-b0c3-0fae0c8ef378
+# ╟─6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
+# ╟─05ad3f54-e92c-4ab5-b276-aa7763ba36b3
+# ╟─82a5527f-0661-4a32-b758-5708bb184968
+# ╟─e34560b8-93af-4f5b-8e4f-f5c48ef29d3c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

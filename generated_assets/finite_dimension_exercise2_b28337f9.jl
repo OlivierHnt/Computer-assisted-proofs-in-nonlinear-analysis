@@ -2,17 +2,20 @@
 # v0.19.45
 
 #> [frontmatter]
-#> homework_number = 5
+#> homework_number = 2
 #> order = 1.5
-#> title = "Rigorous control of the entire spectrum"
+#> title = "Back to period 3 implies chaos"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
+# ╔═╡ 755f440a-f42d-4de2-9cd2-826ea2114ab7
+using PlutoTeachingTools
+
 # ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial, PlutoTeachingTools
+using RadiiPolynomial
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""<style>
@@ -24,61 +27,87 @@ main {
 }
 """
 
-# ╔═╡ 45e10c91-f161-43a5-9c9e-5b4dca6a8e53
+# ╔═╡ aff38e1d-416c-472b-81ea-820d7430dded
 md"""
-The third exercise can be used to enclose eigenvalues of a given matrix one by one. We now present an alternate strategy to enclose the entire spectrum at once (but not the corresponding eigenvectors), which can sometimes also be adapted in infinite dimension.
-"""
-
-# ╔═╡ b0590931-8d44-47b9-9153-00da2a418b00
-md"""
-We recall the Gershgorin circle theorem: for any matrix $A=\left(A_{i,j}\right)_{1\leq i,j\leq d}$,
+In order to study period 3 orbits in the dynamical system $x_{n+1} = \mu x_n (1-x_n)$, we consider the map
 
 $\begin{align}
-\sigma(A) \subset \bigcup_{i=1}^d D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right),
+F : \ \left\{
+\begin{aligned}
+\mathbb{R}^3 &\to \mathbb{R}^3 \\
+\begin{pmatrix} x_0 \\ x_1 \\ x_2 \end{pmatrix}  &\mapsto
+\begin{pmatrix} \mu x_0(1-x_0) - x_1 \\ \mu x_1(1-x_1) - x_2 \\ \mu x_2(1-x_2) - x_0 \end{pmatrix}
+\end{aligned} \right.
 \end{align}$
-
-where $D(z,r)$ denotes the closed disk of center $z$ in radius $r$ in the complex plane. Moreover, if $I \subset \{1,\ldots,d\}$ is such that
-
-$\begin{align}
-\bigcup_{i\in I} D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right)\quad  \text{ is disjoint from }\quad  \bigcup_{i\notin I} D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right),
-\end{align}$
-
-then
-
-$\begin{align}
-\bigcup_{i\in I} D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right) \quad \text{contains exactly }  \vert I\vert \text{ eigenvalues.}
-\end{align}$
-
-
 """
 
-# ╔═╡ d01c5817-c4b6-4502-81f6-51ae5715117b
+# ╔═╡ f283c615-fcde-4752-8d02-fafaa0e73b7d
 md"""
-**1.** Using the Gershgorin circle theorem, get as tight as possible rigorous enclosures of all eigenvalues of $W_{3}$ (defined in the third exercise)).
+**1.** Using the implementation of $F$ and $DF$ provided in the following cells, and the function `newton` from RadiiPolynomial.jl, find an approximate period 3 orbit $\bar{x}$, for $\mu=3.9$.
 """
 
-# ╔═╡ 02939955-c9aa-4152-8e08-f31e1e0c0e9c
-Foldable("Hint",
-md"You may first compute numerically a matrix $P$ of approximate eigenvectors of $W_7$, then rigorously compute $\tilde W_{7} = P^{-1}W_7 P$, and finally apply the Gershgoring circle theorem to $\tilde W_{7}$."
-)
+# ╔═╡ 3b098d28-5fc8-4463-a59b-08bca638d5be
+function F(x, μ)
+	x₀, x₁, x₂ = x
+	return Sequence(
+		[μ * x₀ * (1 - x₀) - x₁,
+		 μ * x₁ * (1 - x₁) - x₂,
+		 μ * x₂ * (1 - x₂) - x₀])
+end
 
-# ╔═╡ bc052916-db0e-43a2-bbb0-76b917d6f638
+# ╔═╡ dda38796-c299-4d38-b479-fde4c1496941
+function DF(x, μ)
+	x₀, x₁, x₂ = x
+	return LinearOperator(
+		[ μ * (1 - 2x₀) -1              0
+		  0              μ * (1 - 2x₁) -1
+		 -1              0              μ * (1 - 2x₂)])
+end
+
+# ╔═╡ 8d22a89b-5531-4e0c-9c02-e351578df93e
+μ = 3.9
+
+# ╔═╡ 698891fa-5637-40de-8756-f507551c25d4
+initial_data = rand(Float64, (3))
+
+# ╔═╡ 5ee47406-c6cc-40d8-adb9-c37146f9db01
+bx, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
+
+# ╔═╡ 7b944744-628c-4ac9-8528-6dc19789ddb0
 md"""
-**2.** Try to prove that $W_{1000}$ has exactly one eigenvalue with positive real part.
+**2.** Define a suitable $A$ to be used later in the Newton-Kantorovich argument.
 """
 
-# ╔═╡ 3686e5b2-daac-470d-b9e3-4bd5706e5894
-Foldable("Hint",md"You do not need to numerically diagonalize all of $W_{1001}$: for most rows, the corresponding Gershgorin disk already lies in the left half of the complex plane. ")
+# ╔═╡ fdd9fd8b-a3df-455d-bfe8-321723f5c566
+# A = ...
 
-# ╔═╡ 1da3287d-333e-4801-8bf2-13041d45ccc8
+# ╔═╡ 8b9a0f39-21f0-4288-bb2b-a594d6712292
 md"""
-## Rigorous continuation
+**3.** Using the 1-norm on $\mathbb{R}^3$, show that the constant function $Z_2(r) = 2\mu \left\Vert A\right\Vert_1$ satisfies the assumption of the Newton-Kantorovich theorem.
 """
 
-# ╔═╡ afef60df-375e-439b-a973-ee36439731f2
+# ╔═╡ 3d27e2d3-e5e8-4e95-9294-23e416608b6a
+Foldable("Need a hint?",	md"You may first compute $D^2F(\bar{x})(u,v)$ and show that $\Vert D^2F(\bar{x})(u,v) \Vert_1 \leq 2\mu  \Vert u\Vert_1 \Vert v\Vert_1$.")
+
+# ╔═╡ 03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
 md"""
-Try to prove that there exists a period 3 orbit in $x_{n+1} = \mu x_n (1-x_n)$, for all $\mu$ in an interval containing $3.9$, and make that interval as large as you can.
+**4.** Implement and evaluate suitable bounds $Y$, $Z_1$ and $Z_2$, and use the function `interval_of_existence` from RadiiPolynomial.jl in order to prove the existence of a period 3 orbit for $\mu = 3.9$.
 """
+
+# ╔═╡ 4c78f87b-7191-47f4-8bd7-cd9d13c5b4c6
+# Y = ...
+
+# ╔═╡ 4ac782db-4d32-4bf8-bddf-cc8f8b5e6217
+# Z₁ = ...
+
+# ╔═╡ a4b2181e-d7dd-4c49-8c45-d6864cf878c6
+rstar = Inf # since Z₂ is constant
+
+# ╔═╡ 2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
+# Z₂ = ...
+
+# ╔═╡ 5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
+# interval_of_existence(Y, Z₁, Z₂, rstar)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -95,7 +124,7 @@ RadiiPolynomial = "~0.8.12"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.2"
+julia_version = "1.10.4"
 manifest_format = "2.0"
 project_hash = "6b5a1c65b08c1cb67df2036186b2c2a085cfc3db"
 
@@ -136,7 +165,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.0+0"
+version = "1.1.1+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -179,9 +208,9 @@ version = "0.9.5"
 
 [[deps.IOCapture]]
 deps = ["Logging", "Random"]
-git-tree-sha1 = "8b72179abc660bfab5e28472e019392b97d0985c"
+git-tree-sha1 = "b6d6bfdd7ce25b0f9b2f6b3dd56b2673a66c8770"
 uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
-version = "0.2.4"
+version = "0.2.5"
 
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
@@ -217,9 +246,9 @@ version = "0.21.4"
 
 [[deps.JuliaInterpreter]]
 deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "a6adc2dcfe4187c40dc7c2c9d2128e326360e90a"
+git-tree-sha1 = "5d3a5a206297af3868151bb4a2cf27ebce46f16d"
 uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.9.32"
+version = "0.9.33"
 
 [[deps.LaTeXStrings]]
 git-tree-sha1 = "50901ebc375ed41dbf8058da26f9de442febbbec"
@@ -228,9 +257,9 @@ version = "1.3.1"
 
 [[deps.Latexify]]
 deps = ["Format", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "OrderedCollections", "Requires"]
-git-tree-sha1 = "e0b5cd21dc1b44ec6e64f351976f961e6f31d6c4"
+git-tree-sha1 = "5b0d630f3020b82c0775a51d05895852f8506f50"
 uuid = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
-version = "0.16.3"
+version = "0.16.4"
 
     [deps.Latexify.extensions]
     DataFramesExt = "DataFrames"
@@ -276,9 +305,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.LoweredCodeUtils]]
 deps = ["JuliaInterpreter"]
-git-tree-sha1 = "eeaedcf337f33c039f9f3a209a8db992deefd7e9"
+git-tree-sha1 = "0b898aba6cb0b01fb96245fa5375accb651a241a"
 uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "2.4.8"
+version = "3.0.0"
 
 [[deps.MIMEs]]
 git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
@@ -399,9 +428,9 @@ version = "1.3.0"
 
 [[deps.Revise]]
 deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "Pkg", "REPL", "Requires", "UUIDs", "Unicode"]
-git-tree-sha1 = "85ddd93ea15dcd8493400600e09104a9e94bb18d"
+git-tree-sha1 = "677b65e17aeb6b4a0be1982e281ec03b0f55155c"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.5.15"
+version = "3.5.16"
 
 [[deps.RoundingEmulator]]
 git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
@@ -487,14 +516,24 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
+# ╟─755f440a-f42d-4de2-9cd2-826ea2114ab7
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
-# ╟─45e10c91-f161-43a5-9c9e-5b4dca6a8e53
-# ╟─b0590931-8d44-47b9-9153-00da2a418b00
-# ╟─d01c5817-c4b6-4502-81f6-51ae5715117b
-# ╟─02939955-c9aa-4152-8e08-f31e1e0c0e9c
-# ╟─bc052916-db0e-43a2-bbb0-76b917d6f638
-# ╟─3686e5b2-daac-470d-b9e3-4bd5706e5894
-# ╟─1da3287d-333e-4801-8bf2-13041d45ccc8
-# ╟─afef60df-375e-439b-a973-ee36439731f2
+# ╟─aff38e1d-416c-472b-81ea-820d7430dded
+# ╟─f283c615-fcde-4752-8d02-fafaa0e73b7d
+# ╠═3b098d28-5fc8-4463-a59b-08bca638d5be
+# ╠═dda38796-c299-4d38-b479-fde4c1496941
+# ╠═8d22a89b-5531-4e0c-9c02-e351578df93e
+# ╠═698891fa-5637-40de-8756-f507551c25d4
+# ╠═5ee47406-c6cc-40d8-adb9-c37146f9db01
+# ╟─7b944744-628c-4ac9-8528-6dc19789ddb0
+# ╠═fdd9fd8b-a3df-455d-bfe8-321723f5c566
+# ╟─8b9a0f39-21f0-4288-bb2b-a594d6712292
+# ╟─3d27e2d3-e5e8-4e95-9294-23e416608b6a
+# ╟─03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
+# ╠═4c78f87b-7191-47f4-8bd7-cd9d13c5b4c6
+# ╠═4ac782db-4d32-4bf8-bddf-cc8f8b5e6217
+# ╠═a4b2181e-d7dd-4c49-8c45-d6864cf878c6
+# ╠═2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
+# ╠═5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

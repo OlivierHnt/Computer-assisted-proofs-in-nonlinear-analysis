@@ -2,17 +2,20 @@
 # v0.19.45
 
 #> [frontmatter]
-#> homework_number = 4
+#> homework_number = 5
 #> order = 1.5
-#> title = "Rigorous inverse of a matrix"
+#> title = "Rigorous control of the entire spectrum"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
+# ╔═╡ 9099f41e-6239-4f7f-a3ec-82e7d4787f8f
 using PlutoTeachingTools
+
+# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
+using RadiiPolynomial
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""<style>
@@ -24,49 +27,80 @@ main {
 }
 """
 
-# ╔═╡ 81ed6d83-622f-46ac-b0c3-0fae0c8ef378
+# ╔═╡ 45e10c91-f161-43a5-9c9e-5b4dca6a8e53
 md"""
-In this exercise, we consider a matrix $M$, and a numerically computed approximate inverse $\bar{X}$ of $M$. Our goal will be to guarantee a posteriori that $M$ is indeed invertible, and to provide a computable error bound between $M^{-1}$ and $\bar{X}$, for any submultiplicative matrix norm (i.e., such that $\Vert A B\Vert \leq \Vert A\Vert \Vert B \Vert$).
+The third exercise can be used to enclose eigenvalues of a given matrix one by one. We now present an alternate strategy to enclose the entire spectrum at once (but not the corresponding eigenvectors), which can sometimes also be adapted in infinite dimension.
 """
 
-# ╔═╡ 6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
+# ╔═╡ b0590931-8d44-47b9-9153-00da2a418b00
 md"""
-**1.** Denoting $\delta = \Vert I - M\bar{X}\Vert$, and assuming $\delta<1$, show that $M$ is invertible and
+We recall the Gershgorin circle theorem: for any matrix $A=\left(A_{i,j}\right)_{1\leq i,j\leq d}$,
 
 $\begin{align}
-\Vert M^{-1} - \bar{X} \Vert \leq \frac{\delta}{1-\delta} \Vert B\Vert.
+\sigma(A) \subset \bigcup_{i=1}^d D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right),
 \end{align}$
+
+where $D(z,r)$ denotes the closed disk of center $z$ in radius $r$ in the complex plane. Moreover, if $I \subset \{1,\ldots,d\}$ is such that
+
+$\begin{align}
+\bigcup_{i\in I} D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right)\quad  \text{ is disjoint from }\quad  \bigcup_{i\notin I} D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right),
+\end{align}$
+
+then
+
+$\begin{align}
+\bigcup_{i\in I} D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right) \quad \text{contains exactly }  \vert I\vert \text{ eigenvalues.}
+\end{align}$
+
+
 """
 
-# ╔═╡ 05ad3f54-e92c-4ab5-b276-aa7763ba36b3
-Foldable("Need a hint?",
-	md"Write $\left(M\bar{X}\right)^{-1}$ as $\left(I + M\bar{X}-I\right)^{-1}$, and mutliply to the left by $\bar{X}$ in order to get a power series expansion of $M^{-1}$"
+# ╔═╡ d01c5817-c4b6-4502-81f6-51ae5715117b
+md"""
+**1.** Using the Gershgorin circle theorem, get as tight as possible rigorous enclosures of all eigenvalues of $W_{3}$ (defined in the third exercise)).
+"""
+
+# ╔═╡ 02939955-c9aa-4152-8e08-f31e1e0c0e9c
+Foldable("Hint",
+md"You may first compute numerically a matrix $P$ of approximate eigenvectors of $W_7$, then rigorously compute $\tilde W_{7} = P^{-1}W_7 P$, and finally apply the Gershgoring circle theorem to $\tilde W_{7}$."
 )
 
-# ╔═╡ 82a5527f-0661-4a32-b758-5708bb184968
+# ╔═╡ bc052916-db0e-43a2-bbb0-76b917d6f638
 md"""
-**2.** Try to obtain a similar estimate using an appropriate zero-finding problem and the Newton-Kantorovich approach.
+**2.** Try to prove that $W_{1000}$ has exactly one eigenvalue with positive real part.
 """
 
-# ╔═╡ e34560b8-93af-4f5b-8e4f-f5c48ef29d3c
-Foldable("Need a hint?",md"You may consider $F(X) = MX-I$ (or $F(X) = XM-I$).")
+# ╔═╡ 3686e5b2-daac-470d-b9e3-4bd5706e5894
+Foldable("Hint",md"You do not need to numerically diagonalize all of $W_{1001}$: for most rows, the corresponding Gershgorin disk already lies in the left half of the complex plane. ")
+
+# ╔═╡ 1da3287d-333e-4801-8bf2-13041d45ccc8
+md"""
+## Rigorous continuation
+"""
+
+# ╔═╡ afef60df-375e-439b-a973-ee36439731f2
+md"""
+Try to prove that there exists a period 3 orbit in $x_{n+1} = \mu x_n (1-x_n)$, for all $\mu$ in an interval containing $3.9$, and make that interval as large as you can.
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
+RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
 PlutoTeachingTools = "~0.2.15"
+RadiiPolynomial = "~0.8.12"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.2"
+julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "b873fd5571111b4c454c95ca5fa58b75bfb4ab46"
+project_hash = "6b5a1c65b08c1cb67df2036186b2c2a085cfc3db"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -84,6 +118,12 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
+[[deps.CRlibm_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "e329286945d0cfc04456972ea732551869af1cfc"
+uuid = "4e9b3aee-d8a1-5a3d-ad8b-7d824db253f0"
+version = "1.0.1+0"
+
 [[deps.CodeTracking]]
 deps = ["InteractiveUtils", "UUIDs"]
 git-tree-sha1 = "c0216e792f518b39b22212127d4a84dc31e4e386"
@@ -99,7 +139,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.0+0"
+version = "1.1.1+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -142,13 +182,35 @@ version = "0.9.5"
 
 [[deps.IOCapture]]
 deps = ["Logging", "Random"]
-git-tree-sha1 = "b6d6bfdd7ce25b0f9b2f6b3dd56b2673a66c8770"
+git-tree-sha1 = "8b72179abc660bfab5e28472e019392b97d0985c"
 uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
-version = "0.2.5"
+version = "0.2.4"
 
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+
+[[deps.IntervalArithmetic]]
+deps = ["CRlibm_jll", "MacroTools", "RoundingEmulator"]
+git-tree-sha1 = "433b0bb201cd76cb087b017e49244f10394ebe9c"
+uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
+version = "0.22.14"
+
+    [deps.IntervalArithmetic.extensions]
+    IntervalArithmeticDiffRulesExt = "DiffRules"
+    IntervalArithmeticForwardDiffExt = "ForwardDiff"
+    IntervalArithmeticRecipesBaseExt = "RecipesBase"
+
+    [deps.IntervalArithmetic.weakdeps]
+    DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
+    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+
+[[deps.JLLWrappers]]
+deps = ["Artifacts", "Preferences"]
+git-tree-sha1 = "7e5d6779a1e09a36db2a7b6cff50942a0a7d0fca"
+uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
+version = "1.5.0"
 
 [[deps.JSON]]
 deps = ["Dates", "Mmap", "Parsers", "Unicode"]
@@ -169,9 +231,9 @@ version = "1.3.1"
 
 [[deps.Latexify]]
 deps = ["Format", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "OrderedCollections", "Requires"]
-git-tree-sha1 = "5b0d630f3020b82c0775a51d05895852f8506f50"
+git-tree-sha1 = "e0b5cd21dc1b44ec6e64f351976f961e6f31d6c4"
 uuid = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
-version = "0.16.4"
+version = "0.16.3"
 
     [deps.Latexify.extensions]
     DataFramesExt = "DataFrames"
@@ -317,6 +379,12 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
+[[deps.RadiiPolynomial]]
+deps = ["IntervalArithmetic", "LinearAlgebra", "Printf", "Reexport", "SparseArrays"]
+git-tree-sha1 = "89f57ab86310e5ca7009cb236441505ba6b3242a"
+uuid = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
+version = "0.8.12"
+
 [[deps.Random]]
 deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
@@ -337,6 +405,11 @@ deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibG
 git-tree-sha1 = "85ddd93ea15dcd8493400600e09104a9e94bb18d"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
 version = "3.5.15"
+
+[[deps.RoundingEmulator]]
+git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
+uuid = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
+version = "0.2.1"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -417,11 +490,15 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
+# ╟─9099f41e-6239-4f7f-a3ec-82e7d4787f8f
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
-# ╟─81ed6d83-622f-46ac-b0c3-0fae0c8ef378
-# ╟─6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
-# ╟─05ad3f54-e92c-4ab5-b276-aa7763ba36b3
-# ╟─82a5527f-0661-4a32-b758-5708bb184968
-# ╟─e34560b8-93af-4f5b-8e4f-f5c48ef29d3c
+# ╟─45e10c91-f161-43a5-9c9e-5b4dca6a8e53
+# ╟─b0590931-8d44-47b9-9153-00da2a418b00
+# ╟─d01c5817-c4b6-4502-81f6-51ae5715117b
+# ╟─02939955-c9aa-4152-8e08-f31e1e0c0e9c
+# ╟─bc052916-db0e-43a2-bbb0-76b917d6f638
+# ╟─3686e5b2-daac-470d-b9e3-4bd5706e5894
+# ╟─1da3287d-333e-4801-8bf2-13041d45ccc8
+# ╟─afef60df-375e-439b-a973-ee36439731f2
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
