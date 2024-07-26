@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.19.43
 
 #> [frontmatter]
 #> homework_number = 5
@@ -62,7 +62,7 @@ md"""
 
 # ╔═╡ 02939955-c9aa-4152-8e08-f31e1e0c0e9c
 Foldable("Hint",
-md"You may first compute numerically a matrix $P$ of approximate eigenvectors of $W_7$, then rigorously compute $\tilde W_{7} = P^{-1}W_7 P$, and finally apply the Gershgoring circle theorem to $\tilde W_{7}$."
+md"You may first compute numerically a matrix $P$ of approximate eigenvectors of $W_3$, then rigorously compute $\tilde W_{3} = P^{-1}W_3 P$, and finally apply the Gershgoring circle theorem to $\tilde W_{3}$."
 )
 
 # ╔═╡ bc052916-db0e-43a2-bbb0-76b917d6f638
@@ -71,17 +71,7 @@ md"""
 """
 
 # ╔═╡ 3686e5b2-daac-470d-b9e3-4bd5706e5894
-Foldable("Hint",md"You do not need to numerically diagonalize all of $W_{1001}$: for most rows, the corresponding Gershgorin disk already lies in the left half of the complex plane. ")
-
-# ╔═╡ 1da3287d-333e-4801-8bf2-13041d45ccc8
-md"""
-## Rigorous continuation
-"""
-
-# ╔═╡ afef60df-375e-439b-a973-ee36439731f2
-md"""
-Try to prove that there exists a period 3 orbit in $x_{n+1} = \mu x_n (1-x_n)$, for all $\mu$ in an interval containing $3.9$, and make that interval as large as you can.
-"""
+Foldable("Hint",md"You do not need to numerically diagonalize all of $W_{1000}$: for most rows, the corresponding Gershgorin disk already lies in the left half of the complex plane. ")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -98,7 +88,7 @@ RadiiPolynomial = "~0.8.12"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.2"
 manifest_format = "2.0"
 project_hash = "6b5a1c65b08c1cb67df2036186b2c2a085cfc3db"
 
@@ -139,7 +129,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.1+0"
+version = "1.1.0+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -498,7 +488,5 @@ version = "17.4.0+2"
 # ╟─02939955-c9aa-4152-8e08-f31e1e0c0e9c
 # ╟─bc052916-db0e-43a2-bbb0-76b917d6f638
 # ╟─3686e5b2-daac-470d-b9e3-4bd5706e5894
-# ╟─1da3287d-333e-4801-8bf2-13041d45ccc8
-# ╟─afef60df-375e-439b-a973-ee36439731f2
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
