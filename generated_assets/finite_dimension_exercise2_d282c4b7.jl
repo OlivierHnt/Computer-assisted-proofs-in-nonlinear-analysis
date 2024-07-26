@@ -1,18 +1,21 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.19.43
 
 #> [frontmatter]
-#> homework_number = 4
+#> homework_number = 2
 #> order = 1.5
-#> title = "Rigorous inverse of a matrix"
+#> title = "Back to period 3 implies chaos"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
+# ╔═╡ 755f440a-f42d-4de2-9cd2-826ea2114ab7
 using PlutoTeachingTools
+
+# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
+using RadiiPolynomial
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""<style>
@@ -24,49 +27,106 @@ main {
 }
 """
 
-# ╔═╡ 81ed6d83-622f-46ac-b0c3-0fae0c8ef378
+# ╔═╡ aff38e1d-416c-472b-81ea-820d7430dded
 md"""
-In this exercise, we consider a matrix $M$, and a numerically computed approximate inverse $\bar{X}$ of $M$. Our goal will be to guarantee a posteriori that $M$ is indeed invertible, and to provide a computable error bound between $M^{-1}$ and $\bar{X}$, for any submultiplicative matrix norm (i.e., such that $\Vert A B\Vert \leq \Vert A\Vert \Vert B \Vert$).
-"""
-
-# ╔═╡ 6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
-md"""
-**1.** Denoting $\delta = \Vert I - M\bar{X}\Vert$, and assuming $\delta<1$, show that $M$ is invertible and
+In order to study period 3 orbits in the dynamical system $x_{n+1} = \mu x_n (1-x_n)$, we consider the map
 
 $\begin{align}
-\Vert M^{-1} - \bar{X} \Vert \leq \frac{\delta}{1-\delta} \Vert B\Vert.
+F : \ \left\{
+\begin{aligned}
+\mathbb{R}^3 &\to \mathbb{R}^3 \\
+\begin{pmatrix} x_0 \\ x_1 \\ x_2 \end{pmatrix}  &\mapsto
+\begin{pmatrix} \mu x_0(1-x_0) - x_1 \\ \mu x_1(1-x_1) - x_2 \\ \mu x_2(1-x_2) - x_0 \end{pmatrix}
+\end{aligned} \right.
 \end{align}$
 """
 
-# ╔═╡ 05ad3f54-e92c-4ab5-b276-aa7763ba36b3
-Foldable("Need a hint?",
-	md"Write $\left(M\bar{X}\right)^{-1}$ as $\left(I + M\bar{X}-I\right)^{-1}$, and mutliply to the left by $\bar{X}$ in order to get a power series expansion of $M^{-1}$"
-)
-
-# ╔═╡ 82a5527f-0661-4a32-b758-5708bb184968
+# ╔═╡ f283c615-fcde-4752-8d02-fafaa0e73b7d
 md"""
-**2.** Try to obtain a similar estimate using an appropriate zero-finding problem and the Newton-Kantorovich approach.
+**1.** Using the implementation of $F$ and $DF$ provided in the following cells, and the function `newton` from RadiiPolynomial.jl, find an approximate period 3 orbit $\bar{x}$, for $\mu=3.9$.
 """
 
-# ╔═╡ e34560b8-93af-4f5b-8e4f-f5c48ef29d3c
-Foldable("Need a hint?",md"You may consider $F(X) = MX-I$ (or $F(X) = XM-I$).")
+# ╔═╡ 3b098d28-5fc8-4463-a59b-08bca638d5be
+function F(x, μ)
+	x₀, x₁, x₂ = x
+	return Sequence(
+		[μ * x₀ * (1 - x₀) - x₁,
+		 μ * x₁ * (1 - x₁) - x₂,
+		 μ * x₂ * (1 - x₂) - x₀])
+end
+
+# ╔═╡ dda38796-c299-4d38-b479-fde4c1496941
+function DF(x, μ)
+	x₀, x₁, x₂ = x
+	return LinearOperator(
+		[ μ * (1 - 2x₀) -1              0
+		  0              μ * (1 - 2x₁) -1
+		 -1              0              μ * (1 - 2x₂)])
+end
+
+# ╔═╡ 8d22a89b-5531-4e0c-9c02-e351578df93e
+μ = 3.9
+
+# ╔═╡ 698891fa-5637-40de-8756-f507551c25d4
+initial_data = rand(Float64, (3))
+
+# ╔═╡ 5ee47406-c6cc-40d8-adb9-c37146f9db01
+x̄, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
+
+# ╔═╡ 7b944744-628c-4ac9-8528-6dc19789ddb0
+md"""
+**2.** Define a suitable $A$ to be used later in the Newton-Kantorovich argument.
+"""
+
+# ╔═╡ fdd9fd8b-a3df-455d-bfe8-321723f5c566
+# A = ...
+
+# ╔═╡ 8b9a0f39-21f0-4288-bb2b-a594d6712292
+md"""
+**3.** Using the 1-norm on $\mathbb{R}^3$, show that the constant function $Z_2(r) = 2\mu \left\Vert A\right\Vert_1$ satisfies the assumption of the Newton-Kantorovich theorem.
+"""
+
+# ╔═╡ 3d27e2d3-e5e8-4e95-9294-23e416608b6a
+Foldable("Hint",	md"You may first compute $D^2F(\bar{x})(u,v)$ and show that $\Vert D^2F(\bar{x})(u,v) \Vert_1 \leq 2\mu  \Vert u\Vert_1 \Vert v\Vert_1$.")
+
+# ╔═╡ 03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
+md"""
+**4.** Implement and evaluate suitable bounds $Y$, $Z_1$ and $Z_2$, and use the function `interval_of_existence` from RadiiPolynomial.jl in order to prove the existence of a period 3 orbit for $\mu = 3.9$.
+"""
+
+# ╔═╡ 4c78f87b-7191-47f4-8bd7-cd9d13c5b4c6
+# Y = ...
+
+# ╔═╡ 4ac782db-4d32-4bf8-bddf-cc8f8b5e6217
+# Z₁ = ...
+
+# ╔═╡ a4b2181e-d7dd-4c49-8c45-d6864cf878c6
+rstar = Inf # since Z₂ is constant
+
+# ╔═╡ 2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
+# Z₂ = ...
+
+# ╔═╡ 5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
+# interval_of_existence(Y, Z₁, Z₂, rstar)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
+RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
 PlutoTeachingTools = "~0.2.15"
+RadiiPolynomial = "~0.8.12"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.2"
 manifest_format = "2.0"
-project_hash = "b873fd5571111b4c454c95ca5fa58b75bfb4ab46"
+project_hash = "6b5a1c65b08c1cb67df2036186b2c2a085cfc3db"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -84,6 +144,12 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
 
+[[deps.CRlibm_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
+git-tree-sha1 = "e329286945d0cfc04456972ea732551869af1cfc"
+uuid = "4e9b3aee-d8a1-5a3d-ad8b-7d824db253f0"
+version = "1.0.1+0"
+
 [[deps.CodeTracking]]
 deps = ["InteractiveUtils", "UUIDs"]
 git-tree-sha1 = "c0216e792f518b39b22212127d4a84dc31e4e386"
@@ -99,7 +165,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.1+0"
+version = "1.1.0+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -149,6 +215,28 @@ version = "0.2.5"
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+
+[[deps.IntervalArithmetic]]
+deps = ["CRlibm_jll", "MacroTools", "RoundingEmulator"]
+git-tree-sha1 = "433b0bb201cd76cb087b017e49244f10394ebe9c"
+uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
+version = "0.22.14"
+
+    [deps.IntervalArithmetic.extensions]
+    IntervalArithmeticDiffRulesExt = "DiffRules"
+    IntervalArithmeticForwardDiffExt = "ForwardDiff"
+    IntervalArithmeticRecipesBaseExt = "RecipesBase"
+
+    [deps.IntervalArithmetic.weakdeps]
+    DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
+    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+
+[[deps.JLLWrappers]]
+deps = ["Artifacts", "Preferences"]
+git-tree-sha1 = "7e5d6779a1e09a36db2a7b6cff50942a0a7d0fca"
+uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
+version = "1.5.0"
 
 [[deps.JSON]]
 deps = ["Dates", "Mmap", "Parsers", "Unicode"]
@@ -217,9 +305,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.LoweredCodeUtils]]
 deps = ["JuliaInterpreter"]
-git-tree-sha1 = "eeaedcf337f33c039f9f3a209a8db992deefd7e9"
+git-tree-sha1 = "0b898aba6cb0b01fb96245fa5375accb651a241a"
 uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "2.4.8"
+version = "3.0.0"
 
 [[deps.MIMEs]]
 git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
@@ -317,6 +405,12 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
+[[deps.RadiiPolynomial]]
+deps = ["IntervalArithmetic", "LinearAlgebra", "Printf", "Reexport", "SparseArrays"]
+git-tree-sha1 = "89f57ab86310e5ca7009cb236441505ba6b3242a"
+uuid = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
+version = "0.8.12"
+
 [[deps.Random]]
 deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
@@ -334,9 +428,14 @@ version = "1.3.0"
 
 [[deps.Revise]]
 deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "Pkg", "REPL", "Requires", "UUIDs", "Unicode"]
-git-tree-sha1 = "85ddd93ea15dcd8493400600e09104a9e94bb18d"
+git-tree-sha1 = "677b65e17aeb6b4a0be1982e281ec03b0f55155c"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.5.15"
+version = "3.5.16"
+
+[[deps.RoundingEmulator]]
+git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
+uuid = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
+version = "0.2.1"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -417,11 +516,24 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╟─2661bfc9-e398-41ed-87d9-c78f05da64cb
-# ╟─81ed6d83-622f-46ac-b0c3-0fae0c8ef378
-# ╟─6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
-# ╟─05ad3f54-e92c-4ab5-b276-aa7763ba36b3
-# ╟─82a5527f-0661-4a32-b758-5708bb184968
-# ╟─e34560b8-93af-4f5b-8e4f-f5c48ef29d3c
+# ╟─755f440a-f42d-4de2-9cd2-826ea2114ab7
+# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
+# ╟─aff38e1d-416c-472b-81ea-820d7430dded
+# ╟─f283c615-fcde-4752-8d02-fafaa0e73b7d
+# ╠═3b098d28-5fc8-4463-a59b-08bca638d5be
+# ╠═dda38796-c299-4d38-b479-fde4c1496941
+# ╠═8d22a89b-5531-4e0c-9c02-e351578df93e
+# ╠═698891fa-5637-40de-8756-f507551c25d4
+# ╠═5ee47406-c6cc-40d8-adb9-c37146f9db01
+# ╟─7b944744-628c-4ac9-8528-6dc19789ddb0
+# ╠═fdd9fd8b-a3df-455d-bfe8-321723f5c566
+# ╟─8b9a0f39-21f0-4288-bb2b-a594d6712292
+# ╟─3d27e2d3-e5e8-4e95-9294-23e416608b6a
+# ╟─03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
+# ╠═4c78f87b-7191-47f4-8bd7-cd9d13c5b4c6
+# ╠═4ac782db-4d32-4bf8-bddf-cc8f8b5e6217
+# ╠═a4b2181e-d7dd-4c49-8c45-d6864cf878c6
+# ╠═2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
+# ╠═5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

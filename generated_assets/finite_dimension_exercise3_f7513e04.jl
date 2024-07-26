@@ -1,21 +1,21 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.19.43
 
 #> [frontmatter]
-#> homework_number = 2
+#> homework_number = 3
 #> order = 1.5
-#> title = "Back to period 3 implies chaos"
+#> title = "Rigorous computation of an eigenpair"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 755f440a-f42d-4de2-9cd2-826ea2114ab7
+# ╔═╡ 70740a99-ec98-45c8-ba8f-06d63dd396b0
 using PlutoTeachingTools
 
 # ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial
+using RadiiPolynomial, LinearAlgebra
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""<style>
@@ -27,91 +27,73 @@ main {
 }
 """
 
-# ╔═╡ aff38e1d-416c-472b-81ea-820d7430dded
+# ╔═╡ c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
 md"""
-In order to study period 3 orbits in the dynamical system $x_{n+1} = \mu x_n (1-x_n)$, we consider the map
+**1.** Consider a matrix $M$, and an approximate eigenpair $(\bar{\lambda},\bar{u})$ of $M$. Assuming the corresponding exact eigenvalue $\lambda$ is simple, define a suitable $F=0$ problem, and derive the bounds needed to apply the Newton-Kantorovich theorem in that context.
+"""
+
+# ╔═╡ 7748e568-afc9-43cc-b2bd-5a231d86f455
+Foldable("Hint",
+md"The *natural* zero finding problem is $G(\lambda,u) = (M-\lambda I)u$, but it has one too many unknowns. This is consistent with the fact that zeros of $G$ are not isolated (one can always rescale the eigenvector). Therefore, a suitable zero finding problem needs to incorporate a normalization condition, for instance:
 
 $\begin{align}
-F : \ \left\{
-\begin{aligned}
-\mathbb{R}^3 &\to \mathbb{R}^3 \\
-\begin{pmatrix} x_0 \\ x_1 \\ x_2 \end{pmatrix}  &\mapsto
-\begin{pmatrix} \mu x_0(1-x_0) - x_1 \\ \mu x_1(1-x_1) - x_2 \\ \mu x_2(1-x_2) - x_0 \end{pmatrix}
-\end{aligned} \right.
+F(\lambda,u) =
+\begin{pmatrix}
+\langle u,\bar{u} \rangle -1 \\
+(M-\lambda I)u
+\end{pmatrix}.
 \end{align}$
-"""
+"
+)
 
-# ╔═╡ f283c615-fcde-4752-8d02-fafaa0e73b7d
+# ╔═╡ cab728f1-9ff5-4bdd-8101-5c39718c4d53
 md"""
-**1.** Using the implementation of $F$ and $DF$ provided in the following cells, and the function `newton` from RadiiPolynomial.jl, find an approximate period 3 orbit $\bar{x}$, for $\mu=3.9$.
+**2.** For any positive integer $N$, the Wilkinson matrix $W_{N}$ is the following $(2N+1)\times(2N+1)$ tridiagonal matrix:
+
+$\begin{align}
+W_{N} =
+\begin{pmatrix}
+N & 1 & & & & & \\
+1 & N-1 & 1 & & & & \\
+ & 1 & \ddots & \ddots & & & \\
+ & & \ddots & 0 & \ddots & & \\
+ & & & \ddots & \ddots & 1 & \\
+ & & & & 1 & N-1 & 1 \\
+ & & & & & 1 & N
+\end{pmatrix}
+\end{align}$
+
+We provide below approximate eigenvalues and eigenvectors of $W_3$. Rigorously enclose all eigenpairs of $W_3$.
 """
 
-# ╔═╡ 3b098d28-5fc8-4463-a59b-08bca638d5be
-function F(x, μ)
-	x₀, x₁, x₂ = x
-	return Sequence(
-		[μ * x₀ * (1 - x₀) - x₁,
-		 μ * x₁ * (1 - x₁) - x₂,
-		 μ * x₂ * (1 - x₂) - x₀])
+# ╔═╡ d61514c3-3b0e-4658-8b31-de9f9514a9c3
+function W(N)
+	M = zeros(2N+1, 2N+1)
+	for i = 1:2N+1
+		M[i,i] = abs(N - i + 1)
+		if i+1 ≤ 2N+1
+			M[i,i+1] = 1
+		end
+		if i-1 ≥ 1
+			M[i,i-1] = 1
+		end
+	end
+	return M
 end
 
-# ╔═╡ dda38796-c299-4d38-b479-fde4c1496941
-function DF(x, μ)
-	x₀, x₁, x₂ = x
-	return LinearOperator(
-		[ μ * (1 - 2x₀) -1              0
-		  0              μ * (1 - 2x₁) -1
-		 -1              0              μ * (1 - 2x₂)])
-end
+# ╔═╡ 1bba510b-be86-44b0-a3c9-419b3b6ada37
+N = 3
 
-# ╔═╡ 8d22a89b-5531-4e0c-9c02-e351578df93e
-μ = 3.9
+# ╔═╡ fe0054f0-4fd5-489f-9fcb-3af086876699
+W(N)
 
-# ╔═╡ 698891fa-5637-40de-8756-f507551c25d4
-initial_data = rand(Float64, (3))
-
-# ╔═╡ 5ee47406-c6cc-40d8-adb9-c37146f9db01
-bx, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
-
-# ╔═╡ 7b944744-628c-4ac9-8528-6dc19789ddb0
-md"""
-**2.** Define a suitable $A$ to be used later in the Newton-Kantorovich argument.
-"""
-
-# ╔═╡ fdd9fd8b-a3df-455d-bfe8-321723f5c566
-# A = ...
-
-# ╔═╡ 8b9a0f39-21f0-4288-bb2b-a594d6712292
-md"""
-**3.** Using the 1-norm on $\mathbb{R}^3$, show that the constant function $Z_2(r) = 2\mu \left\Vert A\right\Vert_1$ satisfies the assumption of the Newton-Kantorovich theorem.
-"""
-
-# ╔═╡ 3d27e2d3-e5e8-4e95-9294-23e416608b6a
-Foldable("Need a hint?",	md"You may first compute $D^2F(\bar{x})(u,v)$ and show that $\Vert D^2F(\bar{x})(u,v) \Vert_1 \leq 2\mu  \Vert u\Vert_1 \Vert v\Vert_1$.")
-
-# ╔═╡ 03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
-md"""
-**4.** Implement and evaluate suitable bounds $Y$, $Z_1$ and $Z_2$, and use the function `interval_of_existence` from RadiiPolynomial.jl in order to prove the existence of a period 3 orbit for $\mu = 3.9$.
-"""
-
-# ╔═╡ 4c78f87b-7191-47f4-8bd7-cd9d13c5b4c6
-# Y = ...
-
-# ╔═╡ 4ac782db-4d32-4bf8-bddf-cc8f8b5e6217
-# Z₁ = ...
-
-# ╔═╡ a4b2181e-d7dd-4c49-8c45-d6864cf878c6
-rstar = Inf # since Z₂ is constant
-
-# ╔═╡ 2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
-# Z₂ = ...
-
-# ╔═╡ 5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
-# interval_of_existence(Y, Z₁, Z₂, rstar)
+# ╔═╡ 3509fe96-4a83-461f-8fed-23343d74dc8c
+eigenvalues, eigenvectors = eigen(W(N))
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
 RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
@@ -124,9 +106,9 @@ RadiiPolynomial = "~0.8.12"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.2"
 manifest_format = "2.0"
-project_hash = "6b5a1c65b08c1cb67df2036186b2c2a085cfc3db"
+project_hash = "49d29ae341b6f6390131461e857efcdfb8528a3c"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -165,7 +147,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.1+0"
+version = "1.1.0+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -516,24 +498,14 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╟─755f440a-f42d-4de2-9cd2-826ea2114ab7
+# ╟─70740a99-ec98-45c8-ba8f-06d63dd396b0
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
-# ╟─aff38e1d-416c-472b-81ea-820d7430dded
-# ╟─f283c615-fcde-4752-8d02-fafaa0e73b7d
-# ╠═3b098d28-5fc8-4463-a59b-08bca638d5be
-# ╠═dda38796-c299-4d38-b479-fde4c1496941
-# ╠═8d22a89b-5531-4e0c-9c02-e351578df93e
-# ╠═698891fa-5637-40de-8756-f507551c25d4
-# ╠═5ee47406-c6cc-40d8-adb9-c37146f9db01
-# ╟─7b944744-628c-4ac9-8528-6dc19789ddb0
-# ╠═fdd9fd8b-a3df-455d-bfe8-321723f5c566
-# ╟─8b9a0f39-21f0-4288-bb2b-a594d6712292
-# ╟─3d27e2d3-e5e8-4e95-9294-23e416608b6a
-# ╟─03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
-# ╠═4c78f87b-7191-47f4-8bd7-cd9d13c5b4c6
-# ╠═4ac782db-4d32-4bf8-bddf-cc8f8b5e6217
-# ╠═a4b2181e-d7dd-4c49-8c45-d6864cf878c6
-# ╠═2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
-# ╠═5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
+# ╟─c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
+# ╟─7748e568-afc9-43cc-b2bd-5a231d86f455
+# ╟─cab728f1-9ff5-4bdd-8101-5c39718c4d53
+# ╠═d61514c3-3b0e-4658-8b31-de9f9514a9c3
+# ╠═1bba510b-be86-44b0-a3c9-419b3b6ada37
+# ╠═fe0054f0-4fd5-489f-9fcb-3af086876699
+# ╠═3509fe96-4a83-461f-8fed-23343d74dc8c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
