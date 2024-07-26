@@ -2,9 +2,9 @@
 # v0.19.43
 
 #> [frontmatter]
-#> homework_number = 6
+#> homework_number = 5
 #> order = 1.5
-#> title = "Toward rigorous continuation"
+#> title = "Rigorous control of the entire spectrum"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
 
