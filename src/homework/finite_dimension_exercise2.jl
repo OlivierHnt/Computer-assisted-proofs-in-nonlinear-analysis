@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.19.43
 
 #> [frontmatter]
 #> homework_number = 2
@@ -71,7 +71,7 @@ end
 initial_data = rand(Float64, (3))
 
 # ╔═╡ 5ee47406-c6cc-40d8-adb9-c37146f9db01
-bx, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
+x̄, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
 
 # ╔═╡ 7b944744-628c-4ac9-8528-6dc19789ddb0
 md"""
@@ -87,7 +87,7 @@ md"""
 """
 
 # ╔═╡ 3d27e2d3-e5e8-4e95-9294-23e416608b6a
-Foldable("Need a hint?",	md"You may first compute $D^2F(\bar{x})(u,v)$ and show that $\Vert D^2F(\bar{x})(u,v) \Vert_1 \leq 2\mu  \Vert u\Vert_1 \Vert v\Vert_1$.")
+Foldable("Hint",	md"You may first compute $D^2F(\bar{x})(u,v)$ and show that $\Vert D^2F(\bar{x})(u,v) \Vert_1 \leq 2\mu  \Vert u\Vert_1 \Vert v\Vert_1$.")
 
 # ╔═╡ 03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
 md"""
@@ -124,7 +124,7 @@ RadiiPolynomial = "~0.8.12"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.2"
 manifest_format = "2.0"
 project_hash = "6b5a1c65b08c1cb67df2036186b2c2a085cfc3db"
 
@@ -165,7 +165,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.1+0"
+version = "1.1.0+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -246,9 +246,9 @@ version = "0.21.4"
 
 [[deps.JuliaInterpreter]]
 deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "5d3a5a206297af3868151bb4a2cf27ebce46f16d"
+git-tree-sha1 = "a6adc2dcfe4187c40dc7c2c9d2128e326360e90a"
 uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.9.33"
+version = "0.9.32"
 
 [[deps.LaTeXStrings]]
 git-tree-sha1 = "50901ebc375ed41dbf8058da26f9de442febbbec"

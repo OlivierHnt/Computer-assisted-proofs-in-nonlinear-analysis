@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.19.43
 
 #> [frontmatter]
 #> homework_number = 4
@@ -39,7 +39,7 @@ $\begin{align}
 """
 
 # ╔═╡ 05ad3f54-e92c-4ab5-b276-aa7763ba36b3
-Foldable("Need a hint?",
+Foldable("Hint",
 	md"Write $\left(M\bar{X}\right)^{-1}$ as $\left(I + M\bar{X}-I\right)^{-1}$, and mutliply to the left by $\bar{X}$ in order to get a power series expansion of $M^{-1}$"
 )
 
@@ -49,7 +49,7 @@ md"""
 """
 
 # ╔═╡ e34560b8-93af-4f5b-8e4f-f5c48ef29d3c
-Foldable("Need a hint?",md"You may consider $F(X) = MX-I$ (or $F(X) = XM-I$).")
+Foldable("Hint",md"You may consider $F(X) = MX-I$ (or $F(X) = XM-I$).")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -64,7 +64,7 @@ PlutoTeachingTools = "~0.2.15"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.2"
 manifest_format = "2.0"
 project_hash = "b873fd5571111b4c454c95ca5fa58b75bfb4ab46"
 
@@ -99,7 +99,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.1+0"
+version = "1.1.0+0"
 
 [[deps.Dates]]
 deps = ["Printf"]

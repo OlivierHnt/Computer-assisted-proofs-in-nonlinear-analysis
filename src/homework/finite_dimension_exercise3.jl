@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.19.43
 
 #> [frontmatter]
 #> homework_number = 3
@@ -33,7 +33,7 @@ md"""
 """
 
 # ╔═╡ 7748e568-afc9-43cc-b2bd-5a231d86f455
-Foldable("Need a hint?",
+Foldable("Hint",
 md"The *natural* zero finding problem is $G(\lambda,u) = (M-\lambda I)u$, but it has one too many unknowns. This is consistent with the fact that zeros of $G$ are not isolated (one can always rescale the eigenvector). Therefore, a suitable zero finding problem needs to incorporate a normalization condition, for instance:
 
 $\begin{align}
@@ -67,7 +67,6 @@ We provide below approximate eigenvalues and eigenvectors of $W_3$. Rigorously e
 """
 
 # ╔═╡ d61514c3-3b0e-4658-8b31-de9f9514a9c3
-# We should probably provide them with some code to get numerical eigenpairs, and maybe also some code for W_{2N+1}
 function W(N)
 	M = zeros(2N+1, 2N+1)
 	for i = 1:2N+1
@@ -107,7 +106,7 @@ RadiiPolynomial = "~0.8.12"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.2"
 manifest_format = "2.0"
 project_hash = "49d29ae341b6f6390131461e857efcdfb8528a3c"
 
@@ -148,7 +147,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.1+0"
+version = "1.1.0+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
