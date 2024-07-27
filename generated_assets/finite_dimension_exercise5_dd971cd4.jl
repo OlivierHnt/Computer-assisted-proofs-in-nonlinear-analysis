@@ -67,7 +67,7 @@ md"You may first compute numerically a matrix $P$ of approximate eigenvectors of
 
 # ╔═╡ bc052916-db0e-43a2-bbb0-76b917d6f638
 md"""
-**2.** Try to prove that $W_{1000}$ has exactly one eigenvalue with positive real part.
+**2.** Try to prove that $W_{1000}$ has exactly one eigenvalue with negative real part.
 """
 
 # ╔═╡ 3686e5b2-daac-470d-b9e3-4bd5706e5894
