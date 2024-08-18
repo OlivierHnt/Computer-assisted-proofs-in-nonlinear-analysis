@@ -2,10 +2,10 @@
 # v0.19.45
 
 #> [frontmatter]
-#> chapter = 1
+#> chapter = 3
 #> order = 1
-#> title = "Lecture notes: Finite-dimensional problems"
-#> tags = ["module1"]
+#> title = "Lecture notes: periodic orbit problems"
+#> tags = ["module3"]
 #> layout = "layout.jlhtml"
 
 using Markdown
