@@ -21,7 +21,7 @@ jobs:
             - name: 🙌 Install Julia
               uses: julia-actions/setup-julia@v1
               with:
-                  version: "1.8"
+                  version: "1.10"
 
             - name: ⏱ Cache notebook states
               uses: actions/cache@v2
@@ -46,7 +46,7 @@ jobs:
 
                   include("./generate.jl")'
 
-            
+
             - name: 📰 Upload site generation report
               uses: actions/upload-artifact@v2
               if: always()
