@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.19.46
 
 #> [frontmatter]
 #> chapter = 1
@@ -64,25 +64,25 @@ mu
 # ╔═╡ 730eeed9-a736-48df-a853-94f45dedd836
 begin
 	x0 = 0.4
-	nb_it = 50
-	x = zeros(nb_it+1)
+	maxiter = 50
+	x = zeros(maxiter+1)
 	x[1] = x0
-	for n=1:nb_it
+	for n = 1:maxiter
 		x[n+1] = mu*x[n]*(1-x[n])
 	end
-	plot(0:nb_it, x, marker=(:circle,5), legend=false)
+	plot(0:maxiter, x; marker = (:circle, 5), legend = false)
 	xlabel!("n")
 	ylims!(-0.1, 1.1)
 end
 
 # ╔═╡ e3be34b1-bc05-49f5-884d-78886f7a9509
-Markdown.MD(Markdown.Admonition("tip", "Theorem", [md"Let $f:[0,1]\to[0,1]$ be continuous, and consider the dynamical system defined by $x_{n+1} = f(x_n)$. If there exists an orbit of period 3, i.e. $x_0$ in $[0,1]$ such that $x_0\neq x_1\neq x_2$ and $x_3=x_0$, then the system is *chaotic*.  In particular, there exist orbits of any period.[^Sha64][^LY75]"]))
+Markdown.MD(Markdown.Admonition("tip", "Theorem", [md"Let $f:[0,1]\to[0,1]$ be continuous, and consider the dynamical system defined by $x_{n+1} = f(x_n)$. If there exists an orbit of period 3, i.e. $x_0$ in $[0,1]$ such that $x_0 \ne x_1 \ne x_2$ and $x_3=x_0$, then the system is *chaotic*. In particular, there exist orbits of any period.[^Sha64][^LY75]"]))
 
 # ╔═╡ 6a625351-cadf-4d51-b30a-ef070ca23552
 md"""
 Let us fix a value of $\mu$ for which the dynamics seems complicated, say $\mu = 3.9$. Our goal will be to prove the existence of a period 3 orbit, by first finding numerically an approximate period 3 orbit, and then proving a posteriori the existence of a true period 3 orbit nearby.
 
-There are several ways to prove the existence of a period 3 orbit for this example (with and without computer-assistance), but the ideas we are going to present and use will generalize to more complicated, infinite-dimensional, problems.
+There are several ways to prove the existence of a period 3 orbit for this example (with and without computer assistance), but the ideas we are going to present and use will generalize to more complicated infinite dimensional problems.
 """
 
 # ╔═╡ 8b779da9-46e2-442d-af54-5ad0284e7b84
@@ -92,73 +92,73 @@ md"""
 
 # ╔═╡ c352e6d8-fd3d-4070-8bdf-4c98ae555b69
 md"""
-Given a problem and an approximate solution $\bar{x}$, we would like to find a fixed-point operator $T$ such that:
-- Solutions to our problem are in one-to-one correspondence with fixed-points of $T$,
+Given a problem and an approximate solution $\bar{x}$, our goal is to define a fixed-point operator $T$ such that
+- the solutions to our problem are in one-to-one correspondence with fixed-points of $T$,
 -  $T$ is a contraction on a small neighborhood of $\bar{x}$.
 
-How to define such a $T$ may of course depend on the problem at hand, but we will give below a generic strategy. First, we give sufficient conditions, that we can explicitly try to check in practice, allowing to prove that an operator $T$ is contracting on a small neighborhood of $\bar{x}$. Even though we only deal with finite-dimentional problems in this first part of the tutorial, we already state these conditions in a general Banach space, as they will also be heavily used in the remainder of the tutorial.
+The specific form of $T$ may vary depending on the nature of the problem, but we can outline a general strategy for constructing such an operator. We provide sufficient conditions that can be verified in practice to demonstrate that an operator $T$ is contracting on a small neighborhood of $\bar{x}$. Even though we only deal with finite dimentional problems in this first module, we already state these conditions in a general Banach space, as they will also be heavily used in the next modules.
 """
 
 # ╔═╡ 6eeb3554-a50c-4f3d-b676-95368021204c
 Markdown.MD(Markdown.Admonition("tip", "Theorem",
 [md"""
-Let $X$ be a Banach space, $\bar{x}\in X$, and $T:X\to X$ a continously differentiable map. Assume there exists a constant $Y$ and a non-decreasing map $Z:[0,\infty)\to[0,\infty)$ such that
+Let $X$ be a Banach space, $\bar{x} \in X$, and $T : X \to X$ a continously differentiable map. Assume there exists a constant $Y$ and a non-decreasing map $Z : [0, \infty) \to [0, \infty)$ such that
 
 $\begin{align}
-\Vert T(\bar{x}) - \bar{x} \Vert &\leq Y \\
-\Vert DT(x) \Vert &\leq Z(\Vert x-\bar{x}\Vert) \quad \forall~x\in X.
+\Vert T(\bar{x}) - \bar{x} \Vert &\leq Y, \\
+\Vert DT(x) \Vert &\leq Z(\Vert x-\bar{x}\Vert), \quad \forall x \in X.
 \end{align}$
 
-It there exists $r>0$ such that
+If there exists $r>0$ such that
 
 $\begin{align}
-Y + \int_0^r Z(s) \mathrm{d}s &\leq r  \\
+Y + \int_0^r Z(s) \mathrm{d}s &\leq r, \\
 Z(r) &< 1,
 \end{align}$
 
-then $T$ has a unique fixed point $x^*$ such that $\Vert x^* - \bar{x} \Vert \leq r$.
+then $T$ has a unique fixed point $\tilde{x}$ such that $\Vert \tilde{x} - \bar{x} \Vert \le r$.
 """]))
 
 # ╔═╡ 94e323ed-5e13-413b-8bcb-1909dd6e14a5
 Markdown.MD(Markdown.Admonition("note", "Remarks",
 [md"""
-- The bound $Z$ is actually only needed locally, i.e. we only need $Z(s)$ for $s\leq r$. Therefore, one can fix a priori some $r^*>0$, and weaken then assumption by only asking for $Z$ to be defined on $[0,r^*]$ and to satisfy $\Vert DT(x) \Vert \leq Z(\Vert x-\bar{x}\Vert)$ for all $x$ in $X$ such that $\Vert x-\bar{x}\Vert \leq r^*$. Of course, we are then only allowed to consider $r\in(0,r^*]$.
-- In practice, studying carefully how $\Vert DT(x)$ depends on $\Vert x-\bar{x}\Vert$ allows us to get better bounds. However, we can sometimes get away with crude estimates. That is, we derive a constant $Z^*$ such that $\Vert DT(x) \Vert \leq Z^*$ for all $x$ in $X$ such that $\Vert x-\bar{x}\Vert \leq r^*$, and then use $Z(s) = Z^*$ for all $s\leq r^*$. The conditions on $r$ then simplify, and, if $Z^*<1$, we can take any $r\geq \frac{Y}{1-Z^*}$.
+- The bound $Z$ is actually only needed locally, i.e. we only need $Z(s)$ for $s \le r$. Therefore, one can fix a priori some $r_* > 0$, and weaken then assumption by only asking for $Z$ to be defined on $[0,r_*]$ and to satisfy $\Vert DT(x) \Vert \le Z(\Vert x-\bar{x} \Vert)$ for all $x$ in $X$ such that $\Vert x-\bar{x} \Vert \le r_*$. Of course, we are then only allowed to consider $r \in (0,r_*]$.
+- In practice, studying carefully how $\Vert DT(x) \Vert$ depends on $\Vert x-\bar{x} \Vert$ allows us to get better bounds. However, we can sometimes get away with crude estimates. That is, we derive a constant $Z_*$ such that $\Vert DT(x) \Vert \le Z_*$ for all $x \in X$ such that $\Vert x-\bar{x} \Vert \le r_*$, and then use $Z(s) = Z_*$ for all $s \le r_*$. The conditions on $r$ then simplify, and, if $Z_* < 1$, we can take any $r \ge \frac{Y}{1-Z_*}$.
 """]))
 
 # ╔═╡ accd6469-25c3-40d7-959b-5663d560437c
 md"""
-Going back to a dynamical system $x_{n+1} = f(x_n)$, a natural fixed-point operator for period 3 orbits is given by $T(x) = f^3(x)$, i.e. $f$ composed with itself three times. However, such a $T$ has no reason to be contracting near a period 3 orbit.
+Going back to a dynamical system $x_{n+1} = f(x_n)$, a natural fixed-point operator for period 3 orbits is given by $T(x) = f^3(x)$, i.e. $f$ composed with itself three times. However, such a $T$ has no reason to be contracting.
 
-In order to get a general procedure to construct a fixed-point problem, one can start by finding a map $F$ such that solutions of our problem are isolated zeros of $F$. Then, given an approximate solution $\bar{x}$, one can consider the Newton-like fixed-point operator $T(x) = x - DF(\bar{x})^{-1}F(x)$, which should be contracting on a neighborhood of $\bar{x}$, as $DT(\bar{x}) = 0$.
+To develop a more general procedure for constructing a fixed-point problem, one can start by finding a map $F$ whose isolated zeros are solutions to our problem. Given an approximate solution $\bar{x}$, one can consider the Newton-like operator $T(x) = x - DF(\bar{x})^{-1} F(x)$. This operator should be contracting in a neighborhood of $\bar{x}$, as $DT(\bar{x}) = 0$.
 
-For finite dimensional problems (of moderate size), the inverse of $DF(\bar{x})$ is mostly innocous, but $DF(\bar{x})^{-1}$ may become very hard to deal with for infinite dimensional problems. Therefore, one often considers instead an approximate inverse $A\approx DF(\bar{x})^{-1}$ and the fixed-point operator $T(x) = x - AF(x)$. We state all following results in this context, for an $A$ which is not specified and could actually (but does not have to) be $DF(\bar{x})^{-1}$.
+For finite dimensional problems of moderate size, computing the inverse of $DF(\bar{x})$ is feasible. However, in infinite dimensional problems, $DF(\bar{x})^{-1}$ may become challenging to work with. To address this, one often considers an approximate inverse $A \approx DF(\bar{x})^{-1}$ and the fixed-point operator $T(x) = x - AF(x)$. We state all following results in this context, for an $A$ which is not specified and could actually (but does not have to) be $DF(\bar{x})^{-1}$.
 """
 
 # ╔═╡ 542de1ab-1b8b-49c8-8960-704c2351407a
 Markdown.MD(Markdown.Admonition("tip", "Corollary",
 [md"""
-Let $X$ and $Y$ be two Banach spaces, $\bar{x}\in X$,  $F:X\to Y$ a continously differentiable map, $A:Y\to X$ an injective linear map, and $r^*>0$. Assume there exists constants $Y$ and $Z_1$ and a non-decreasing map $Z_2:[0,r^*]\to[0,\infty)$ such that
+Let $X$ and $Y$ be two Banach spaces, $\bar{x}\in X$, $F : X \to Y$ a continously differentiable map, $A : Y \to X$ an injective linear map, and $r_* > 0$. Assume there exist constants $Y$, $Z_1$ and a non-decreasing map $Z_2 : [0, r_*] \to [0, \infty)$ such that
 
 $\begin{align}
-\Vert AF(\bar{x}) \Vert &\leq Y \\
-\Vert I-ADF(\bar{x}) \Vert &\leq Z_1 \\
-\Vert A(DF(x)-DF(\bar{x})) \Vert &\leq Z_2(\Vert x-\bar{x}\Vert) \quad \forall~x\in X \text{ such that } \Vert x-\bar{x}\Vert \leq r^*.
+\Vert AF(\bar{x}) \Vert &\le Y, \\
+\Vert I-ADF(\bar{x}) \Vert &\le Z_1, \\
+\Vert A(DF(x)-DF(\bar{x})) \Vert &\leq Z_2(\Vert x-\bar{x}\Vert), \quad \forall x \in X \text{ such that } \Vert x-\bar{x}\Vert \le r_*.
 \end{align}$
 
-It there exists $r>0$ such that
+If there exists $r>0$ such that
 
 $\begin{align}
-Y + Z_1 r + \frac{1}{2}Z_2 r^2 &\leq r \\
+Y + Z_1 r + \frac{1}{2} Z_2 r^2 &\le r, \\
 Z_1 + Z_2 r &< 1,
 \end{align}$
 
-then $F$ has a unique zero $x^*$ such that $\Vert x^* - \bar{x} \Vert \leq r$.
+then $F$ has a unique zero $\tilde{x}$ such that $\Vert \tilde{x} - \bar{x} \Vert \le r$.
 """]))
 
 # ╔═╡ 23923d27-9905-4f26-8ef5-53f183d290da
 md"""
-This corollary is a simplified version of the Newton-Kantorovich Theorem [^Ort68]. Many slight variations can be found in the literature, and are used in many many CAPs (see for instance [^BL15] [^NPW19] and the references therein).
+This corollary is a simplified version of the Newton-Kantorovich Theorem [^Ort68]. Many slight variations can be found in the literature, and are used in many CAPs (see for instance [^BL15] [^NPW19] and the references therein).
 """
 
 # ╔═╡ 66ca51ad-0f2e-4f3c-8dd0-e66649b224d9
@@ -168,15 +168,18 @@ md"""
 
 # ╔═╡ f7d40916-2d5b-47f2-9fe9-6635363978ae
 md"""
-When we want to use the Newton-Kantorovich theorem with $\bar{x}$ being an approximate solution obtained using the computer, we also need to use the computer to evaluate quantities like $\Vert F(\bar{x}) \Vert $ and get the required bounds $Y$ and $Z$. However, by default the computer will evaluate $\Vert F(\bar{x}) \Vert$ using floating-point arithmetic, and the output will contain rounding errors. In particular, if we set $Y = \Vert F(\bar{x}) \Vert$ on the computer, we in fact do not know whether $Y$ actually satifies the assumption of the Newton-Kantorovich theorem or not.
+When we want to use the Newton-Kantorovich theorem with $\bar{x}$ being an approximate solution obtained using the computer, we also need to use the computer to evaluate quantities like $\Vert F(\bar{x}) \Vert$ to obtain the bounds $Y$ and $Z$. However, by default these computations are performed using floating-point arithmetic, which introduces rounding errors. In particular, if we set $Y = \Vert F(\bar{x}) \Vert$ on the computer, we cannot be certain that $Y$ actually satifies the assumption of the Newton-Kantorovich theorem.
 
-Interval arithmetic gives us a way to control rounding errors and to get guaranteed results from the computer. We only give a brief description of interval arithmetic here, and refer to [^Moo79] [^Tuc11] for more comprehensive treatments.
+[Interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic) provides a way to control rounding errors and obtain guaranteed results from computer calculations. Here, we only give a brief description of interval arithmetic; refer to [^Moo79] [^Tuc11] for more detailed discussions.
 """
 
-# ╔═╡ 21711cc5-dc6b-4aed-8783-383f718b121a
+# ╔═╡ 7b174512-9ed1-4b99-ae17-a366323f0a46
 md"""
-When a command like `a=0.1` is executed, the computer associates to the variable `a` a single floating-point number: the floating-point number which is the closest to the real number $0.1$. However, because $0.1$ does not have a finite representation in base 2, $0.1$ is not a floating-point number, so the value stored in `a` is already not equal to $0.1$. It turns out to be slightly larger than $0.1$, but it could very well have been the other way around.
+When a command like `a = 0.1` is executed in Julia, the computer associates to the variable `a` a single floating-point number: the floating-point number which is the closest to $1/10$. Since $1/10$ does not have a finite representation in base $2$, the value stored in `a` is already not equal to the typed-in number `0.1`. It turns out to be slightly larger than $1/10$, but it could very well have been the other way around (e.g. `0.3`).
 """
+
+# ╔═╡ b9a5fc37-1be5-4ce2-9f8a-7a08500e9608
+versioninfo()
 
 # ╔═╡ 2d68d26d-6e10-407f-8227-515ddadd9599
 a = 0.1
@@ -186,28 +189,30 @@ a > 1//10
 
 # ╔═╡ c359bec8-4a1a-4e34-9f56-1f70f4fa5cbe
 md"""
-When using interval arithmetic, we can instead represent any real number by an interval, whose end-points are floating-point numbers. That is, the computer can also represent `a` as an interval $[\underline{a},\overline{a}]$, whose end-points should be floating-point numbers satisfying $\underline{a}\leq a \leq \overline{a}$. We give up the hope of representing numbers exactly, but we recover guaranteed information: the real number $a$ is contained in the interval representing it on the computer.
+When using interval arithmetic, we represent any real number by an interval, whose end-points are floating-point numbers. More precisely, for $a \in \mathbb{R}$, we consider the interval $[\underline{a}, \overline{a}]$ where $\underline{a}, \overline{a}$ are floating-point numbers satisfying $\underline{a} \le a \le \overline{a}$. We give up the hope of representing numbers exactly, but we recover guaranteed information: the real number $a$ is contained in the interval representing it on the computer.
+
+We use the Julia package [IntervalArithmetic.jl](https://github.com/JuliaIntervals/IntervalArithmetic.jl) in this course, but there are many other interval arithmetic librairies in different languages (e.g. [Arb](https://arblib.org/) or [Intlab](https://www.tuhh.de/ti3/rump/intlab/)).
+Note that IntervalArithmetic is automatically available when using [RadiiPolynomial.jl](https://github.com/OlivierHnt/RadiiPolynomial.jl).
 """
 
 # ╔═╡ c44fd902-7655-43b5-82cc-53c2ecc4f77b
 ia = I"0.1" #interval(1)/interval(10)
 
 # ╔═╡ 4c15bb79-2591-4f2a-9243-ff811de70df7
-in_interval(1//10,ia)
+in_interval(1//10, ia)
 
 # ╔═╡ 97fcd17c-9710-4753-89f5-9d592a33d0b1
 md"""
-The rules of interval arithmetic then ensure that this property is preserved when doing arithmetic operations. For instance, consider two intervals `a` and `b` of the form $[\underline{a},\overline{a}]$ and $[\underline{b},\overline{b}]$, containing the reals numbers $a$ and $b$. When we do `c = a+b`, the resulting interval $[\underline{c},\overline{c}]$ for `c` is computed as follows. For $\underline{c}$, we take $\underline{a}+\underline{b}$ **rounded downward** (a sum of two floating-points numbers is not necessarily a floating-point number), and for $\overline{c}$ we take $\overline{a}+\overline{b}$ **rounded upward**. In particular, the real number $c=a+b$ is contained in the interval `c`.
-
+The rules of interval arithmetic then ensure that this property is preserved when doing arithmetic operations. For instance, consider two intervals `a` and `b` of the form $[\underline{a}, \overline{a}]$ and $[\underline{b}, \overline{b}]$, containing the reals numbers $a$ and $b$. When we do `c = a + b`, the resulting interval $[\underline{c},\overline{c}]$ for `c` is computed as follows. For $\underline{c}$, we take $\underline{a}+\underline{b}$ **rounded downward**, and for $\overline{c}$ we take $\overline{a}+\overline{b}$ **rounded upward**. In particular, the real number $c = a + b$ is contained in the interval `c`.
 """
 
 # ╔═╡ c41f292d-b61a-4386-90ca-358d2c3faaea
 md"""
-Similarly, if the variable `c` is an interval $[\underline{c},\overline{c}]$, and we do `d = exp(c)`, we would like to get for `d` an interval containing $\{\exp(c),\  d\in[\underline{d},\overline{d}]\}$. Usual arithmetic operations, as well as implementations of basic functions like `exp`, `log`, etc, complying with these rules are provided in interval arithmetic libraries. We make use of the Julia library [IntervalArithmetic](https://github.com/JuliaIntervals/IntervalArithmetic.jl) in this tutorial, but there are many other interval arithmetic librairies, in different languages, like [Arb](https://arblib.org/) or [Intlab](https://www.tuhh.de/ti3/rump/intlab/).
+Similarly, if the variable `c` is an interval $[\underline{c}, \overline{c}]$, and we compute `d = exp(c)`, we would like that `d` contains $\exp(c)$. Usual arithmetic operations, as well as implementations of elementary functions (e.g. `exp`, `log`, `cos`, etc.) complying with these rules are provided in IntervalArithmetic.
 """
 
 # ╔═╡ f8eab26f-c893-4d2e-b4e8-6b59f33cbc9c
-c = interval(2,4)
+c = interval(2, 4)
 
 # ╔═╡ 556163e0-80d2-4f4e-b198-b8e0922438db
 d = cos(exp(sqrt(c)))
@@ -215,14 +220,14 @@ d = cos(exp(sqrt(c)))
 # ╔═╡ 97fadca1-fcf9-46b8-aa07-c615ca0deb7f
 Markdown.MD(Markdown.Admonition("note", "Remarks",
 [md"""
-**Remark.** Even when doing computer-assisted proofs, one should not use interval arithmetics for all computations. When trying to find an approximate solution $\bar{x}$, floating-point calculations are perfectly fine, and it is only when evaluating the bounds in the Newton-Kantorovich theorem that interval arithmetic must be used.
+Even when doing computer-assisted proofs, one should not use interval arithmetics for all computations. When trying to find an approximate solution $\bar{x}$, floating-point calculations are perfectly fine, and it is only when evaluating the bounds in the Newton-Kantorovich theorem that interval arithmetic must be used.
 """]))
 
 # ╔═╡ b8d56ba6-01da-4604-8dad-3e63ec203fd4
 md"""
 ## References
 [^BL15]: J. B. van den Berg and J.-P. Lessard. Rigorous numerics in dynamics. *Notices Amer. Math. Soc.*, 62(9), 2015.
-[^LY75]: T.-Y. Li and J. A. Yorke. Period Three Implies Chaos. *The American Mathematical Monthly*, 82(10):985--992, 1975.
+[^LY75]: T.-Y. Li and J. A. Yorke. Period three implies chaos. *The American Mathematical Monthly*, 82(10):985--992, 1975.
 [^Moo79]: R. E. Moore. *Methods and applications of interval analysis*. SIAM, 1979
 [^Ort68]: J. M. Ortega. The Newton-Kantorovich theorem. *The American Mathematical Monthly*, 75(6):658--660, 1968.
 [^NPW19]: M. T. Nakao, M. Plum, and Y. Watanabe. *Numerical Verification Methods and Computer-Assisted Proofs for Partial Differential Equations*. Springer Singapore, 2019.
@@ -300,15 +305,15 @@ version = "1.3.5"
 
 [[deps.CodecZlib]]
 deps = ["TranscodingStreams", "Zlib_jll"]
-git-tree-sha1 = "b8fe8546d52ca154ac556809e10c75e6e7430ac8"
+git-tree-sha1 = "bce6804e5e6044c6daab27bb533d1295e4a2e759"
 uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
-version = "0.7.5"
+version = "0.7.6"
 
 [[deps.ColorSchemes]]
 deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "PrecompileTools", "Random"]
-git-tree-sha1 = "4b270d6465eb21ae89b732182c20dc165f8bf9f2"
+git-tree-sha1 = "b5278586822443594ff615963b0c09755771b3e0"
 uuid = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
-version = "3.25.0"
+version = "3.26.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
@@ -336,9 +341,9 @@ version = "0.12.11"
 
 [[deps.Compat]]
 deps = ["TOML", "UUIDs"]
-git-tree-sha1 = "b1c55339b7c6c350ee89f2c1604299660525b248"
+git-tree-sha1 = "8ae8d32e09f0dcf42a36b90d4e17f5dd2e4c4215"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "4.15.0"
+version = "4.16.0"
 weakdeps = ["Dates", "LinearAlgebra"]
 
     [deps.Compat.extensions]
@@ -374,6 +379,12 @@ version = "0.18.20"
 [[deps.Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
+
+[[deps.Dbus_jll]]
+deps = ["Artifacts", "Expat_jll", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "fc173b380865f70627d7dd1190dc2fce6cc105af"
+uuid = "ee1fde0b-3d02-5ea6-8484-8dfef6360eab"
+version = "1.14.10+0"
 
 [[deps.DelimitedFiles]]
 deps = ["Mmap"]
@@ -459,10 +470,10 @@ uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.14+0"
 
 [[deps.GLFW_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll", "xkbcommon_jll"]
-git-tree-sha1 = "3f74912a156096bd8fdbef211eff66ab446e7297"
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll", "libdecor_jll", "xkbcommon_jll"]
+git-tree-sha1 = "532f9126ad901533af1d4f5c198867227a7bb077"
 uuid = "0656b61e-2033-5cc2-a64a-77c0f6c09b89"
-version = "3.4.0+0"
+version = "3.4.0+1"
 
 [[deps.GR]]
 deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Preferences", "Printf", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "p7zip_jll"]
@@ -598,9 +609,9 @@ version = "3.0.0+1"
 
 [[deps.LLVMOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "d986ce2d884d49126836ea94ed5bfb0f12679713"
+git-tree-sha1 = "e16271d212accd09d52ee0ae98956b8a05c4b626"
 uuid = "1d63c593-3942-5779-bab2-d838dc0a180e"
-version = "15.0.7+0"
+version = "17.0.6+0"
 
 [[deps.LZO_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -834,6 +845,12 @@ version = "1.6.3"
 deps = ["Artifacts", "Libdl"]
 uuid = "efcefdf7-47ab-520b-bdef-62a2eaa19f15"
 version = "10.42.0+1"
+
+[[deps.Pango_jll]]
+deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "FriBidi_jll", "Glib_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "cb5a2ab6763464ae0f19c86c56c63d4a2b0f5bda"
+uuid = "36c8627f-9965-5494-a995-c6b170f724f3"
+version = "1.52.2+0"
 
 [[deps.Parsers]]
 deps = ["Dates", "PrecompileTools", "UUIDs"]
@@ -1070,13 +1087,9 @@ deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[deps.TranscodingStreams]]
-git-tree-sha1 = "60df3f8126263c0d6b357b9a1017bb94f53e3582"
+git-tree-sha1 = "e84b3a11b9bece70d14cce63406bbc79ed3464d2"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
-version = "0.11.0"
-weakdeps = ["Random", "Test"]
-
-    [deps.TranscodingStreams.extensions]
-    TestExt = ["Test", "Random"]
+version = "0.11.2"
 
 [[deps.Tricks]]
 git-tree-sha1 = "eae1bb484cd63b36999ee58be2de6c178105112f"
@@ -1103,9 +1116,9 @@ version = "0.4.1"
 
 [[deps.Unitful]]
 deps = ["Dates", "LinearAlgebra", "Random"]
-git-tree-sha1 = "dd260903fdabea27d9b6021689b3cd5401a57748"
+git-tree-sha1 = "d95fe458f26209c66a187b1114df96fd70839efd"
 uuid = "1986cc42-f94f-5a68-af5c-568840ba703d"
-version = "1.20.0"
+version = "1.21.0"
 
     [deps.Unitful.extensions]
     ConstructionBaseUnitfulExt = "ConstructionBase"
@@ -1352,6 +1365,12 @@ deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
 version = "5.8.0+1"
 
+[[deps.libdecor_jll]]
+deps = ["Artifacts", "Dbus_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pango_jll", "Wayland_jll", "xkbcommon_jll"]
+git-tree-sha1 = "9bf7903af251d2050b467f76bdbe57ce541f7f4f"
+uuid = "1183f4f0-6f2a-5f1a-908b-139f9cdfea6f"
+version = "0.2.2+0"
+
 [[deps.libevdev_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
 git-tree-sha1 = "141fe65dc3efabb0b1d5ba74e91f6ad26f84cc22"
@@ -1378,9 +1397,9 @@ version = "1.6.43+1"
 
 [[deps.libvorbis_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Ogg_jll", "Pkg"]
-git-tree-sha1 = "b910cb81ef3fe6e78bf6acee440bda86fd6ae00c"
+git-tree-sha1 = "490376214c4721cdaca654041f635213c6165cb3"
 uuid = "f27f6e37-5d2b-51aa-960f-b287f2bc3b7a"
-version = "1.3.7+1"
+version = "1.3.7+2"
 
 [[deps.mtdev_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1419,7 +1438,7 @@ version = "1.4.1+1"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╟─d0e623ee-b096-4a27-977d-dc32567d6020
+# ╠═d0e623ee-b096-4a27-977d-dc32567d6020
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╟─c33dc650-3f94-11ef-398a-8bbc4a2b69b8
 # ╟─2fe25b56-0fcc-41a0-b74a-2bd650c387d5
@@ -1437,7 +1456,8 @@ version = "1.4.1+1"
 # ╟─23923d27-9905-4f26-8ef5-53f183d290da
 # ╟─66ca51ad-0f2e-4f3c-8dd0-e66649b224d9
 # ╟─f7d40916-2d5b-47f2-9fe9-6635363978ae
-# ╟─21711cc5-dc6b-4aed-8783-383f718b121a
+# ╟─7b174512-9ed1-4b99-ae17-a366323f0a46
+# ╠═b9a5fc37-1be5-4ce2-9f8a-7a08500e9608
 # ╠═2d68d26d-6e10-407f-8227-515ddadd9599
 # ╠═78f17262-7ffc-4d74-835c-f17863817b9a
 # ╟─c359bec8-4a1a-4e34-9f56-1f70f4fa5cbe

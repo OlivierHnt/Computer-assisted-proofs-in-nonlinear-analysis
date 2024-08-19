@@ -1,21 +1,21 @@
 ### A Pluto.jl notebook ###
-# v0.19.43
+# v0.19.46
 
 #> [frontmatter]
-#> homework_number = 5
+#> homework_number = 3
 #> order = 1.5
-#> title = "Rigorous control of the entire spectrum"
+#> title = "Rigorous computation of an eigenpair"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 9099f41e-6239-4f7f-a3ec-82e7d4787f8f
+# ╔═╡ 70740a99-ec98-45c8-ba8f-06d63dd396b0
 using PlutoTeachingTools
 
 # ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial
+using RadiiPolynomial, LinearAlgebra
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""<style>
@@ -27,55 +27,73 @@ main {
 }
 """
 
-# ╔═╡ 45e10c91-f161-43a5-9c9e-5b4dca6a8e53
+# ╔═╡ c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
 md"""
-The third exercise can be used to enclose eigenvalues of a given matrix one by one. We now present an alternate strategy to enclose the entire spectrum at once (but not the corresponding eigenvectors), which can sometimes also be adapted in infinite dimension.
+**1.** Consider a matrix $M$, and an approximate eigenpair $(\bar{\lambda},\bar{u})$ of $M$. Assuming the corresponding exact eigenvalue $\lambda$ is simple, define a suitable $F=0$ problem, and derive the bounds needed to apply the Newton-Kantorovich theorem in that context.
 """
 
-# ╔═╡ b0590931-8d44-47b9-9153-00da2a418b00
-md"""
-We recall the Gershgorin circle theorem: for any matrix $A=\left(A_{i,j}\right)_{1\leq i,j\leq d}$,
-
-$\begin{align}
-\sigma(A) \subset \bigcup_{i=1}^d D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right),
-\end{align}$
-
-where $D(z,r)$ denotes the closed disk of center $z$ in radius $r$ in the complex plane. Moreover, if $I \subset \{1,\ldots,d\}$ is such that
-
-$\begin{align}
-\bigcup_{i\in I} D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right)\quad  \text{ is disjoint from }\quad  \bigcup_{i\notin I} D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right),
-\end{align}$
-
-then
-
-$\begin{align}
-\bigcup_{i\in I} D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right) \quad \text{contains exactly }  \vert I\vert \text{ eigenvalues.}
-\end{align}$
-
-
-"""
-
-# ╔═╡ d01c5817-c4b6-4502-81f6-51ae5715117b
-md"""
-**1.** Using the Gershgorin circle theorem, get as tight as possible rigorous enclosures of all eigenvalues of $W_{3}$ (defined in the third exercise)).
-"""
-
-# ╔═╡ 02939955-c9aa-4152-8e08-f31e1e0c0e9c
+# ╔═╡ 7748e568-afc9-43cc-b2bd-5a231d86f455
 Foldable("Hint",
-md"You may first compute numerically a matrix $P$ of approximate eigenvectors of $W_3$, then rigorously compute $\tilde W_{3} = P^{-1}W_3 P$, and finally apply the Gershgoring circle theorem to $\tilde W_{3}$."
+md"The *natural* zero-finding problem is $G(\lambda, u) := (M-\lambda I)u$, but it has one too many unknowns. This is consistent with the fact that zeros of $G$ are not isolated (one can always rescale the eigenvector). Therefore, a suitable zero-finding problem needs to incorporate a normalization condition, for instance:
+
+$\begin{align}
+F(\lambda,u) =
+\begin{pmatrix}
+\langle u,\bar{u} \rangle -1 \\
+(M-\lambda I)u
+\end{pmatrix}.
+\end{align}$
+"
 )
 
-# ╔═╡ bc052916-db0e-43a2-bbb0-76b917d6f638
+# ╔═╡ cab728f1-9ff5-4bdd-8101-5c39718c4d53
 md"""
-**2.** Try to prove that $W_{1000}$ has exactly one eigenvalue with negative real part.
+**2.** For any positive integer $N$, the Wilkinson matrix $W_{N}$ is the following $(2N+1)\times(2N+1)$ tridiagonal matrix:
+
+$\begin{align}
+W_{N} =
+\begin{pmatrix}
+N & 1 & & & & & \\
+1 & N-1 & 1 & & & & \\
+ & 1 & \ddots & \ddots & & & \\
+ & & \ddots & 0 & \ddots & & \\
+ & & & \ddots & \ddots & 1 & \\
+ & & & & 1 & N-1 & 1 \\
+ & & & & & 1 & N
+\end{pmatrix}
+\end{align}$
+
+We provide below approximate eigenvalues and eigenvectors of $W_3$. Rigorously enclose all eigenpairs of $W_3$.
 """
 
-# ╔═╡ 3686e5b2-daac-470d-b9e3-4bd5706e5894
-Foldable("Hint",md"You do not need to numerically diagonalize all of $W_{1000}$: for most rows, the corresponding Gershgorin disk already lies in the left half of the complex plane. ")
+# ╔═╡ d61514c3-3b0e-4658-8b31-de9f9514a9c3
+function wilkinson(N)
+	M = zeros(2N+1, 2N+1)
+	for i = 1:2N+1
+		M[i,i] = abs(N - i + 1)
+		if i+1 ≤ 2N+1
+			M[i,i+1] = 1
+		end
+		if i-1 ≥ 1
+			M[i,i-1] = 1
+		end
+	end
+	return M
+end
+
+# ╔═╡ 1bba510b-be86-44b0-a3c9-419b3b6ada37
+N = 3
+
+# ╔═╡ fe0054f0-4fd5-489f-9fcb-3af086876699
+wilkinson(N)
+
+# ╔═╡ 3509fe96-4a83-461f-8fed-23343d74dc8c
+eigenvalues, eigenvectors = eigen(wilkinson(N))
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
 RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
@@ -88,9 +106,9 @@ RadiiPolynomial = "~0.8.12"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.2"
+julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "6b5a1c65b08c1cb67df2036186b2c2a085cfc3db"
+project_hash = "49d29ae341b6f6390131461e857efcdfb8528a3c"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -129,7 +147,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.0+0"
+version = "1.1.1+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -172,9 +190,9 @@ version = "0.9.5"
 
 [[deps.IOCapture]]
 deps = ["Logging", "Random"]
-git-tree-sha1 = "8b72179abc660bfab5e28472e019392b97d0985c"
+git-tree-sha1 = "b6d6bfdd7ce25b0f9b2f6b3dd56b2673a66c8770"
 uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
-version = "0.2.4"
+version = "0.2.5"
 
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
@@ -210,9 +228,9 @@ version = "0.21.4"
 
 [[deps.JuliaInterpreter]]
 deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "a6adc2dcfe4187c40dc7c2c9d2128e326360e90a"
+git-tree-sha1 = "5d3a5a206297af3868151bb4a2cf27ebce46f16d"
 uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.9.32"
+version = "0.9.33"
 
 [[deps.LaTeXStrings]]
 git-tree-sha1 = "50901ebc375ed41dbf8058da26f9de442febbbec"
@@ -221,9 +239,9 @@ version = "1.3.1"
 
 [[deps.Latexify]]
 deps = ["Format", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "OrderedCollections", "Requires"]
-git-tree-sha1 = "e0b5cd21dc1b44ec6e64f351976f961e6f31d6c4"
+git-tree-sha1 = "5b0d630f3020b82c0775a51d05895852f8506f50"
 uuid = "23fbe1c1-3f47-55db-b15f-69d7ec21a316"
-version = "0.16.3"
+version = "0.16.4"
 
     [deps.Latexify.extensions]
     DataFramesExt = "DataFrames"
@@ -269,9 +287,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.LoweredCodeUtils]]
 deps = ["JuliaInterpreter"]
-git-tree-sha1 = "eeaedcf337f33c039f9f3a209a8db992deefd7e9"
+git-tree-sha1 = "0b898aba6cb0b01fb96245fa5375accb651a241a"
 uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "2.4.8"
+version = "3.0.0"
 
 [[deps.MIMEs]]
 git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
@@ -392,9 +410,9 @@ version = "1.3.0"
 
 [[deps.Revise]]
 deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "Pkg", "REPL", "Requires", "UUIDs", "Unicode"]
-git-tree-sha1 = "85ddd93ea15dcd8493400600e09104a9e94bb18d"
+git-tree-sha1 = "677b65e17aeb6b4a0be1982e281ec03b0f55155c"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.5.15"
+version = "3.5.16"
 
 [[deps.RoundingEmulator]]
 git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
@@ -480,13 +498,14 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╟─9099f41e-6239-4f7f-a3ec-82e7d4787f8f
+# ╠═70740a99-ec98-45c8-ba8f-06d63dd396b0
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
-# ╟─45e10c91-f161-43a5-9c9e-5b4dca6a8e53
-# ╟─b0590931-8d44-47b9-9153-00da2a418b00
-# ╟─d01c5817-c4b6-4502-81f6-51ae5715117b
-# ╟─02939955-c9aa-4152-8e08-f31e1e0c0e9c
-# ╟─bc052916-db0e-43a2-bbb0-76b917d6f638
-# ╟─3686e5b2-daac-470d-b9e3-4bd5706e5894
+# ╟─c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
+# ╟─7748e568-afc9-43cc-b2bd-5a231d86f455
+# ╟─cab728f1-9ff5-4bdd-8101-5c39718c4d53
+# ╠═d61514c3-3b0e-4658-8b31-de9f9514a9c3
+# ╠═1bba510b-be86-44b0-a3c9-419b3b6ada37
+# ╠═fe0054f0-4fd5-489f-9fcb-3af086876699
+# ╠═3509fe96-4a83-461f-8fed-23343d74dc8c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
