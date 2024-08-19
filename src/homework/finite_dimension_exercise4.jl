@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.43
+# v0.19.46
 
 #> [frontmatter]
 #> homework_number = 4
@@ -26,21 +26,21 @@ main {
 
 # ╔═╡ 81ed6d83-622f-46ac-b0c3-0fae0c8ef378
 md"""
-In this exercise, we consider a matrix $M$, and a numerically computed approximate inverse $\bar{X}$ of $M$. Our goal will be to guarantee a posteriori that $M$ is indeed invertible, and to provide a computable error bound between $M^{-1}$ and $\bar{X}$, for any submultiplicative matrix norm (i.e., such that $\Vert A B\Vert \leq \Vert A\Vert \Vert B \Vert$).
+In this exercise, we consider a matrix $M$, and a numerically computed approximate inverse $\bar{X}$ of $M$. Our goal will be to guarantee a posteriori that $M$ is indeed invertible, and to provide a computable error bound between $M^{-1}$ and $\bar{X}$, for any submultiplicative matrix norm (i.e. $\Vert A B \Vert \le \Vert A \Vert \Vert B \Vert$).
 """
 
 # ╔═╡ 6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
 md"""
-**1.** Denoting $\delta = \Vert I - M\bar{X}\Vert$, and assuming $\delta<1$, show that $M$ is invertible and
+**1.** Denoting $\delta = \Vert I - M\bar{X} \Vert$, and assuming $\delta<1$, show that $M$ is invertible and
 
 $\begin{align}
-\Vert M^{-1} - \bar{X} \Vert \leq \frac{\delta}{1-\delta} \Vert B\Vert.
+\Vert M^{-1} - \bar{X} \Vert \le \frac{\delta}{1-\delta} \Vert \bar{X} \Vert.
 \end{align}$
 """
 
 # ╔═╡ 05ad3f54-e92c-4ab5-b276-aa7763ba36b3
 Foldable("Hint",
-	md"Write $\left(M\bar{X}\right)^{-1}$ as $\left(I + M\bar{X}-I\right)^{-1}$, and mutliply to the left by $\bar{X}$ in order to get a power series expansion of $M^{-1}$"
+	md"Write $\left(M\bar{X}\right)^{-1}$ as $\left(I + M\bar{X} - I\right)^{-1}$ and mutliply to the left by $\bar{X}$ in order to get a power series expansion of $M^{-1}$."
 )
 
 # ╔═╡ 82a5527f-0661-4a32-b758-5708bb184968
@@ -49,7 +49,7 @@ md"""
 """
 
 # ╔═╡ e34560b8-93af-4f5b-8e4f-f5c48ef29d3c
-Foldable("Hint",md"You may consider $F(X) = MX-I$ (or $F(X) = XM-I$).")
+Foldable("Hint", md"You may consider $F(X) = MX-I$ (or $F(X) = XM-I$).")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -64,7 +64,7 @@ PlutoTeachingTools = "~0.2.15"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.2"
+julia_version = "1.10.4"
 manifest_format = "2.0"
 project_hash = "b873fd5571111b4c454c95ca5fa58b75bfb4ab46"
 
@@ -99,7 +99,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.0+0"
+version = "1.1.1+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -417,7 +417,7 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╟─2661bfc9-e398-41ed-87d9-c78f05da64cb
+# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╟─81ed6d83-622f-46ac-b0c3-0fae0c8ef378
 # ╟─6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
 # ╟─05ad3f54-e92c-4ab5-b276-aa7763ba36b3

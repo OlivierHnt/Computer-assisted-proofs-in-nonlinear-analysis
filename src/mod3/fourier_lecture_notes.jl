@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.45
+# v0.19.46
 
 #> [frontmatter]
 #> chapter = 3
@@ -14,11 +14,8 @@ using InteractiveUtils
 # ╔═╡ d0e623ee-b096-4a27-977d-dc32567d6020
 using PlutoTeachingTools, PlutoUI
 
-# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial, IntervalArithmetic
-
 # ╔═╡ 018ecc45-8638-4a59-b561-efb086bdc751
-using LinearAlgebra,ToeplitzMatrices, Plots
+using RadiiPolynomial, LinearAlgebra, ToeplitzMatrices, Plots
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""<style>
@@ -54,7 +51,7 @@ md"""
 We consider the second order ODE
 
 $\begin{align}
-u''(t) + \beta_1 u'(t) + \beta_2 u(t) - u(t)^2 = \beta_3 \cos(t)
+u''(t) + \beta_1 u'(t) + \beta_2 u(t) - u(t)^2 = \beta_3 \cos(t),
 \end{align}$
 
 where $\beta_1, \beta_2, \beta_3$ are parameters, and we aim to find a periodic solution $u(t)$.
@@ -82,7 +79,7 @@ md"""
 We substitute the Fourier series 
 
 $\begin{align}
-u(t) = \sum_{n\in\mathbb{Z}} a_n e^{int}
+u(t) = \sum_{n\in\mathbb{Z}} a_n e^{int},
 \end{align}$
 
 in the ODE to find the infinite set of equations ($n \in \mathbb{Z}$)
@@ -91,13 +88,10 @@ $\begin{align}
 \lambda_n a_n + (a*a)_n + c_n = 0.
 \end{align}$
 
-where
-$\lambda_n:= n^2-in \beta_1-\beta_2$, while
-$c$ represents the Fourier transform of $\beta_3 \cos(t)$,
- given by
+where $\lambda_n := n^2 - i \beta_1 n - \beta_2$, while $c$ represents the Fourier transform of $\beta_3 \cos(t)$, given by
 
 $\begin{align}
-c_n := \begin{cases} \frac{\beta_3}{2} & n= \pm 1\\ 0 & \text{otherwise} \end{cases}
+c_n := \begin{cases} \frac{\beta_3}{2}, & n = \pm 1,\\ 0, & n \ne \pm 1. \end{cases}
 \end{align}$
 """
 
@@ -111,7 +105,7 @@ md"""
 The convolution product is given by 
 
 $\begin{align}
-(a*b)_n := \sum_{k\in\mathbb{Z}} a_k b_{n-k} 
+(a*b)_n := \sum_{k\in\mathbb{Z}} a_k b_{n-k}.
 \end{align}$
 """
 
@@ -127,26 +121,24 @@ An implementation is below.
 """
 
 # ╔═╡ 4a8b8e9e-9562-4cb5-a029-856127e84b98
-function convolution(a, b, nab=-1)
+function convolution(a, b, nab = (length(a)-1)÷2 + (length(b)-1)÷2)
     # convolution for 1D Fourier; nab is size of output (default is all nonzero coefficients)
+
     na = (length(a)-1)÷2
     nb = (length(b)-1)÷2
-	if nab<0
-		nab = na + nb
-	end
-	
-    # Initialize the result array with zeros
-    result = zeros(typeof(a[1]),2*nab+1)
+
+    # initialize the result array with zeros
+    result = zeros(eltype(a), 2*nab+1)
     
-    # Perform the convolution
-    for ia in -na:na
-		minib=max(-nab-ia,-nb)
-		maxib=min(nab-ia,nb)
-        for ib in minib:maxib 
+    # perform the convolution
+    for ia = -na:na
+		minib = max(-nab-ia, -nb)
+		maxib = min( nab-ia,  nb)
+        for ib = minib:maxib
             result[nab+ia+ib+1] += a[na+ia+1] * b[nb+ib+1]
         end
     end
-    
+
     return result
 end
 
@@ -160,7 +152,7 @@ md"""
 We will work in the sequence space 
 
 $\begin{align}
-X=X_\nu=\{ a \in \mathbb{C}^\mathbb{Z} : \|a\|_X:= \sum_{n\in\mathbb{Z}} \nu^{|n|} |a_n| < \infty \}.
+X = X_\nu := \{ a \in \mathbb{C}^\mathbb{Z} : \|a\|_X:= \sum_{n\in\mathbb{Z}} |a_n| \nu^{|n|} < \infty \}.
 \end{align}$
 
 We will choose the value of $\nu$ later.
@@ -170,7 +162,7 @@ We will choose the value of $\nu$ later.
 Markdown.MD(Markdown.Admonition("tip", "Lemma",[md"""When $a\in X_\nu$ for some $\nu \geq 1$ then the Fourier series $\sum_{n\in\mathbb{Z}} a_n e^{int}$ converges uniformly. When $\nu>1$ then term-by-term differentiation up to any order of the Fourier series is justified."""]))
 
 # ╔═╡ bbf2e943-8c5c-469f-a2f3-5f8b758f6638
-Foldable("""Is X with this norm a Banach space?""", md"""**Exercise**: Yes""")
+Foldable("Is X with this norm a Banach space?", md"""**Exercise**: Yes""")
 
 # ╔═╡ f91abfa7-8a8f-4204-95d9-637c622dd720
 md"""
@@ -178,14 +170,14 @@ The product and the norm play together nicely: they give the space $X$ the struc
 """
 
 # ╔═╡ 8f6431ed-346c-4c51-83c4-ea7ec12a8d60
-Markdown.MD(Markdown.Admonition("tip", "Lemma (Banach algebra property)",[md"""For any $\nu \geq 1$ and $a,b\in X=X_\nu$ we have $\|a*b\|_X\leq \|a\|_X \|b\|_X$."""]))
+Markdown.MD(Markdown.Admonition("tip", "Lemma (Banach algebra property)", [md"""For any $\nu \ge 1$ and $a,b \in X=X_\nu$ we have $\|a*b\|_X \le \|a\|_X \|b\|_X$."""]))
 
 # ╔═╡ c5cfe80e-1728-4393-b837-187e3e7d49a9
-Foldable("""Proof""", md"""**Exercise** (rearranging series and using triangle inequality)""")
+Foldable("""Proof""", md"""**Exercise** (rearrange the series and use the triangle inequality)""")
 
 # ╔═╡ 39d13194-bca9-47c1-a686-2ea5f9d62289
 md"""
-The operator norm (recall: $\|\Gamma\|_{B(X)}$ is the smallest number such that $\|\Gamma a\|_X\leq \|\Gamma\|_{B(X)} \|a\|_X$ for all $a\in X$) has a particularly nice representation for weighted $l^1$ spaces such as $X_\nu$.
+The operator norm (recall: $\|\Gamma\|_{B(X)}$ is the smallest number such that $\|\Gamma a\|_X\leq \|\Gamma\|_{B(X)} \|a\|_X$ for all $a\in X$) has a particularly nice representation for weighted $\ell^1$ spaces such as $X_\nu$.
 """
 
 # ╔═╡ 7e78028c-f70b-4474-8bee-783ad7d99d56
@@ -194,7 +186,7 @@ Let $\Gamma$ be a bounded operator on $X$, represented by $(\Gamma a)_n=\sum_{k\
 Then 
 
 $\begin{align}
-  \|\Gamma\|_{B(X)} = \sup_{k\in\mathbb{Z}} \frac{1}{\nu^{|k|}} \sum_{n\in\mathbb{Z}} \nu^{|n|} |\Gamma_{nk}| .
+  \|\Gamma\|_{B(X)} = \sup_{k\in\mathbb{Z}} \frac{1}{\nu^{|k|}} \sum_{n\in\mathbb{Z}} |\Gamma_{nk}| \nu^{|n|}.
 \end{align}$
 
 Let $e_k$ denote the basis vector given by $(e_k)_n=\delta_{kn}$ for any $k,n \in \mathbb{Z}$. Then 
@@ -212,15 +204,14 @@ Code for the (operator) norm is given below for the case of finitely represented
 # ╔═╡ efb766e3-e41f-4113-ae6e-c4dd7766c784
 function nunorm(B, nu)
     # weighted l1-norm; works for both vectors and matrices B
-    n1 = (size(B,1)-1)÷2 
-    n2 = (size(B,2)-1)÷2
 
-	weights=[nu^(abs(i)) for i in -n1:n1]'
-	invweights=[nu^(-abs(i)) for i in -n2:n2]'
+    n1 = (size(B, 1)-1)÷2
+    n2 = (size(B, 2)-1)÷2
 
-	result=maximum((weights*abs.(B)).*invweights)
-    
-	return result
+	weights    = [nu^( abs(i)) for i = -n1:n1]'
+	invweights = [nu^(-abs(i)) for i = -n2:n2]'
+
+	return maximum((weights * abs.(B)) .* invweights)
 end
 
 # ╔═╡ 0f04a415-b4c1-4b05-a35a-6d3029decb12
@@ -236,13 +227,13 @@ md"""
 We define the zero finding problem $F(a)=0$ on $X$ by ($n \in \mathbb{Z}$)
 
 $\begin{align}
-F_n(a) := a_n + \lambda_n^{-1} [(a*a)+c]_n .
+F_n(a) := a_n + \lambda_n^{-1} (a*a)_n +c_n .
 \end{align}$
 """
 
 # ╔═╡ b2defc79-da78-47c8-bb78-44cb9000ff58
 Foldable("""Why divide by lambda?""", md"""
-Dividing by $\lambda_n$ is a choice that simplifies the linear term, which is beneficial for some of the algebra. In terms of estimates it merely shifts the difficulty to the nonlinear term. Working with the alternative $\tilde{F}_n(a) := \lambda_n a_n + [(a*a)+b]_n$ is also a perfectly valid choice.
+Dividing by $\lambda_n$ is a choice that simplifies the linear term, which is beneficial for some of the algebra. In terms of estimates it merely shifts the difficulty to the nonlinear term. Working with the alternative $\tilde{F}_n(a) := \lambda_n a_n + (a*a)_n + c_n$ is also a perfectly valid choice.
 """)
 
 # ╔═╡ 9ab6ce17-0637-4008-be29-e0bf4fda4287
@@ -280,13 +271,13 @@ We need the projection operator on a finite number of modes ($2N+1$ coefficents)
 
 $\begin{align}
 (\pi^{\leq N} a)_n := \begin{cases}
-a_n & |n| \leq N \\
-0 & |n| > N
+a_n, & |n| \le N, \\
+0, & |n| > N,
 \end{cases}
 & \qquad\qquad
 (\pi^{>N} a)_n := \begin{cases}
-0 & |n| \leq N \\
-a_n & |n| > N
+0, & |n| \le N, \\
+a_n, & |n| > N,
 \end{cases}
 \end{align}$
 
@@ -306,38 +297,35 @@ The range $\pi^{\leq N}X$ is finite dimensional, and
 the restriction of $\pi^{\leq N} F$ to $\pi^{\leq N} X$, which we denote by $F^{\leq N}$, is what we will work with in the computer. An implementation is given below"""
 
 # ╔═╡ 026aec24-4ed0-4189-af4f-28f56e6964ef
-function F(a, beta, Nf=-1)
+function F(a, beta, Nf = (length(a)-1)÷2)
 	# default length of output is same as input
-    Na = (length(a) - 1) ÷ 2
-	if Nf<0
-		Nf = Na
-	end
+	
+	Na = (length(a)-1)÷2
 
 	# deal with sizes
-	Naf=min(Na,Nf);
-	a1=zeros(typeof(a[1]),2*Nf+1);
-	a1[Nf+1-Naf:Nf+1+Naf]=a[Na+1-Naf:Na+1+Naf]
+	Naf = min(Na, Nf)
+	a1 = zeros(eltype(a), 2*Nf+1)
+	a1[Nf+1-Naf:Nf+1+Naf] = a[Na+1-Naf:Na+1+Naf]
 
 	# the nonlinear term
-	nonlinear=convolution(a,a,Nf)
+	nonlinear = convolution(a, a, Nf)
 	# add the forcing term
-	if Nf>0
-	    nonlinear[Nf] += beta[3]/2
+	if Nf > 0
+	    nonlinear[Nf]   += beta[3]/2
 		nonlinear[Nf+2] += beta[3]/2
 	end
 
 	# linear terms
-    lambdainv = 1 ./ [n^2 - 1im * beta[1] * n - beta[2] for n in -Nf:Nf]
-    result = a1 + lambdainv.*nonlinear
-
-    return result
+    lambdainv = [inv(n^2 - im * beta[1] * n - beta[2]) for n = -Nf:Nf]
+	
+    return a1 + lambdainv .* nonlinear
 end
 
 # ╔═╡ 06f3d467-af63-440d-b486-8da7f67c314f
 md"""It is convenient to introduce the diagonal linear operator 
 
 $\begin{align}
-(\Lambda a)_n := \lambda_n a_n
+(\Lambda a)_n := \lambda_n a_n.
 \end{align}$
 
 When $\beta_1 \neq 0$ then the inverse $\Lambda^{-1}$ is well-defined as a bounded operator on $X$. 
@@ -358,27 +346,23 @@ An implementation of the Jacobian $DF^{\leq N}$ of the truncated problem is give
 """
 
 # ╔═╡ e5b2628d-2e64-47ca-b594-a0e4cb8ea64a
-function DF(a, beta, Ndf=-1)
+function DF(a, beta, Ndf = (length(a)-1)÷2)
 	# Jacobian; default size of output is same as input
-    Na = (length(a) - 1) ÷ 2
-	if Ndf<0
-		Ndf = Na
-	end
+	
+    Na = (length(a)-1)÷2
 
 	# deal with nonlinear term in terms of a Toeplitz matrix
-	Naf=min(Na,2*Ndf);
-	a1c=zeros(typeof(a[1]),2*Ndf+1);
-	a1r=zeros(typeof(a[1]),2*Ndf+1);
-	a1c[1:Naf+1]=a[Na+1:Na+1+Naf]
-	a1r[1:Naf+1]=a[Na+1:-1:Na+1-Naf]
-    Ta=Toeplitz(a1c,a1r);
+	Naf = min(Na, 2*Ndf)
+	a1c = zeros(eltype(a), 2*Ndf+1)
+	a1r = zeros(eltype(a), 2*Ndf+1)
+	a1c[1:Naf+1] = a[Na+1:Na+1+Naf]
+	a1r[1:Naf+1] = a[Na+1:-1:Na+1-Naf]
+    Ta = Toeplitz(a1c, a1r)
 
 	# linear terms
-    lambda = [n^2 - 1im * beta[1] * n - beta[2] for n in -Ndf:Ndf]
- 	Lambdainv=Diagonal( 1 ./ lambda );
-    result = I(2*Ndf+1)+2*Lambdainv*Ta;    
-	
-    return result
+    lambdainv = [inv(n^2 - im * beta[1] * n - beta[2]) for n = -Ndf:Ndf]
+
+    return I + 2*Diagonal(lambdainv)*Ta	
 end
 
 # ╔═╡ c4363fdf-6500-4830-bc42-9777d616ac34
@@ -390,19 +374,18 @@ md"""
 md"""
 We also use the project to split $A$ into a finite part and a tail part:
 
-$\begin{align}A:=A^{\leq N}\pi^{\leq N} + I^{>N}\pi^{>N}, \end{align}$
+$\begin{align}A := A^{\le N}\pi^{\le N} + I^{>N}\pi^{>N},\end{align}$
 
-where $A^{\leq N}$ is a linear map (to be chosen below) on $\pi^{\leq N}X$ and $I^{>N}$ is the identity on
-$\pi^{> N}X$. Hence by construction one may also write this is block diagonal form:
+where $A^{\le N}$ is a linear map (to be chosen below) on $\pi^{\le N}X$ and $I^{>N}$ is the identity on $\pi^{> N}X$. Hence by construction one may also write this is block diagonal form:
 
-$\begin{align}A=\pi^{\leq N}A^{\leq N}\pi^{\leq N} + \pi^{> N}I^{>N}\pi^{>N}, \end{align}$
+$\begin{align}A = \pi^{\le N}A^{\le N}\pi^{\le N} + \pi^{>N}I^{>N}\pi^{>N}.\end{align}$
 """
 
 # ╔═╡ 77b91c27-ddb0-4115-b0d0-a78f2729dadc
 Foldable("""Is A injective?""", md"""
 The operator $A$ is injective on $X$ if and only $A^{\leq N}$ is injective on $\pi^{\leq N} X$. The operator $A^{\leq N}$ has a (finite) matrix representation, hence injectivity can be proved by computer.
 
-One may also observe that $A=I+\pi^{\leq N}(A^{\leq N}-I^{\leq N})\pi^{\leq N}$, hence $A$ is of the form identity plus compacy (and thus a Fredholm operator of index $0$).
+One may also observe that $A=I+\pi^{\leq N}(A^{\leq N}-I^{\leq N})\pi^{\leq N}$, hence $A$ is of the form identity plus compact operator (and thus a Fredholm operator of index $0$).
 """)
 
 # ╔═╡ 51e35c7e-77f2-4911-914c-7f1a242c3b91
@@ -423,9 +406,9 @@ We choose parameter values
 
 # ╔═╡ 1688b3d8-8228-45ee-8729-22265a86484a
 # in interval form
-beta= [ I"0.1"
-	    I"4.0"
-	    I"1.0" ]
+beta = [I"0.1",
+	    I"4.0",
+	    I"1.0"]
 
 # ╔═╡ aa150fa3-1729-43b1-bb55-73c741221760
 md"""
@@ -433,7 +416,7 @@ and truncation dimension
 """
 
 # ╔═╡ e1f6ef9b-5818-415a-8945-97b65288a433
-N=10
+N = 10
 
 # ╔═╡ d0858eee-5086-4754-966f-de2940183573
 md"""
@@ -450,14 +433,14 @@ We then run Newton iterations.
 
 # ╔═╡ 301bf3ed-b180-4c44-a92f-0f9f4c2509ed
 begin
-	initialdata = zeros(typeof(0.0im),2*N+1)   # Fourier coefficients are complex-valued
-	initialdata[N+1] += 0.0 	
-	initialdata=(initialdata+conj(reverse(initialdata)))/2
+	initialdata = zeros(ComplexF64, 2*N+1) # Fourier coefficients are complex-valued
+	initialdata[N+1] += 0
+	initialdata = (initialdata + conj(reverse(initialdata))) / 2
 
-	Fbeta=mid.(beta)   # floats
+	Fbeta = mid.(beta) # floats
 	
 	a0, success = newton(a -> (F(a, Fbeta), DF(a, Fbeta)), initialdata)
-	a0=(a0+conj(reverse(a0)))/2    # symmetry
+	a0 = (a0 + conj(reverse(a0))) / 2 # symmetry
 end
 
 # ╔═╡ aa320281-42ce-4035-8c55-1f44661737e2
@@ -486,17 +469,16 @@ Foldable("""Initializing Newton's method""", md"""Finding a good starting point 
 
 # ╔═╡ 936423fd-0d78-41da-8b49-5fca3c125547
 md"""
-Next we compute a numerical inverse of the Jacobian $DF^{\leq N}(\bar{a})$ and we denote this inverse matrix by $A^{\leq N}$.
+Next we compute a numerical inverse of the Jacobian $DF^{\le N}(\bar{a})$ and we denote this inverse matrix by $A^{\le N}$.
 """
 
 # ╔═╡ e37811fa-cd67-424e-8707-25ad8534d293
-AN=inv(DF(a0,Fbeta))
+AN = inv(DF(a0, Fbeta))
 
 # ╔═╡ 0b4e2571-cbec-4a4d-aac6-dd8b32e3f474
 Markdown.MD(Markdown.Admonition("note", "Remark on truncation dimension",
 [md"""
-It is not necessary to choose the finite truncation dimensions for $\bar{a}\in \pi^{\leq N} X$ and $A^{\leq N}$ equal. 
-For purposes of exposition we do not introduce two different truncation dimension parameters here, but essentially the truncation dimension for $\bar{a}\in \pi^{\leq N} X$ controls the size of the residue, while the truncation dimension for the approximate inverse $A^{\leq N}$ controls the contractivity of the fixed point operator. These can in principle be  controled rather independently.
+It is not necessary to choose the finite truncation dimensions for $\bar{a} \in \pi^{\le N} X$ and $A^{\le N}$ equal. For purposes of exposition we do not introduce two different truncation dimension parameters here, but essentially the truncation dimension for $\bar{a}\in \pi^{\le N} X$ controls the size of the residue, while the truncation dimension for the approximate inverse $A^{\le N}$ controls the contractivity of the fixed point operator. These can in principle be controled rather independently.
 """]))
 
 # ╔═╡ 0d75d077-53c3-4f03-99d3-af796d973d66
@@ -510,7 +492,7 @@ We choose a value for the weight $\nu$ in the Banach space norm.
 """
 
 # ╔═╡ 671babb1-4b04-4d6a-8dba-79f807114d63
-nu=1.1
+nu = interval(1.1)
 
 # ╔═╡ 83f772ea-aeec-49a3-baa2-d2fd8771c0a7
 md"""
@@ -519,15 +501,15 @@ Since we want to prove something we need to resort to interval arithmetic. Hence
 
 # ╔═╡ 1ace9001-93ae-46f2-98e6-7b371221beb3
 begin
-	Ia0=interval(a0)
-	Ibeta=beta
-	IAN=interval(AN)
-	Inu=interval(nu)
+	Ia0 = interval(a0)
+	Ibeta = beta
+	IAN = interval(AN)
+	Inu = interval(nu)
 	# for testing without intervals:	
-	 # Ia0=a0
-	 # Ibeta=Fbeta
-	 # IA=AN
-	 # Inu=nu
+    # Ia0 = a0
+    # Ibeta = Fbeta
+	# IA = AN
+	# Inu = nu
 end
 
 # ╔═╡ 9433b6f1-3460-48c4-b587-9009823327c0
@@ -548,23 +530,21 @@ This concerns the bound on the residue $A F(\bar{a})$. Determining the residue r
 # ╔═╡ 3021e7c0-508a-4a95-9c16-098fa35b65a0
 function boundY(a, beta, A, nu)
 	# deal with sizes
-    Na = (length(a) - 1) ÷ 2
-    NA = (size(A,1)- 1) ÷ 2
-	NAfa=max(NA,2*Na)
+    Na = (length(a)-1)÷2
+    NA = (size(A, 1)-1)÷2
+	NAfa = max(NA, 2*Na)
 
 	# compute residue
-	Fa=F(a,beta,2*Na);
-	AFa=zeros(typeof(a[1]),2*NAfa+1)
-	AFa[NAfa+1-2*Na:NAfa+1+2*Na]=Fa;
-    AFa[NAfa+1-NA:NAfa+1+NA]=A*AFa[NAfa+1-NA:NAfa+1+NA];
+	Fa = F(a,beta,2*Na)
+	AFa = zeros(eltype(a), 2*NAfa+1)
+	AFa[NAfa+1-2*Na:NAfa+1+2*Na] = Fa
+    AFa[NAfa+1-NA:NAfa+1+NA] = A*AFa[NAfa+1-NA:NAfa+1+NA]
 
-	result=nunorm(AFa,nu)
-
-    return result
+	return nunorm(AFa, nu)
 end
 
 # ╔═╡ 9bf0e55e-de5f-4ec9-92e9-5169d3d14302
-IY=boundY(Ia0,Ibeta,IAN,Inu)
+IY = boundY(Ia0, Ibeta, IAN, Inu)
 
 # ╔═╡ fc18e3ff-4a39-4aba-a2d2-94521035013e
 md"""
@@ -576,7 +556,7 @@ md"""
 This concerns the bound on the operator $I-A DF(\bar{a})$. In the analysis we will split the bound in a part which is computable by "brute force" and an estimate of the tail. The triangle inequality is often helpful for sch arguments, but in our case the characterisation of the operator norm gives an additional tool. In particular we will use that for any $M \in \mathbb{N}$ we have that 
 
 $\begin{align}
-\|\Gamma\|_{B(X)} = \max \{ \|\Gamma \pi^{\leq M}\|_{B(X)} , \|\Gamma \pi^{> M}\|_{B(X)} \}.
+\|\Gamma\|_{B(X)} = \max \Big( \|\Gamma \pi^{\le M}\|_{B(X)}, \|\Gamma \pi^{> M}\|_{B(X)} \Big).
 \end{align}$
 
 We will make a suitable choice for $M$ later.
@@ -585,20 +565,20 @@ We will make a suitable choice for $M$ later.
 # ╔═╡ 907f8fb5-859b-4751-b483-2006ba358d5c
 Markdown.MD(Markdown.Admonition("note", "Finite bandwidth",[md"""
 It follows from the expression for $DF(a)$ that $DF(\bar{a})$ is an finite bandwidth operator of width $N+1$.
-In particular, for any $M \in \mathbb{N}$ we have $\pi^{> M+N} DF(\bar{a}) \pi^{\leq M} =0$ and for any $M\geq N$ we have that $\pi^{\leq M-N} DF(\bar{a}) \pi^{> M} =0$.
+In particular, for any $M \in \mathbb{N}$ we have $\pi^{> M+N} DF(\bar{a}) \pi^{\leq M} = 0$ and for any $M \ge N$ we have that $\pi^{\le M-N} DF(\bar{a}) \pi^{> M} =0$.
 
 It follows from the block-diagonal structure of $A$ that this implies that 
 
 $\begin{align}
-A DF(\bar{a}) \pi^{> 2N} =  (A^{\leq N}\pi^{\leq N} + I^{>N} \pi^{>N}) DF(\bar{a}) \pi^{> 2N} =   \pi^{>N} DF(\bar{a}) \pi^{> 2N},
+A DF(\bar{a}) \pi^{> 2N} =  (A^{\le N}\pi^{\le N} + I^{>N} \pi^{>N}) DF(\bar{a}) \pi^{> 2N} = \pi^{>N} DF(\bar{a}) \pi^{> 2N},
 \end{align}$
 
-and this expression does not involve $A^{\leq N}$.
+and this expression does not involve $A^{\le N}$.
 
 Furthermore, it also follows from the block-diagonal structure of $A$ and finite bandwidth of $DF(\bar{a})$ that 
 
 $\begin{align}
-A DF(\bar{a}) \pi^{\leq 2N} = A \pi^{\leq 3N} DF(\bar{a}) \pi^{\leq 2N} = \pi^{\leq 3N} A DF(\bar{a}) \pi^{\leq 2N},
+A DF(\bar{a}) \pi^{\le 2N} = A \pi^{\le 3N} DF(\bar{a}) \pi^{\le 2N} = \pi^{\le 3N} A DF(\bar{a}) \pi^{\le 2N},
 \end{align}$
 
 which can be represented as a matrix and requires only a finite computation to evaluate.
@@ -609,10 +589,10 @@ Foldable("""Exercise""", md"""Provide the details proving the statements in the 
 
 # ╔═╡ d35592ba-c0cf-45fe-94c1-c58c3c0bc939
 md"""
-By choosing $M=2N$ we can thus split the computation of the norm in two parts:
+By choosing $M = 2N$ we can thus split the computation of the norm in two parts:
 
 $\begin{align}
-\|I-ADF(\bar{a})\|_{B(X)} = \max \{ \|\pi^{\leq 3N} [I-A DF(\bar{a})] \pi^{\leq 2N}\|_{B(X)} , \| [I-ADF(\bar{a})] \pi^{>2N} \|_{B(X)} \}.
+\|I-ADF(\bar{a})\|_{B(X)} = \max \Big( \|\pi^{\le 3N} [I-A DF(\bar{a})] \pi^{\le 2N}\|_{B(X)} , \| [I-ADF(\bar{a})] \pi^{>2N} \|_{B(X)} \Big).
 \end{align}$
 
 The latter term is computable thanks to the following lemma.
@@ -620,14 +600,13 @@ The latter term is computable thanks to the following lemma.
 
 # ╔═╡ d71cba6e-4f62-48d0-aa17-061e1f6bd744
 Markdown.MD(Markdown.Admonition("tip", "Lemma",[md"""
-Final lemma:
-Assume that $N\geq \sqrt{\beta_3}$. 
+Assume that $N \ge \sqrt{\beta_3}$. 
 Then
 
 $\begin{align}
 \| [I-ADF(\bar{a})]\pi^{>2N} \|_{B(X)} = 
-\max \left\{ \frac{\|[I-ADF(\bar{a})]e_{2N+1}\|_X}{\|e_{2N+1}\|_X} ,  
-\frac{\|[I-ADF(\bar{a})]e_{-(2N+1)}\|_X}{\|e_{-(2N+1)}\|_X} \right\}.
+\max \left( \frac{\|[I-ADF(\bar{a})]e_{2N+1}\|_X}{\|e_{2N+1}\|_X} ,  
+\frac{\|[I-ADF(\bar{a})]e_{-(2N+1)}\|_X}{\|e_{-(2N+1)}\|_X} \right).
 \end{align}$
 """]))
 
@@ -640,7 +619,7 @@ md"""
 Collecting and summarizing the above results, we conclude that 
 
 $\begin{align}
-\|I-ADF(\bar{a})\|_{B(X)} = \|\pi^{\leq 3N+1}[I-ADF(\bar{a})]\pi^{\leq 2N+1}\|_{B(X)}.
+\|I-ADF(\bar{a})\|_{B(X)} = \|\pi^{\le 3N+1}[I-ADF(\bar{a})]\pi^{\le 2N+1}\|_{B(X)}.
 \end{align}$
 
 The latter operator can be represented by a finite matrix and we can compute the operator norm $\|I-ADF(\bar{a})\|_{B(X)}$ using interval arithmetic to obtain the bound $Z_1$.
@@ -662,8 +641,8 @@ We note that sharpness of the $Z_2$-bound is less of an issue, as it plays a con
 
 # ╔═╡ 4a57ce24-2872-4ef1-ada1-73a64ab4f17a
 function boundZ1(a, beta, A, nu)
-    Na = (length(a) - 1) ÷ 2
-    NA = (size(A,1)- 1) ÷ 2
+    Na = (length(a)-1)÷2
+    NA = (size(A, 1)-1)÷2
 
 	# deal with sizes
 	Ncol = max(NA,ceil(Integer,sup(sqrt(beta[2])))) + Na + 1
@@ -673,15 +652,14 @@ function boundZ1(a, beta, A, nu)
 	Adfa = DF(a,beta,Nrow)
 	Adfa[Nrow+1-NA:Nrow+1+NA,:] = A*Adfa[Nrow+1-NA:Nrow+1+NA,:]
 
-	B = I(2*Nrow+1)-Adfa;
+	B = I(2*Nrow+1)-Adfa
 	B = B[:,Nrow+1-Ncol:Nrow+1+Ncol]
-	result=nunorm(B,nu)
-		
-    return result
+	
+	return nunorm(B, nu)
 end
 
 # ╔═╡ 47ef9015-eae8-4b29-807f-d223754701d3
-IZ1=boundZ1(Ia0,Ibeta,IAN,Inu)
+IZ1 = boundZ1(Ia0, Ibeta, IAN, Inu)
 
 # ╔═╡ abdca76c-832e-42aa-98fc-8a6c2c03965e
 Foldable("""Injectivity of A revisited.""", md"""**Exercise**: Prove that $\|I-A DF(\bar{a})\|_{B(X)}<1$ implies that $A$ is surjective on $X$.
@@ -721,25 +699,22 @@ Foldable("""Proof""", md"""**Exercise**. Hint: consider $\|A\Lambda^{-1}e_n\|_X$
 
 # ╔═╡ 6688fe5d-0019-485d-9059-bb5bd2be7d6e
 function boundZ2(a, beta, A, nu)
-	NA = (size(A,1)- 1) ÷ 2
+	NA = (size(A, 1)-1)÷2
 
 	# bound on finite projection
-    lambda = [n^2 - 1im * beta[1] * n - beta[2] for n in -NA:NA]
- 	Lambdainv=Diagonal( 1 ./ lambda );
-	normALinv=nunorm(A*Lambdainv,nu)
+    lambdainv = [inv(n^2 - im * beta[1] * n - beta[2]) for n = -NA:NA]
+	normALinv = nunorm(A*Diagonal(lambdainv), nu)
 
-	#tail bound
-	Nmax=max(NA+1,ceil(Integer,sup(sqrt(beta[2])))+1)
-	abslambda=[abs(n^2 - 1im * beta[1] * n - beta[2]) for n in NA+1:Nmax]
-    tailbound=1/minimum(abslambda)
+	# tail bound
+	Nmax = max(NA+1, ceil(Integer, sup(sqrt(beta[2]))) + 1)
+	abslambda = [abs(n^2 - im * beta[1] * n - beta[2]) for n = NA+1:Nmax]
+    tailbound = 1/minimum(abslambda)
 
-	result=2*max(normALinv,tailbound);
-	
-    return result
+	return 2*max(normALinv, tailbound)
 end
 
 # ╔═╡ 0d7146b3-3015-416b-aae8-697ac0850603
-IZ2=boundZ2(Ia0,Ibeta,IAN,Inu)
+IZ2 = boundZ2(Ia0, Ibeta, IAN, Inu)
 
 # ╔═╡ 5d0b6b50-0170-4f8b-ad5a-0dda212a00e1
 md"""
@@ -754,9 +729,9 @@ We now evaluate the radii polynomial to finish the proof.
 # ╔═╡ fceb89d1-127a-41b0-b0ec-ec58763a9caa
 begin
 	# set proper bounds and absorb case of non-interval-arithmetic
-	Y=interval(sup(IY))
-	Z1=interval(sup(IZ1))
-	Z2=interval(sup(IZ2))
+	Y  = interval(sup(IY))
+	Z1 = interval(sup(IZ1))
+	Z2 = interval(sup(IZ2))
 end
 
 # ╔═╡ 60b43603-9937-4869-b5fc-f74c1c18e710
@@ -783,19 +758,21 @@ Hence the following lemma finishes our proof.
 # ╔═╡ 35df9eed-5f22-4e26-b119-ea7354d2c762
 Markdown.MD(Markdown.Admonition("tip", "Lemma (symmetry of the solution)",
 [md"""
-Assume that $\bar{a}^\dagger=\bar{a}$ and that the asummptions of the Newton-Kantorovich theorem were satisfied for some $r=r_0>0$. Then the zero $a^*$ of $F$ such that $\|a^*-\bar{a}\|_X \leq r_0$ satisfies $(a^*)^\dagger=a^*$.
+Assume that $\bar{a}^\dagger=\bar{a}$ and that the asummptions of the Newton-Kantorovich theorem were satisfied for some $r=r_0>0$. Then the zero $\tilde{a}$ of $F$ such that $\|\tilde{a}-\bar{a}\|_X \leq r_0$ satisfies $\tilde{a}^\dagger = \tilde{a}$.
 """]))
 
 # ╔═╡ bae570fe-8219-4cf2-b763-fcd9f0f02735
 md"""
-*Proof*: First, based on the symmetry $F(a^\dagger)=F(a)^\dagger$ of the zero finding problem, we see that $F(a^*)=0$ implies that $F((a^*)^\dagger)=(F(a^*))^\dagger=0$, hence $(a^*)^\dagger$ is a zero of $F$.  Second, the norm on $X$ is such that $\|a^\dagger\|_X=\|a\|_X$  for all $a\in X$. We find that 
+*Proof*: First, based on the symmetry $F(a^\dagger) = F(a)^\dagger$ of the zero-finding problem, we see that $F(\tilde{a}) = 0$ implies that $F(\tilde{a}^\dagger) = F(\tilde{a})^\dagger = 0$, hence $\tilde{a}^\dagger$ is a zero of $F$. Second, the norm on $X$ is such that $\|a^\dagger\|_X = \|a\|_X$ for all $a \in X$. We find that 
 
 $\begin{align} 
-\|(a^*)^\dagger-\bar{a}\|_X=\|(a^*)^\dagger-\bar{a}^\dagger\|_X 
-=\|(a^*-\bar{a})^\dagger\|_X = \|a^*-\bar{a}\|_X \leq r_0.
+\|\tilde{a}^\dagger-\bar{a}\|_X
+= \|\tilde{a}^\dagger-\bar{a}^\dagger\|_X 
+= \|(\tilde{a}-\bar{a})^\dagger\|_X
+= \|\tilde{a}-\bar{a}\|_X \le r_0.
 \end{align}$
 
-Hence $(a^*)^\dagger$ is a zero of $F$ inside the ball of radius $r_0$ around $\bar{a}$, and since this zero is unique by the Newton-Kantorovich theorem, we conclude that $(a^*)^\dagger=a^*$.
+Hence $\tilde{a}^\dagger$ is a zero of $F$ inside the ball of radius $r_0$ around $\bar{a}$, and since this zero is unique by the Newton-Kantorovich theorem, we conclude that $\tilde{a}^\dagger = \tilde{a}$.
 """
 
 # ╔═╡ 09922158-6ac9-410e-90ac-5240a9056086
@@ -809,7 +786,7 @@ We choose
 """
 
 # ╔═╡ 238c9111-7dda-40e8-8297-9776fe77f7d9
-r₀=inf(r)
+r₀ = inf(r)
 
 # ╔═╡ 02740c7a-451f-452c-8c02-22a7a3b9fcc1
 md"""
@@ -818,9 +795,9 @@ which satisfies $Y+Z_1 r_0+\frac{1}{2}Z_2 r_0^2 \leq r_0$ and $Z_1+Z_2 r_0 < 1$:
 
 # ╔═╡ 6f6cd8ea-ada3-44ae-8263-3065f8d104b4
 begin
-	Ir0=interval(r₀)
-	println(precedes(IY+IZ1*Ir0+IZ2*Ir0^2/2,Ir0))
-	println(strictprecedes(IZ1+IZ2*Ir0,interval(1)))
+	Ir0 = interval(r₀)
+	println(precedes(IY+IZ1*Ir0+IZ2*Ir0^2/2, Ir0))
+	println(strictprecedes(IZ1+IZ2*Ir0, interval(1)))
 end
 
 # ╔═╡ 3cc0fc2c-9512-41d6-9798-4e8cbec94c9e
@@ -857,7 +834,7 @@ In this worksheet we discussed the setup of a CAP for a periodic solution in a s
 
 # ╔═╡ 194e7df2-a234-45c7-8760-8c49a0d6e651
 md"""
-The *Julia* package [RadiiPolynomial.jl](https://olivierhnt.github.io/RadiiPolynomial.jl/stable/) provides convenient high-level support for such problems. In particular, the example of a periodic orbit in the Lorenz system is implemented and documented
+The Julia package [RadiiPolynomial.jl](https://olivierhnt.github.io/RadiiPolynomial.jl/stable/) provides convenient high-level support for such problems. In particular, the example of a periodic orbit in the Lorenz system is implemented and documented
 [here](https://olivierhnt.github.io/RadiiPolynomial.jl/stable/examples/infinite_dimensional_proofs/ode/lorenz_po/).
 """
 
@@ -868,7 +845,7 @@ md"""
 
 # ╔═╡ 4f085dd2-a60e-4764-b1a1-bced7ff36007
 md"""
-In the code provided in this notebook we used the *Julia* interval arithmetic library [IntervalArithmetic.jl](https://juliaintervals.github.io/IntervalArithmetic.jl/stable/). We took a bit of liberty by taking advantage of automatic conversion of floats and integers to intervals, when variables of these types are combined in elementary operations. The interval arithmetic library is not entirely happy about this:
+In the code provided in this notebook we used the Julia interval arithmetic library [IntervalArithmetic.jl](https://juliaintervals.github.io/IntervalArithmetic.jl/stable/). We took a bit of liberty by taking advantage of automatic conversion of floats and integers to intervals, when variables of these types are combined in elementary operations. The interval arithmetic library is not entirely happy about this:
 """
 
 # ╔═╡ f3636af3-42bd-4a2d-a604-eae51db48996
@@ -881,7 +858,6 @@ end
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-IntervalArithmetic = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
@@ -890,7 +866,6 @@ RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 ToeplitzMatrices = "c751599d-da0a-543b-9d20-d0a503d91d24"
 
 [compat]
-IntervalArithmetic = "~0.22.14"
 Plots = "~1.40.5"
 PlutoTeachingTools = "~0.2.15"
 PlutoUI = "~0.7.59"
@@ -904,7 +879,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "5c4f9c8910023b5ca661d26fb771b7c2b82a7f4f"
+project_hash = "db3d94c0ad35dd4b82a364910d1cea9158e423fd"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
@@ -2239,7 +2214,6 @@ version = "1.4.1+1"
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
 # ╠═d0e623ee-b096-4a27-977d-dc32567d6020
-# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╠═018ecc45-8638-4a59-b561-efb086bdc751
 # ╟─d5a510a3-c518-47ed-96bc-7bb22e3b08b5
 # ╟─f73b88cb-19e2-4d50-a45e-fbe90fb691cd
@@ -2296,7 +2270,7 @@ version = "1.4.1+1"
 # ╟─192507bd-8285-4581-8a6d-f9ff1b2c4793
 # ╠═301bf3ed-b180-4c44-a92f-0f9f4c2509ed
 # ╟─aa320281-42ce-4035-8c55-1f44661737e2
-# ╠═d5800e45-8809-46d6-9f41-7565e5b1cbfd
+# ╟─d5800e45-8809-46d6-9f41-7565e5b1cbfd
 # ╟─5f3d91ee-14c2-4b5e-8e2a-a607d086eb51
 # ╟─936423fd-0d78-41da-8b49-5fca3c125547
 # ╠═e37811fa-cd67-424e-8707-25ad8534d293
@@ -2348,7 +2322,7 @@ version = "1.4.1+1"
 # ╟─3cc0fc2c-9512-41d6-9798-4e8cbec94c9e
 # ╟─26d06cfe-24cc-41ec-87d2-8e489865b5b8
 # ╟─e40d36d5-93a6-4b76-bccd-c629f621b22b
-# ╠═83c4964e-dfb2-47e0-8f05-eed53e21944f
+# ╟─83c4964e-dfb2-47e0-8f05-eed53e21944f
 # ╟─9dc65809-74c2-4341-baa8-63900de08df4
 # ╟─194e7df2-a234-45c7-8760-8c49a0d6e651
 # ╟─badfb1b2-5a07-4098-a313-aa667330ffd7

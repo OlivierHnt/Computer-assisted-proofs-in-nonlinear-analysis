@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.43
+# v0.19.46
 
 #> [frontmatter]
 #> homework_number = 3
@@ -34,7 +34,7 @@ md"""
 
 # ╔═╡ 7748e568-afc9-43cc-b2bd-5a231d86f455
 Foldable("Hint",
-md"The *natural* zero finding problem is $G(\lambda,u) = (M-\lambda I)u$, but it has one too many unknowns. This is consistent with the fact that zeros of $G$ are not isolated (one can always rescale the eigenvector). Therefore, a suitable zero finding problem needs to incorporate a normalization condition, for instance:
+md"The *natural* zero-finding problem is $G(\lambda, u) := (M-\lambda I)u$, but it has one too many unknowns. This is consistent with the fact that zeros of $G$ are not isolated (one can always rescale the eigenvector). Therefore, a suitable zero-finding problem needs to incorporate a normalization condition, for instance:
 
 $\begin{align}
 F(\lambda,u) =
@@ -67,7 +67,7 @@ We provide below approximate eigenvalues and eigenvectors of $W_3$. Rigorously e
 """
 
 # ╔═╡ d61514c3-3b0e-4658-8b31-de9f9514a9c3
-function W(N)
+function wilkinson(N)
 	M = zeros(2N+1, 2N+1)
 	for i = 1:2N+1
 		M[i,i] = abs(N - i + 1)
@@ -85,10 +85,10 @@ end
 N = 3
 
 # ╔═╡ fe0054f0-4fd5-489f-9fcb-3af086876699
-W(N)
+wilkinson(N)
 
 # ╔═╡ 3509fe96-4a83-461f-8fed-23343d74dc8c
-eigenvalues, eigenvectors = eigen(W(N))
+eigenvalues, eigenvectors = eigen(wilkinson(N))
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -106,7 +106,7 @@ RadiiPolynomial = "~0.8.12"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.2"
+julia_version = "1.10.4"
 manifest_format = "2.0"
 project_hash = "49d29ae341b6f6390131461e857efcdfb8528a3c"
 
@@ -147,7 +147,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.0+0"
+version = "1.1.1+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -498,7 +498,7 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╟─70740a99-ec98-45c8-ba8f-06d63dd396b0
+# ╠═70740a99-ec98-45c8-ba8f-06d63dd396b0
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╟─c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
 # ╟─7748e568-afc9-43cc-b2bd-5a231d86f455

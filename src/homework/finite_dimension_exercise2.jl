@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.43
+# v0.19.46
 
 #> [frontmatter]
 #> homework_number = 2
@@ -29,21 +29,21 @@ main {
 
 # ╔═╡ aff38e1d-416c-472b-81ea-820d7430dded
 md"""
-In order to study period 3 orbits in the dynamical system $x_{n+1} = \mu x_n (1-x_n)$, we consider the map
+To study period 3 orbits of the dynamical system $x_{n+1} = \mu x_n (1-x_n)$, we consider the map
 
 $\begin{align}
 F : \ \left\{
 \begin{aligned}
-\mathbb{R}^3 &\to \mathbb{R}^3 \\
+\mathbb{R}^3 &\to \mathbb{R}^3, \\
 \begin{pmatrix} x_0 \\ x_1 \\ x_2 \end{pmatrix}  &\mapsto
-\begin{pmatrix} \mu x_0(1-x_0) - x_1 \\ \mu x_1(1-x_1) - x_2 \\ \mu x_2(1-x_2) - x_0 \end{pmatrix}
+\begin{pmatrix} \mu x_0(1-x_0) - x_1 \\ \mu x_1(1-x_1) - x_2 \\ \mu x_2(1-x_2) - x_0 \end{pmatrix}.
 \end{aligned} \right.
 \end{align}$
 """
 
 # ╔═╡ f283c615-fcde-4752-8d02-fafaa0e73b7d
 md"""
-**1.** Using the implementation of $F$ and $DF$ provided in the following cells, and the function `newton` from RadiiPolynomial.jl, find an approximate period 3 orbit $\bar{x}$, for $\mu=3.9$.
+**1.** Using the implementation of $F$ and $DF$ provided in the following cells, and the function `newton` from the RadiiPolynomial library, find an approximate period 3 orbit $\bar{x}$ for $\mu = 3.9$.
 """
 
 # ╔═╡ 3b098d28-5fc8-4463-a59b-08bca638d5be
@@ -64,14 +64,11 @@ function DF(x, μ)
 		 -1              0              μ * (1 - 2x₂)])
 end
 
-# ╔═╡ 8d22a89b-5531-4e0c-9c02-e351578df93e
-μ = 3.9
-
 # ╔═╡ 698891fa-5637-40de-8756-f507551c25d4
-initial_data = rand(Float64, (3))
+# initial_data = ...
 
 # ╔═╡ 5ee47406-c6cc-40d8-adb9-c37146f9db01
-x̄, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
+# x̄, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
 
 # ╔═╡ 7b944744-628c-4ac9-8528-6dc19789ddb0
 md"""
@@ -83,7 +80,7 @@ md"""
 
 # ╔═╡ 8b9a0f39-21f0-4288-bb2b-a594d6712292
 md"""
-**3.** Using the 1-norm on $\mathbb{R}^3$, show that the constant function $Z_2(r) = 2\mu \left\Vert A\right\Vert_1$ satisfies the assumption of the Newton-Kantorovich theorem.
+**3.** Using the $1$-norm on $\mathbb{R}^3$, show that the constant function $Z_2(r) = 2\mu \left\Vert A \right\Vert_1$ satisfies the assumption of the Newton-Kantorovich theorem.
 """
 
 # ╔═╡ 3d27e2d3-e5e8-4e95-9294-23e416608b6a
@@ -91,7 +88,7 @@ Foldable("Hint",	md"You may first compute $D^2F(\bar{x})(u,v)$ and show that $\V
 
 # ╔═╡ 03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
 md"""
-**4.** Implement and evaluate suitable bounds $Y$, $Z_1$ and $Z_2$, and use the function `interval_of_existence` from RadiiPolynomial.jl in order to prove the existence of a period 3 orbit for $\mu = 3.9$.
+**4.** Implement and evaluate suitable bounds $Y$, $Z_1$ and $Z_2$, and use the function `interval_of_existence` from RadiiPolynomial in order to prove the existence of a period 3 orbit for $\mu = 3.9$.
 """
 
 # ╔═╡ 4c78f87b-7191-47f4-8bd7-cd9d13c5b4c6
@@ -101,13 +98,13 @@ md"""
 # Z₁ = ...
 
 # ╔═╡ a4b2181e-d7dd-4c49-8c45-d6864cf878c6
-rstar = Inf # since Z₂ is constant
+r_star = Inf # since Z₂ is constant
 
 # ╔═╡ 2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
 # Z₂ = ...
 
 # ╔═╡ 5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
-# interval_of_existence(Y, Z₁, Z₂, rstar)
+# interval_of_existence(Y, Z₁, Z₂, r_star)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -124,7 +121,7 @@ RadiiPolynomial = "~0.8.12"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.2"
+julia_version = "1.10.4"
 manifest_format = "2.0"
 project_hash = "6b5a1c65b08c1cb67df2036186b2c2a085cfc3db"
 
@@ -152,9 +149,9 @@ version = "1.0.1+0"
 
 [[deps.CodeTracking]]
 deps = ["InteractiveUtils", "UUIDs"]
-git-tree-sha1 = "c0216e792f518b39b22212127d4a84dc31e4e386"
+git-tree-sha1 = "7eee164f122511d3e4e1ebadb7956939ea7e1c77"
 uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
-version = "1.3.5"
+version = "1.3.6"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
@@ -165,7 +162,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.0+0"
+version = "1.1.1+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -246,9 +243,9 @@ version = "0.21.4"
 
 [[deps.JuliaInterpreter]]
 deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "a6adc2dcfe4187c40dc7c2c9d2128e326360e90a"
+git-tree-sha1 = "7ae67d8567853d367e3463719356b8989e236069"
 uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.9.32"
+version = "0.9.34"
 
 [[deps.LaTeXStrings]]
 git-tree-sha1 = "50901ebc375ed41dbf8058da26f9de442febbbec"
@@ -305,9 +302,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.LoweredCodeUtils]]
 deps = ["JuliaInterpreter"]
-git-tree-sha1 = "0b898aba6cb0b01fb96245fa5375accb651a241a"
+git-tree-sha1 = "1ce1834f9644a8f7c011eb0592b7fd6c42c90653"
 uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "3.0.0"
+version = "3.0.1"
 
 [[deps.MIMEs]]
 git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
@@ -427,10 +424,10 @@ uuid = "ae029012-a4dd-5104-9daa-d747884805df"
 version = "1.3.0"
 
 [[deps.Revise]]
-deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "Pkg", "REPL", "Requires", "UUIDs", "Unicode"]
-git-tree-sha1 = "677b65e17aeb6b4a0be1982e281ec03b0f55155c"
+deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "REPL", "Requires", "UUIDs", "Unicode"]
+git-tree-sha1 = "7b7850bb94f75762d567834d7e9802fc22d62f9c"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.5.16"
+version = "3.5.18"
 
 [[deps.RoundingEmulator]]
 git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
@@ -477,9 +474,9 @@ deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[deps.Tricks]]
-git-tree-sha1 = "eae1bb484cd63b36999ee58be2de6c178105112f"
+git-tree-sha1 = "7822b97e99a1672bfb1b49b668a6d46d58d8cbcb"
 uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
-version = "0.1.8"
+version = "0.1.9"
 
 [[deps.URIs]]
 git-tree-sha1 = "67db6cc7b3821e19ebe75791a9dd19c9b1188f2b"
@@ -516,13 +513,12 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╟─755f440a-f42d-4de2-9cd2-826ea2114ab7
+# ╠═755f440a-f42d-4de2-9cd2-826ea2114ab7
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╟─aff38e1d-416c-472b-81ea-820d7430dded
 # ╟─f283c615-fcde-4752-8d02-fafaa0e73b7d
 # ╠═3b098d28-5fc8-4463-a59b-08bca638d5be
 # ╠═dda38796-c299-4d38-b479-fde4c1496941
-# ╠═8d22a89b-5531-4e0c-9c02-e351578df93e
 # ╠═698891fa-5637-40de-8756-f507551c25d4
 # ╠═5ee47406-c6cc-40d8-adb9-c37146f9db01
 # ╟─7b944744-628c-4ac9-8528-6dc19789ddb0

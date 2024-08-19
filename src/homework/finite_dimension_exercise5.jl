@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.43
+# v0.19.46
 
 #> [frontmatter]
 #> homework_number = 5
@@ -29,7 +29,7 @@ main {
 
 # ╔═╡ 45e10c91-f161-43a5-9c9e-5b4dca6a8e53
 md"""
-The third exercise can be used to enclose eigenvalues of a given matrix one by one. We now present an alternate strategy to enclose the entire spectrum at once (but not the corresponding eigenvectors), which can sometimes also be adapted in infinite dimension.
+Exercise 3 can be used to enclose eigenvalues of a given matrix one by one. We now present an alternate strategy to enclose the entire spectrum at once (but not the corresponding eigenvectors), which can sometimes also be adapted in infinite dimension.
 """
 
 # ╔═╡ b0590931-8d44-47b9-9153-00da2a418b00
@@ -40,24 +40,12 @@ $\begin{align}
 \sigma(A) \subset \bigcup_{i=1}^d D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right),
 \end{align}$
 
-where $D(z,r)$ denotes the closed disk of center $z$ in radius $r$ in the complex plane. Moreover, if $I \subset \{1,\ldots,d\}$ is such that
-
-$\begin{align}
-\bigcup_{i\in I} D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right)\quad  \text{ is disjoint from }\quad  \bigcup_{i\notin I} D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right),
-\end{align}$
-
-then
-
-$\begin{align}
-\bigcup_{i\in I} D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right) \quad \text{contains exactly }  \vert I\vert \text{ eigenvalues.}
-\end{align}$
-
-
+where $D(z,r)$ denotes the closed disk of center $z$ in radius $r$ in the complex plane. Moreover, if $I \subset \{1,\ldots,d\}$ is such that $\bigcup_{i \in I} D\left(A_{i,i},\, \sum_{j \ne i} \vert A_{i,j} \vert\right)$ is disjoint from $\bigcup_{i \notin I} D\left(A_{i,i},\, \sum_{j \ne i} \vert A_{i,j} \vert\right)$, then $\bigcup_{i \in I} D\left(A_{i,i},\, \sum_{j \ne i} \vert A_{i,j} \vert\right)$ contains exactly $\vert I \vert$ eigenvalues.
 """
 
 # ╔═╡ d01c5817-c4b6-4502-81f6-51ae5715117b
 md"""
-**1.** Using the Gershgorin circle theorem, get as tight as possible rigorous enclosures of all eigenvalues of $W_{3}$ (defined in the third exercise)).
+**1.** Using the [Gershgorin circle theorem](https://en.wikipedia.org/wiki/Gershgorin_circle_theorem), get as tight as possible rigorous enclosures of all eigenvalues of $W_{3}$ (defined in Exercise 3).
 """
 
 # ╔═╡ 02939955-c9aa-4152-8e08-f31e1e0c0e9c
@@ -88,7 +76,7 @@ RadiiPolynomial = "~0.8.12"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.2"
+julia_version = "1.10.4"
 manifest_format = "2.0"
 project_hash = "6b5a1c65b08c1cb67df2036186b2c2a085cfc3db"
 
@@ -129,7 +117,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.0+0"
+version = "1.1.1+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -480,7 +468,7 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╟─9099f41e-6239-4f7f-a3ec-82e7d4787f8f
+# ╠═9099f41e-6239-4f7f-a3ec-82e7d4787f8f
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╟─45e10c91-f161-43a5-9c9e-5b4dca6a8e53
 # ╟─b0590931-8d44-47b9-9153-00da2a418b00
