@@ -178,9 +178,6 @@ md"""
 When a command like `a = 0.1` is executed in Julia, the computer associates to the variable `a` a single floating-point number: the floating-point number which is the closest to $1/10$. Since $1/10$ does not have a finite representation in base $2$, the value stored in `a` is already not equal to the typed-in number `0.1`. It turns out to be slightly larger than $1/10$, but it could very well have been the other way around (e.g. `0.3`).
 """
 
-# ╔═╡ b9a5fc37-1be5-4ce2-9f8a-7a08500e9608
-versioninfo()
-
 # ╔═╡ 2d68d26d-6e10-407f-8227-515ddadd9599
 a = 0.1
 
@@ -1457,7 +1454,6 @@ version = "1.4.1+1"
 # ╟─66ca51ad-0f2e-4f3c-8dd0-e66649b224d9
 # ╟─f7d40916-2d5b-47f2-9fe9-6635363978ae
 # ╟─7b174512-9ed1-4b99-ae17-a366323f0a46
-# ╠═b9a5fc37-1be5-4ce2-9f8a-7a08500e9608
 # ╠═2d68d26d-6e10-407f-8227-515ddadd9599
 # ╠═78f17262-7ffc-4d74-835c-f17863817b9a
 # ╟─c359bec8-4a1a-4e34-9f56-1f70f4fa5cbe
