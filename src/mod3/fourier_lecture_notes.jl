@@ -15,7 +15,7 @@ using InteractiveUtils
 using PlutoTeachingTools, PlutoUI
 
 # ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial, Plots
+using RadiiPolynomial, IntervalArithmetic, Plots
 
 # ╔═╡ 018ecc45-8638-4a59-b561-efb086bdc751
 using LinearAlgebra,ToeplitzMatrices
@@ -881,6 +881,7 @@ end
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+IntervalArithmetic = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
@@ -889,6 +890,7 @@ RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 ToeplitzMatrices = "c751599d-da0a-543b-9d20-d0a503d91d24"
 
 [compat]
+IntervalArithmetic = "~0.22.14"
 Plots = "~1.40.5"
 PlutoTeachingTools = "~0.2.15"
 PlutoUI = "~0.7.59"
@@ -902,7 +904,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "db3d94c0ad35dd4b82a364910d1cea9158e423fd"
+project_hash = "5c4f9c8910023b5ca661d26fb771b7c2b82a7f4f"
 
 [[deps.AbstractFFTs]]
 deps = ["LinearAlgebra"]
