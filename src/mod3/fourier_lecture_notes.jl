@@ -2,10 +2,10 @@
 # v0.19.45
 
 #> [frontmatter]
-#> chapter = 1
+#> chapter = 3
 #> order = 1
-#> title = "Lecture notes: Finite-dimensional problems"
-#> tags = ["module1"]
+#> title = "Lecture notes: periodic orbit problems"
+#> tags = ["module3"]
 #> layout = "layout.jlhtml"
 
 using Markdown
@@ -15,10 +15,10 @@ using InteractiveUtils
 using PlutoTeachingTools, PlutoUI
 
 # ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial, IntervalArithmetic, Plots
+using RadiiPolynomial, IntervalArithmetic
 
 # ╔═╡ 018ecc45-8638-4a59-b561-efb086bdc751
-using LinearAlgebra,ToeplitzMatrices
+using LinearAlgebra,ToeplitzMatrices, Plots
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""<style>
