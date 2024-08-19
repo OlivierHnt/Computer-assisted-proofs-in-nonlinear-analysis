@@ -2,10 +2,10 @@
 # v0.19.45
 
 #> [frontmatter]
-#> chapter = 3
+#> chapter = 1
 #> order = 1
-#> title = "Lecture notes: periodic orbit problems"
-#> tags = ["module3"]
+#> title = "Lecture notes: Finite-dimensional problems"
+#> tags = ["module1"]
 #> layout = "layout.jlhtml"
 
 using Markdown
@@ -696,7 +696,7 @@ md"""
 
 # ╔═╡ 6f346c67-879a-4427-afd4-6acdeb17af21
 md"""
-This concerns the bound on the operator $A[DF(a)-DF(\bar{a})]$. We see that 
+This concerns the bound on the operator $A[DF(a)-DF(\bar{a})]$. Since this is a Lipschitz bound on the first derivative, one approach is to bound the second derivative. However, here we just do a direct computation to see that 
 $A[DF(a)-DF(\bar{a})]b =2A\Lambda^{-1}(a-\bar{a})*b$, hence by the Banach algebra property and the definition of the operator norm we arrive at
 
 $\begin{align}
@@ -762,23 +762,6 @@ end
 # ╔═╡ 60b43603-9937-4869-b5fc-f74c1c18e710
 r=interval_of_existence(Y, Z1, Z2, Inf)
 
-# ╔═╡ ee6195ff-70b0-46f9-9911-c17bac67aa82
-md"""
-## Interval arithmetic in Julia 
-"""
-
-# ╔═╡ a16e9d49-7fd2-4594-8b81-f8c758b7efd1
-md"""
-This does not look great:
-"""
-
-# ╔═╡ 64a95b2a-f747-4de1-aca1-c54e43119f64
-begin
-	[isguaranteed(IY)
-	 isguaranteed(IZ1)
-	 isguaranteed(IZ2)]
-end
-
 # ╔═╡ b0612642-f710-496b-be28-c12d5f867e20
 md"""
 ## Symmetry
@@ -820,16 +803,28 @@ md"""
 ## Conclusion
 """
 
-# ╔═╡ 3cc0fc2c-9512-41d6-9798-4e8cbec94c9e
-md"""This means that we have proven that there is a periodic solution of the differential equation within distance"""
+# ╔═╡ eef1afcd-4da9-4042-a7c9-0124070740f8
+md"""
+We choose 
+"""
 
-# ╔═╡ 670dd539-75b4-45b5-b9f3-de4354945648
+# ╔═╡ 238c9111-7dda-40e8-8297-9776fe77f7d9
 r₀=inf(r)
 
-# ╔═╡ f4f432f8-ea80-4169-94ad-ee3289e1a93f
+# ╔═╡ 02740c7a-451f-452c-8c02-22a7a3b9fcc1
 md"""
-of the approximation depicted in the figure below (with distance measured in the max-norm on $[0,2\pi]$). 
+which satisfies $Y+Z_1 r_0+\frac{1}{2}Z_2 r_0^2 \leq r_0$ and $Z_1+Z_2 r_0 < 1$:
 """
+
+# ╔═╡ 6f6cd8ea-ada3-44ae-8263-3065f8d104b4
+begin
+	Ir0=interval(r₀)
+	println(precedes(IY+IZ1*Ir0+IZ2*Ir0^2/2,Ir0))
+	println(strictprecedes(IZ1+IZ2*Ir0,interval(1)))
+end
+
+# ╔═╡ 3cc0fc2c-9512-41d6-9798-4e8cbec94c9e
+md"""The Newton-Kantorovich theorem implies that there is a periodic solution of the differential equation within distance $r_0$ of the approximation depicted in the figure below (with distance measured in the max-norm on $[0,2\pi]$)."""
 
 # ╔═╡ 26d06cfe-24cc-41ec-87d2-8e489865b5b8
 begin
@@ -850,8 +845,38 @@ $\begin{align}
 \end{align}$
 """)
 
-# ╔═╡ 194e7df2-a234-45c7-8760-8c49a0d6e651
+# ╔═╡ 83c4964e-dfb2-47e0-8f05-eed53e21944f
+md"""
+# Next steps and further reading
+"""
 
+# ╔═╡ 9dc65809-74c2-4341-baa8-63900de08df4
+md"""
+In this worksheet we discussed the setup of a CAP for a periodic solution in a simplified problem, including explicit estimates and code. These arguments can be generalizd to the more general problem of a periodic orbit in a system of ODEs. As mentioned before, the main additional difficulties are the unknown period of the orbit, the phase condition, and the bookkeeping of the different components of the system. 
+"""
+
+# ╔═╡ 194e7df2-a234-45c7-8760-8c49a0d6e651
+md"""
+The *Julia* package [RadiiPolynomial.jl](https://olivierhnt.github.io/RadiiPolynomial.jl/stable/) provides convenient high-level support for such problems. In particular, the example of a periodic orbit in the Lorenz system is implemented and documented
+[here](https://olivierhnt.github.io/RadiiPolynomial.jl/stable/examples/infinite_dimensional_proofs/ode/lorenz_po/).
+"""
+
+# ╔═╡ badfb1b2-5a07-4098-a313-aa667330ffd7
+md"""
+#### A final note on interval arithmetic
+"""
+
+# ╔═╡ 4f085dd2-a60e-4764-b1a1-bced7ff36007
+md"""
+In the code provided in this notebook we used the *Julia* interval arithmetic library [IntervalArithmetic.jl](https://juliaintervals.github.io/IntervalArithmetic.jl/stable/). We took a bit of liberty by taking advantage of automatic conversion of floats and integers to intervals, when variables of these types are combined in elementary operations. The interval arithmetic library is not entirely happy about this:
+"""
+
+# ╔═╡ f3636af3-42bd-4a2d-a604-eae51db48996
+begin
+	[isguaranteed(IY)
+	 isguaranteed(IZ1)
+	 isguaranteed(IZ2)]
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -2307,9 +2332,6 @@ version = "1.4.1+1"
 # ╟─a9f597fe-4058-47a8-8a39-8d6b36594a96
 # ╠═fceb89d1-127a-41b0-b0ec-ec58763a9caa
 # ╠═60b43603-9937-4869-b5fc-f74c1c18e710
-# ╟─ee6195ff-70b0-46f9-9911-c17bac67aa82
-# ╟─a16e9d49-7fd2-4594-8b81-f8c758b7efd1
-# ╠═64a95b2a-f747-4de1-aca1-c54e43119f64
 # ╟─b0612642-f710-496b-be28-c12d5f867e20
 # ╟─eb1f2c71-60fc-4ee5-9716-f18dd5eb0d2d
 # ╠═6df91aa3-ad36-4b9e-ba4a-4dfb46eb1d27
@@ -2317,11 +2339,18 @@ version = "1.4.1+1"
 # ╟─35df9eed-5f22-4e26-b119-ea7354d2c762
 # ╟─bae570fe-8219-4cf2-b763-fcd9f0f02735
 # ╟─09922158-6ac9-410e-90ac-5240a9056086
+# ╟─eef1afcd-4da9-4042-a7c9-0124070740f8
+# ╠═238c9111-7dda-40e8-8297-9776fe77f7d9
+# ╟─02740c7a-451f-452c-8c02-22a7a3b9fcc1
+# ╠═6f6cd8ea-ada3-44ae-8263-3065f8d104b4
 # ╟─3cc0fc2c-9512-41d6-9798-4e8cbec94c9e
-# ╠═670dd539-75b4-45b5-b9f3-de4354945648
-# ╟─f4f432f8-ea80-4169-94ad-ee3289e1a93f
 # ╟─26d06cfe-24cc-41ec-87d2-8e489865b5b8
 # ╟─e40d36d5-93a6-4b76-bccd-c629f621b22b
-# ╠═194e7df2-a234-45c7-8760-8c49a0d6e651
+# ╠═83c4964e-dfb2-47e0-8f05-eed53e21944f
+# ╟─9dc65809-74c2-4341-baa8-63900de08df4
+# ╟─194e7df2-a234-45c7-8760-8c49a0d6e651
+# ╟─badfb1b2-5a07-4098-a313-aa667330ffd7
+# ╟─4f085dd2-a60e-4764-b1a1-bced7ff36007
+# ╠═f3636af3-42bd-4a2d-a604-eae51db48996
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
