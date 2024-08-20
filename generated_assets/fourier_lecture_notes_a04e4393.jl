@@ -64,9 +64,9 @@ Since the (minimal) period of the forcing is $2\pi$, we will look for a periodic
 
 # ╔═╡ 1bfcc76a-266a-4784-b76b-3871445e603e
 Foldable("""Why is this a "simple" example?""", md"""
-A more natural problem to look at is to find a periodic orbit in a system of ODEs. In such an *autonomous* system of ODEs the period of a periodic solution is unknown a priori, and determining the period $\tau$ is thus part of the problem, in addition to finding the unknown $\tau$-periodic function $u(t)$. Furthermore, when $u(t)$ is a periodic solution, so is $u(t-t_0)$ for any time shift $t_0$. In particular, periodic solutions are not isolated unless an additional phase condition is imposed. An additional complication is that for a system of equations the bookkeeping is more involved than for a single equation.
+A more natural problem to look at is to find a periodic orbit in a system of ODEs. In such an *autonomous* system of ODEs the period of a periodic solution is unknown a priori, and determining the period $\tau$ is thus part of the problem, in addition to finding the unknown $\tau$-periodic function $u(t)$. Furthermore, when $u(t)$ is a periodic solution, so is $u(t-t_0)$ for any time shift $t_0$. In particular, periodic solutions are not isolated unless an additional phase condition is imposed. A final complication is that for a *system* of equations the bookkeeping is more involved than for a single equation.
 
-Although these difficulties can be overcome, the notation can get in the way of understanding. Since we want to focus here on how to deal with periodic functions, we choose to look at a scalar, nonautonomous problem where the period is given.
+Although these difficulties can be overcome, the notation can get in the way of understanding. Since we want to focus here on how to deal with periodic functions, we choose to look at a scalar, non-autonomous problem where the period is given.
 """)
 
 # ╔═╡ 3e3a3a60-f76f-401d-b265-a99e713d98c5
@@ -85,10 +85,10 @@ u(t) = \sum_{n\in\mathbb{Z}} a_n e^{int},
 in the ODE to find the infinite set of equations ($n \in \mathbb{Z}$)
 
 $\begin{align}
-\lambda_n a_n + (a*a)_n + c_n = 0.
+\lambda_n a_n + (a*a)_n + c_n = 0,
 \end{align}$
 
-where $\lambda_n := n^2 - i \beta_1 n - \beta_2$, while $c$ represents the Fourier transform of $\beta_3 \cos(t)$, given by
+where $\lambda_n := n^2 - i \beta_1 n - \beta_2$ and $c$ represents the Fourier transform of $\beta_3 \cos(t)$, given by
 
 $\begin{align}
 c_n := \begin{cases} \frac{\beta_3}{2}, & n = \pm 1,\\ 0, & n \ne \pm 1. \end{cases}
@@ -181,7 +181,7 @@ The operator norm (recall: $\|\Gamma\|_{B(X)}$ is the smallest number such that 
 """
 
 # ╔═╡ 7e78028c-f70b-4474-8bee-783ad7d99d56
-Markdown.MD(Markdown.Admonition("tip", "Lemma (characterisation of operator norm)",[md"""
+Markdown.MD(Markdown.Admonition("tip", "Lemma (characterization of operator norm)",[md"""
 Let $\Gamma$ be a bounded operator on $X$, represented by $(\Gamma a)_n=\sum_{k\in\mathbb{Z}} \Gamma_{nk} a_k$. 
 Then 
 
@@ -229,7 +229,7 @@ F_n(a) := a_n + \lambda_n^{-1} [(a*a)_n +c_n].
 """
 
 # ╔═╡ b2defc79-da78-47c8-bb78-44cb9000ff58
-Foldable("""Why divide by lambda?""", md"""
+Foldable("""Why divide by λ?""", md"""
 Dividing by $\lambda_n$ is a choice that simplifies the linear term, which is beneficial for some of the algebra. In terms of estimates it merely shifts the difficulty to the nonlinear term. Working with the alternative $\tilde{F}_n(a) := \lambda_n a_n + (a*a)_n + c_n$ is also a perfectly valid choice.
 """)
 
@@ -259,12 +259,12 @@ Markdown.MD(Markdown.Admonition("tip", "Lemma",[md"""Let $\nu>1$. When $a\in X$ 
 
 # ╔═╡ 66deaecf-e201-40ec-88d3-99574195253a
 md"""
-## Finite dimensional projection
+### Finite dimensional projection
 """
 
 # ╔═╡ c32d9839-7cb7-4018-bab1-b2211f05b71e
 md"""
-We need the projection operator on a finite number of modes ($2N+1$ coefficents) and its complement:
+We need the projection operator on a finite number of modes ($2N+1$ coefficients) and its complement:
 
 $\begin{align}
 (\pi^{\leq N} a)_n := \begin{cases}
@@ -291,7 +291,7 @@ The projections provide a sleek way to do the algebra that essentially splits th
 # ╔═╡ 740167dc-5bcd-48c0-b1f0-a7bf5e1b6cb7
 md"""
 The range $\pi^{\leq N}X$ is finite dimensional, and 
-the restriction of $\pi^{\leq N} F$ to $\pi^{\leq N} X$, which we denote by $F^{\leq N}$, is what we will work with in the computer. An implementation is given below"""
+the restriction of $\pi^{\leq N} F$ to $\pi^{\leq N} X$, which we denote by $F^{\leq N}$, is what we will work with in the computer. An implementation is given below."""
 
 # ╔═╡ 026aec24-4ed0-4189-af4f-28f56e6964ef
 function F(a, beta, Nf = (length(a)-1)÷2)
@@ -364,25 +364,25 @@ end
 
 # ╔═╡ c4363fdf-6500-4830-bc42-9777d616ac34
 md"""
-## Choosing the approximate inverse of the Jacobian
+### Choosing the approximate inverse of the Jacobian
 """
 
 # ╔═╡ 24e1a5af-569e-4ae8-a3d7-19b7962db48b
 md"""
-We also use the project to split $A$ into a finite part and a tail part:
+We also use the projection to split $A$ into a finite part and a tail part:
 
 $\begin{align}A := A^{\le N}\pi^{\le N} + I^{>N}\pi^{>N},\end{align}$
 
-where $A^{\le N}$ is a linear map (to be chosen below) on $\pi^{\le N}X$ and $I^{>N}$ is the identity on $\pi^{> N}X$. Hence by construction one may also write this is block diagonal form:
+where $A^{\le N}$ is a linear map (to be chosen below) on $\pi^{\le N}X$ and $I^{>N}$ is the identity on $\pi^{> N}X$. Hence by construction one may also write $A$ in block diagonal form:
 
 $\begin{align}A = \pi^{\le N}A^{\le N}\pi^{\le N} + \pi^{>N}I^{>N}\pi^{>N}.\end{align}$
 """
 
 # ╔═╡ 77b91c27-ddb0-4115-b0d0-a78f2729dadc
 Foldable("""Is A injective?""", md"""
-The operator $A$ is injective on $X$ if and only $A^{\leq N}$ is injective on $\pi^{\leq N} X$. The operator $A^{\leq N}$ has a (finite) matrix representation, hence injectivity can be proved by computer.
+The operator $A$ is injective on $X$ if and only if $A^{\leq N}$ is injective on $\pi^{\leq N} X$. The operator $A^{\leq N}$ has a (finite) matrix representation, hence injectivity can be proven by computer.
 
-One may also observe that $A=I+\pi^{\leq N}(A^{\leq N}-I^{\leq N})\pi^{\leq N}$, hence $A$ is of the form identity plus compact operator (and thus a Fredholm operator of index $0$).
+One may also observe that $A=I+\pi^{\leq N}(A^{\leq N}-I^{\leq N})\pi^{\leq N}$, hence $A$ is of the form identity plus compact operator (and thus $A$ is a Fredholm operator of index $0$).
 """)
 
 # ╔═╡ 51e35c7e-77f2-4911-914c-7f1a242c3b91
@@ -393,7 +393,7 @@ md"""
 # ╔═╡ 4a9daa68-86ed-4327-98fc-03d436885d2e
 md"""
 We consider the finite truncation $F^{\leq N}$ and use a Newton algorithm to find a point $\bar{a} \in \pi^{\leq N} X$ such that $\pi^{\leq N} F (\bar{a}) \approx 0$. If the truncation dimensions $N$ is large enough we may hope that also 
-$\pi^{> N} F (\bar{a}) \approx 0$, since we expect the coefficients of $\bar{a}$ to decrease for large $n$.
+$\pi^{> N} F (\bar{a}) \approx 0$, since we expect the coefficients of $\bar{a}$ to decrease for moderately large $n$.
 """
 
 # ╔═╡ 3842ad29-ae9c-4743-b487-e76d94fb01cf
@@ -462,7 +462,7 @@ begin
 end
 
 # ╔═╡ 5f3d91ee-14c2-4b5e-8e2a-a607d086eb51
-Foldable("""Initializing Newton's method""", md"""Finding a good starting point for Newton's method is not always easy. Here we were a bit lucky that a simple guess suffices. For other parameter values one may need to study the solution of the ODE in more detail using numerical integration.""")
+Foldable("""Initializing Newton's method""", md"""Finding a good starting point for Newton's method is not always easy. Here we were a bit lucky that a simple guess sufficed. For other parameter values one may need to study the solutions of the ODE in more detail using numerical integration.""")
 
 # ╔═╡ 936423fd-0d78-41da-8b49-5fca3c125547
 md"""
@@ -475,7 +475,7 @@ AN = inv(DF(a0, Fbeta))
 # ╔═╡ 0b4e2571-cbec-4a4d-aac6-dd8b32e3f474
 Markdown.MD(Markdown.Admonition("note", "Remark on truncation dimension",
 [md"""
-It is not necessary to choose the finite truncation dimensions for $\bar{a} \in \pi^{\le N} X$ and $A^{\le N}$ equal. For purposes of exposition we do not introduce two different truncation dimension parameters here, but essentially the truncation dimension for $\bar{a}\in \pi^{\le N} X$ controls the size of the residue, while the truncation dimension for the approximate inverse $A^{\le N}$ controls the contractivity of the fixed point operator. These can in principle be controled rather independently.
+It is not necessary to choose the finite truncation dimensions for $\bar{a} \in \pi^{\le N} X$ and $A^{\le N}$ equal. For purposes of exposition we do not introduce two different truncation dimension parameters here, but essentially the truncation dimension for $\bar{a}\in \pi^{\le N} X$ controls the size of the residue, while the truncation dimension for the approximate inverse $A^{\le N}$ controls the contractivity of the fixed point operator. These can in principle be controlled rather independently.
 """]))
 
 # ╔═╡ 0d75d077-53c3-4f03-99d3-af796d973d66
@@ -493,7 +493,7 @@ nu = interval(1.1)
 
 # ╔═╡ 83f772ea-aeec-49a3-baa2-d2fd8771c0a7
 md"""
-Since we want to prove something we need to resort to interval arithmetic. Hence we will need to convert $\bar{a}$, $\beta$ and $A$ to interval-valued variables. 
+Since we want to prove something we need to resort to interval arithmetic. Hence we will need to convert $\bar{a}$ and $A$ to interval-valued variables. 
 """
 
 # ╔═╡ 1ace9001-93ae-46f2-98e6-7b371221beb3
@@ -521,7 +521,7 @@ md"""
 
 # ╔═╡ eb2ae1fd-5062-436b-ac50-eb3b169bca42
 md"""
-This concerns the bound on the residue $A F(\bar{a})$. Determining the residue requires only a finite computation. Indeed, since $(\bar{a}*\bar{a})_n=0$ for $|n|>2N$ (why?) we infer that $\pi^{>2N} F(\bar{a})=0$ and it can be computed explicitly. In turn this implies that $A F(\bar{a})= \pi^{\leq 2N} A \pi^{\leq 2N} F(\bar{a})$. We conclude that $\|A F(\bar{a})\|_X= \|\pi^{\leq 2N} A \pi^{\leq 2N} F(\bar{a})\|_X $ requires a finite computation only, which we can perform with interval arithmetic to get a rigorous upper bound $Y \geq \|A F(\bar{a})\|_X$.
+This concerns the bound on the residue $A F(\bar{a})$. Determining the residue requires only a finite computation. Indeed, since $(\bar{a}*\bar{a})_n=0$ for $|n|>2N$ (why?) we infer that $\pi^{>2N} F(\bar{a})=0$, and $F(\bar{a})$ can be computed explicitly. In turn this implies that $A F(\bar{a})= \pi^{\leq 2N} A \pi^{\leq 2N} F(\bar{a})$. We conclude that $\|A F(\bar{a})\|_X= \|\pi^{\leq 2N} A \pi^{\leq 2N} F(\bar{a})\|_X $ requires only a finite computation, which we can perform with interval arithmetic to get a rigorous upper bound $Y \geq \|A F(\bar{a})\|_X$.
 """
 
 # ╔═╡ 3021e7c0-508a-4a95-9c16-098fa35b65a0
@@ -550,7 +550,7 @@ md"""
 
 # ╔═╡ 002c7c0a-2b38-4a31-9e08-a424fa5679b8
 md"""
-This concerns the bound on the operator $I-A DF(\bar{a})$. In the analysis we will split the bound in a part which is computable by "brute force" and an estimate of the tail. The triangle inequality is often helpful for sch arguments, but in our case the characterisation of the operator norm gives an additional tool. In particular we will use that for any $M \in \mathbb{N}$ we have that 
+This concerns the bound on the operator $I-A DF(\bar{a})$. In the analysis we will split the bound in a part which is computable by "brute force" and an estimate of the tail. The triangle inequality is often helpful for such arguments, but in our case the characterization of the operator norm gives an additional tool. In particular we will use that for any $M \in \mathbb{N}$ we have that 
 
 $\begin{align}
 \|\Gamma\|_{B(X)} = \max \Big( \|\Gamma \pi^{\le M}\|_{B(X)}, \|\Gamma \pi^{> M}\|_{B(X)} \Big).
@@ -570,9 +570,9 @@ $\begin{align}
 A DF(\bar{a}) \pi^{> 2N} =  (A^{\le N}\pi^{\le N} + I^{>N} \pi^{>N}) DF(\bar{a}) \pi^{> 2N} = \pi^{>N} DF(\bar{a}) \pi^{> 2N},
 \end{align}$
 
-and this expression does not involve $A^{\le N}$.
+and we see that this expression does not involve $A^{\le N}$.
 
-Furthermore, it also follows from the block-diagonal structure of $A$ and finite bandwidth of $DF(\bar{a})$ that 
+Furthermore, it also follows from the block-diagonal structure of $A$ and the finite bandwidth of $DF(\bar{a})$ that 
 
 $\begin{align}
 A DF(\bar{a}) \pi^{\le 2N} = A \pi^{\le 3N} DF(\bar{a}) \pi^{\le 2N} = \pi^{\le 3N} A DF(\bar{a}) \pi^{\le 2N},
@@ -609,7 +609,7 @@ $\begin{align}
 
 # ╔═╡ ac18ecec-5d4e-4d4d-99f1-d5cefcb1355d
 Foldable("""Proof""", md"""**Exercise**. Hint: for $|k| \geq 2N+1$
-we have $[I-ADF(\bar{a})]e_k= -2\Lambda^{-1} \bar{a} * e_k$ and it follows from monotonicity of $\lambda_n$ in $|n|$ for $|n|\geq \sqrt{\beta_3}$ that $\frac{\|\Lambda^{-1} \bar{a} * e_k \|_X}{\|e_{k}\|_X}$ decreases monotonically in $|k|$ for $|k|\geq 2N+1$. """)
+we have $[I-ADF(\bar{a})]e_k= -2\Lambda^{-1} (\bar{a} * e_k)$ and it follows from monotonicity of $\lambda_n$ in $|n|$ for $|n|\geq \sqrt{\beta_3}$ that $\frac{\|\Lambda^{-1} (\bar{a} * e_k) \|_X}{\|e_{k}\|_X}$ decreases monotonically in $|k|$ for $|k|\geq 2N+1$. """)
 
 # ╔═╡ b6ae8c03-57aa-4a45-9d6a-9886421ee934
 md"""
@@ -623,7 +623,7 @@ The latter operator can be represented by a finite matrix and we can compute the
 """
 
 # ╔═╡ a18bb200-3166-4c23-bcb9-dee71ff5035a
-Foldable("""Do we need to determine the norm of I-ADF(a̅) exactly?""", md"""No, we just need an estimate. But we need a pretty good estimate, since we can only succeed with the contraction argument if $Z_1<1$. A naive estimate like $\|I-ADF(\bar{a})\|_{B(X)} \leq \|I\|_{B(X)}+\|A\|_{B(X)}\|DF(\bar{a})\|_{B(X)}$ will certainly not work out. Indeed, we need to take advantage of the cancellations occuring in $I-ADF(\bar{a})$ due to $A$ being an approximate inverse of $DF(\bar{a})$.
+Foldable("""Do we need to determine the norm of I-ADF(a̅) exactly?""", md"""No, we just need an estimate. But we need a pretty good estimate, since we can only succeed with the contraction argument if $Z_1<1$. A naive estimate like $\|I-ADF(\bar{a})\|_{B(X)} \leq \|I\|_{B(X)}+\|A\|_{B(X)}\|DF(\bar{a})\|_{B(X)}$ will certainly not work out. Indeed, we need to take advantage of the cancellations occurring in $I-ADF(\bar{a})$ due to $A$ being an approximate inverse of $DF(\bar{a})$.
 
 We are often willing to spend quite some computer power on getting a rather sharp bound.
 For the current problem we could also get away with a somewhat rougher bound,
@@ -633,7 +633,7 @@ $\begin{align}
 Z_1=\max\left\{ \|\pi^{\leq 3N}[I- ADF(\bar{a})]\pi^{\leq 2N}\|_{B(X)} , \frac{2  \|\bar{a}\|_X}{|\lambda_{N+1}|} \right\} .
 \end{align}$
 
-We note that sharpness of the $Z_2$-bound is less of an issue, as it plays a considerably less important role in the radii polynomial inequality. 
+We note that sharpness of the $Z_2$-bound is less of an issue, as it plays a considerably less critical role in the radii polynomial inequality. 
 """)
 
 # ╔═╡ 4a57ce24-2872-4ef1-ada1-73a64ab4f17a
@@ -659,7 +659,7 @@ end
 IZ1 = boundZ1(Ia0, Ibeta, IAN, Inu)
 
 # ╔═╡ abdca76c-832e-42aa-98fc-8a6c2c03965e
-Foldable("""Injectivity of A revisited.""", md"""**Exercise**: Prove that $\|I-A DF(\bar{a})\|_{B(X)}<1$ implies that $A$ is surjective on $X$.
+Foldable("""Injectivity of A revisited""", md"""**Exercise**: Prove that $\|I-A DF(\bar{a})\|_{B(X)}<1$ implies that $A$ is surjective on $X$.
 
 **Corollary**: The block-diagonal structure of $A$ implies that it follows from surjectivity of $A$ onto $X$ that $A^{\leq N}$ is surjective as an operator on $X^{\leq N}$. Since $X^{\leq N}$ is finite dimensional, this implies that $A^{\leq N}$  is injective on $X^{\leq N}$. We conclude that $A$ is also injective on $X$.
 """) 
@@ -672,7 +672,7 @@ md"""
 # ╔═╡ 6f346c67-879a-4427-afd4-6acdeb17af21
 md"""
 This concerns the bound on the operator $A[DF(a)-DF(\bar{a})]$. Since this is a Lipschitz bound on the first derivative, one approach is to bound the second derivative. However, here we just do a direct computation to see that 
-$A[DF(a)-DF(\bar{a})]b =2A\Lambda^{-1}(a-\bar{a})*b$, hence by the Banach algebra property and the definition of the operator norm we arrive at
+$A[DF(a)-DF(\bar{a})]b =2A\Lambda^{-1}[(a-\bar{a})*b]$, hence by the Banach algebra property and the definition of the operator norm we arrive at
 
 $\begin{align}
 \|A[DF(a)-DF(\bar{a})]b\|_X \leq 2 \|A\Lambda^{-1}\|_{B(X)} \|a-\bar{a}\|_X \|b\|_X.
@@ -683,7 +683,7 @@ We thus need to compute (or bound) $2\|A\Lambda^{-1}\|_{B(X)}$.
 
 # ╔═╡ 1c2cf614-faba-4fd4-8ceb-2a5d1373d93a
 md"""
-Since the operator $\Lambda^{-1}$ is diagonal, it has a natural restriction to $\pi^{\leq N} X$. The next lemma shows that the operator norm of $\|A\Lambda^{-1}\|_{B(X)}$ requires only a finite computation.
+Since the operator $\Lambda^{-1}$ is diagonal, it has a natural restriction to $\pi^{\leq N} X$. The next lemma shows that determining the operator norm $\|A\Lambda^{-1}\|_{B(X)}$ requires only a finite computation.
 """
 
 # ╔═╡ 62cec2b5-e408-46a4-947a-ebc58745c1ec
@@ -720,7 +720,7 @@ md"""
 
 # ╔═╡ a9f597fe-4058-47a8-8a39-8d6b36594a96
 md"""
-We now evaluate the radii polynomial to finish the proof.
+We now evaluate the radii polynomial to finish the Newton-Kantorovich proof.
 """
 
 # ╔═╡ fceb89d1-127a-41b0-b0ec-ec58763a9caa
@@ -736,7 +736,7 @@ r=interval_of_existence(Y, Z1, Z2, Inf)
 
 # ╔═╡ b0612642-f710-496b-be28-c12d5f867e20
 md"""
-## Symmetry
+### Symmetry
 """
 
 # ╔═╡ eb1f2c71-60fc-4ee5-9716-f18dd5eb0d2d
@@ -749,13 +749,13 @@ We made sure that the numerical approximation was conjugate symmetric: $\bar{a}^
 
 # ╔═╡ 49eae38b-786f-45fc-b331-3b01c32363a1
 md"""
-Hence the following lemma finishes our proof.
+Hence the following lemma provides the final step of our proof.
 """
 
 # ╔═╡ 35df9eed-5f22-4e26-b119-ea7354d2c762
 Markdown.MD(Markdown.Admonition("tip", "Lemma (symmetry of the solution)",
 [md"""
-Assume that $\bar{a}^\dagger=\bar{a}$ and that the assumptions of the Newton-Kantorovich theorem were satisfied for some $r=r_0>0$. Then the zero $\tilde{a}$ of $F$ such that $\|\tilde{a}-\bar{a}\|_X \leq r_0$ satisfies $\tilde{a}^\dagger = \tilde{a}$.
+Assume that $\bar{a}^\dagger=\bar{a}$ and that the assumptions of the Newton-Kantorovich theorem are satisfied for some $r=r_0>0$. Then the zero $\tilde{a}$ of $F$ such that $\|\tilde{a}-\bar{a}\|_X \leq r_0$ satisfies $\tilde{a}^\dagger = \tilde{a}$.
 """]))
 
 # ╔═╡ bae570fe-8219-4cf2-b763-fcd9f0f02735
@@ -774,7 +774,7 @@ Hence $\tilde{a}^\dagger$ is a zero of $F$ inside the ball of radius $r_0$ aroun
 
 # ╔═╡ 09922158-6ac9-410e-90ac-5240a9056086
 md"""
-## Conclusion
+### Conclusion
 """
 
 # ╔═╡ eef1afcd-4da9-4042-a7c9-0124070740f8
@@ -812,10 +812,10 @@ end
 
 # ╔═╡ e40d36d5-93a6-4b76-bccd-c629f621b22b
 Foldable("""Error bound""", md"""
-**Exercise**: Prove that the error between the solution $u^*(t)=\sum_{n\in \mathbb{Z}} a^*_n e^{int}$ and the approximation $\bar{u}(t)=\sum_{|n| \leq N} \bar{a}_n e^{int}$ is indeed controled by
+**Exercise**: Prove that the error between the solution $\tilde{u}(t)=\sum_{n\in \mathbb{Z}} \tilde{a}_n e^{int}$ and the approximation $\bar{u}(t)=\sum_{|n| \leq N} \bar{a}_n e^{int}$ is indeed controlled by
 
 $\begin{align}
-\max_{t \in [0,2\pi]} | u^*(t) - \bar{u}(t)| \leq r_0
+\max_{t \in [0,2\pi]} | \tilde{u}(t) - \bar{u}(t)| \leq r_0
 \end{align}$
 """)
 
@@ -826,7 +826,7 @@ md"""
 
 # ╔═╡ 9dc65809-74c2-4341-baa8-63900de08df4
 md"""
-In this worksheet we discussed the setup of a CAP for a periodic solution in a simplified problem, including explicit estimates and code. These arguments can be generalizd to the more general problem of a periodic orbit in a system of ODEs. As mentioned before, the main additional difficulties are the unknown period of the orbit, the phase condition, and the bookkeeping of the different components of the system. 
+In this worksheet we discussed the setup of a CAP for a periodic solution in a simplified problem, including explicit estimates and code. These arguments can be generalized to the more general problem of finding a periodic orbit in a system of ODEs. As mentioned before, the main additional difficulties are the unknown period of the orbit, the phase condition, and the bookkeeping of the different components of the system. 
 """
 
 # ╔═╡ 194e7df2-a234-45c7-8760-8c49a0d6e651
