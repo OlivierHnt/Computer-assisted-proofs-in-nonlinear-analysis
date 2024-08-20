@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.19.45
 
 #> [frontmatter]
 #> chapter = 3
@@ -214,9 +214,6 @@ function nunorm(B, nu)
 	return maximum((weights * abs.(B)) .* invweights)
 end
 
-# ╔═╡ 0f04a415-b4c1-4b05-a35a-6d3029decb12
-maximum([1.9414153246843213 1.9290258804863343 1.4084075531504734])
-
 # ╔═╡ 31a59e3d-32af-4328-b3bc-cc434728429d
 md"""
 ## Zero finding problem
@@ -227,7 +224,7 @@ md"""
 We define the zero finding problem $F(a)=0$ on $X$ by ($n \in \mathbb{Z}$)
 
 $\begin{align}
-F_n(a) := a_n + \lambda_n^{-1} (a*a)_n +c_n .
+F_n(a) := a_n + \lambda_n^{-1} [(a*a)_n +c_n].
 \end{align}$
 """
 
@@ -509,7 +506,7 @@ begin
     # Ia0 = a0
     # Ibeta = Fbeta
 	# IA = AN
-	# Inu = nu
+	# Inu = mid(nu)
 end
 
 # ╔═╡ 9433b6f1-3460-48c4-b587-9009823327c0
@@ -758,7 +755,7 @@ Hence the following lemma finishes our proof.
 # ╔═╡ 35df9eed-5f22-4e26-b119-ea7354d2c762
 Markdown.MD(Markdown.Admonition("tip", "Lemma (symmetry of the solution)",
 [md"""
-Assume that $\bar{a}^\dagger=\bar{a}$ and that the asummptions of the Newton-Kantorovich theorem were satisfied for some $r=r_0>0$. Then the zero $\tilde{a}$ of $F$ such that $\|\tilde{a}-\bar{a}\|_X \leq r_0$ satisfies $\tilde{a}^\dagger = \tilde{a}$.
+Assume that $\bar{a}^\dagger=\bar{a}$ and that the assumptions of the Newton-Kantorovich theorem were satisfied for some $r=r_0>0$. Then the zero $\tilde{a}$ of $F$ such that $\|\tilde{a}-\bar{a}\|_X \leq r_0$ satisfies $\tilde{a}^\dagger = \tilde{a}$.
 """]))
 
 # ╔═╡ bae570fe-8219-4cf2-b763-fcd9f0f02735
@@ -2239,7 +2236,6 @@ version = "1.4.1+1"
 # ╟─7e78028c-f70b-4474-8bee-783ad7d99d56
 # ╟─c7a10c87-a95d-4b0b-b63d-f9546e97bb36
 # ╠═efb766e3-e41f-4113-ae6e-c4dd7766c784
-# ╠═0f04a415-b4c1-4b05-a35a-6d3029decb12
 # ╟─31a59e3d-32af-4328-b3bc-cc434728429d
 # ╟─8d7fb15d-32d3-4fbb-9d06-c8ec1ed7d00e
 # ╟─b2defc79-da78-47c8-bb78-44cb9000ff58
