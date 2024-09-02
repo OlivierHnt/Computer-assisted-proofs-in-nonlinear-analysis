@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.19.43
 
 #> [frontmatter]
 #> chapter = 1
@@ -102,7 +102,7 @@ The specific form of $T$ may vary depending on the nature of the problem, but we
 # ╔═╡ 6eeb3554-a50c-4f3d-b676-95368021204c
 Markdown.MD(Markdown.Admonition("tip", "Theorem",
 [md"""
-Let $X$ be a Banach space, $\bar{x} \in X$, and $T : X \to X$ a continously differentiable map. Assume there exists a constant $Y$ and a non-decreasing map $Z : [0, \infty) \to [0, \infty)$ such that
+Let $X$ be a Banach space, $\bar{x} \in \mathcal{X}$, and $T : \mathcal{X} \to \mathcal{X}$ a continously differentiable map. Assume there exists a constant $Y$ and a non-decreasing map $Z : [0, \infty) \to [0, \infty)$ such that
 
 $\begin{align}
 \Vert T(\bar{x}) - \bar{x} \Vert &\leq Y, \\
@@ -123,7 +123,7 @@ then $T$ has a unique fixed point $\tilde{x}$ such that $\Vert \tilde{x} - \bar{
 Markdown.MD(Markdown.Admonition("note", "Remarks",
 [md"""
 - The bound $Z$ is actually only needed locally, i.e. we only need $Z(s)$ for $s \le r$. Therefore, one can fix a priori some $r_* > 0$, and weaken then assumption by only asking for $Z$ to be defined on $[0,r_*]$ and to satisfy $\Vert DT(x) \Vert \le Z(\Vert x-\bar{x} \Vert)$ for all $x$ in $X$ such that $\Vert x-\bar{x} \Vert \le r_*$. Of course, we are then only allowed to consider $r \in (0,r_*]$.
-- In practice, studying carefully how $\Vert DT(x) \Vert$ depends on $\Vert x-\bar{x} \Vert$ allows us to get better bounds. However, we can sometimes get away with crude estimates. That is, we derive a constant $Z_*$ such that $\Vert DT(x) \Vert \le Z_*$ for all $x \in X$ such that $\Vert x-\bar{x} \Vert \le r_*$, and then use $Z(s) = Z_*$ for all $s \le r_*$. The conditions on $r$ then simplify, and, if $Z_* < 1$, we can take any $r \ge \frac{Y}{1-Z_*}$.
+- In practice, studying carefully how $\Vert DT(x) \Vert$ depends on $\Vert x-\bar{x} \Vert$ allows us to get better bounds. However, we can sometimes get away with crude estimates. That is, we derive a constant $Z_*$ such that $\Vert DT(x) \Vert \le Z_*$ for all $x \in \mathcal{X}$ such that $\Vert x-\bar{x} \Vert \le r_*$, and then use $Z(s) = Z_*$ for all $s \le r_*$. The conditions on $r$ then simplify, and, if $Z_* < 1$, we can take any $r \ge \frac{Y}{1-Z_*}$.
 """]))
 
 # ╔═╡ accd6469-25c3-40d7-959b-5663d560437c
@@ -138,12 +138,12 @@ For finite dimensional problems of moderate size, computing the inverse of $DF(\
 # ╔═╡ 542de1ab-1b8b-49c8-8960-704c2351407a
 Markdown.MD(Markdown.Admonition("tip", "Corollary",
 [md"""
-Let $X$ and $Y$ be two Banach spaces, $\bar{x}\in X$, $F : X \to Y$ a continously differentiable map, $A : Y \to X$ an injective linear map, and $r_* > 0$. Assume there exist constants $Y$, $Z_1$ and a non-decreasing map $Z_2 : [0, r_*] \to [0, \infty)$ such that
+Let $\mathcal{X}$ and $\mathcal{Y}$ be two Banach spaces, $\bar{x}\in \mathcal{X}$, $F : \mathcal{X} \to \mathcal{Y}$ a continously differentiable map, $A : \mathcal{Y} \to \mathcal{X}$ an injective linear map, and $r_* > 0$. Assume there exist constants $Y$, $Z_1$ and  $Z_2$ such that
 
 $\begin{align}
 \Vert AF(\bar{x}) \Vert &\le Y, \\
 \Vert I-ADF(\bar{x}) \Vert &\le Z_1, \\
-\Vert A(DF(x)-DF(\bar{x})) \Vert &\leq Z_2(\Vert x-\bar{x}\Vert), \quad \forall x \in X \text{ such that } \Vert x-\bar{x}\Vert \le r_*.
+\Vert A(DF(x)-DF(\bar{x})) \Vert &\leq Z_2\Vert x-\bar{x}\Vert, \quad \forall x \in X \text{ such that } \Vert x-\bar{x}\Vert \le r_*.
 \end{align}$
 
 If there exists $r>0$ such that
@@ -251,7 +251,7 @@ RadiiPolynomial = "~0.8.12"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.2"
 manifest_format = "2.0"
 project_hash = "7925f9f6cada232762e2f631a25cadf231226208"
 
@@ -302,9 +302,9 @@ version = "1.3.5"
 
 [[deps.CodecZlib]]
 deps = ["TranscodingStreams", "Zlib_jll"]
-git-tree-sha1 = "bce6804e5e6044c6daab27bb533d1295e4a2e759"
+git-tree-sha1 = "b8fe8546d52ca154ac556809e10c75e6e7430ac8"
 uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
-version = "0.7.6"
+version = "0.7.5"
 
 [[deps.ColorSchemes]]
 deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "PrecompileTools", "Random"]
@@ -338,9 +338,9 @@ version = "0.12.11"
 
 [[deps.Compat]]
 deps = ["TOML", "UUIDs"]
-git-tree-sha1 = "8ae8d32e09f0dcf42a36b90d4e17f5dd2e4c4215"
+git-tree-sha1 = "b1c55339b7c6c350ee89f2c1604299660525b248"
 uuid = "34da2185-b29b-5c13-b0c7-acf172513d20"
-version = "4.16.0"
+version = "4.15.0"
 weakdeps = ["Dates", "LinearAlgebra"]
 
     [deps.Compat.extensions]
@@ -349,7 +349,7 @@ weakdeps = ["Dates", "LinearAlgebra"]
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.1+0"
+version = "1.1.0+0"
 
 [[deps.ConcurrentUtilities]]
 deps = ["Serialization", "Sockets"]
@@ -376,12 +376,6 @@ version = "0.18.20"
 [[deps.Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
-
-[[deps.Dbus_jll]]
-deps = ["Artifacts", "Expat_jll", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "fc173b380865f70627d7dd1190dc2fce6cc105af"
-uuid = "ee1fde0b-3d02-5ea6-8484-8dfef6360eab"
-version = "1.14.10+0"
 
 [[deps.DelimitedFiles]]
 deps = ["Mmap"]
@@ -467,22 +461,22 @@ uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.14+0"
 
 [[deps.GLFW_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll", "libdecor_jll", "xkbcommon_jll"]
-git-tree-sha1 = "532f9126ad901533af1d4f5c198867227a7bb077"
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll", "xkbcommon_jll"]
+git-tree-sha1 = "3f74912a156096bd8fdbef211eff66ab446e7297"
 uuid = "0656b61e-2033-5cc2-a64a-77c0f6c09b89"
-version = "3.4.0+1"
+version = "3.4.0+0"
 
 [[deps.GR]]
-deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Preferences", "Printf", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "p7zip_jll"]
-git-tree-sha1 = "3e527447a45901ea392fe12120783ad6ec222803"
+deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Preferences", "Printf", "Qt6Wayland_jll", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "p7zip_jll"]
+git-tree-sha1 = "629693584cef594c3f6f99e76e7a7ad17e60e8d5"
 uuid = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
-version = "0.73.6"
+version = "0.73.7"
 
 [[deps.GR_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Cairo_jll", "FFMPEG_jll", "Fontconfig_jll", "FreeType2_jll", "GLFW_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pixman_jll", "Qt6Base_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "182c478a179b267dd7a741b6f8f4c3e0803795d6"
+git-tree-sha1 = "a8863b69c2a0859f2c2c87ebdc4c6712e88bdf0d"
 uuid = "d2c73de3-f751-5644-a686-071e5b155ba9"
-version = "0.73.6+0"
+version = "0.73.7+0"
 
 [[deps.Gettext_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "XML2_jll"]
@@ -588,9 +582,9 @@ version = "3.0.3+0"
 
 [[deps.JuliaInterpreter]]
 deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "a6adc2dcfe4187c40dc7c2c9d2128e326360e90a"
+git-tree-sha1 = "5d3a5a206297af3868151bb4a2cf27ebce46f16d"
 uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.9.32"
+version = "0.9.33"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -606,9 +600,9 @@ version = "3.0.0+1"
 
 [[deps.LLVMOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "e16271d212accd09d52ee0ae98956b8a05c4b626"
+git-tree-sha1 = "d986ce2d884d49126836ea94ed5bfb0f12679713"
 uuid = "1d63c593-3942-5779-bab2-d838dc0a180e"
-version = "17.0.6+0"
+version = "15.0.7+0"
 
 [[deps.LZO_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -741,9 +735,9 @@ version = "1.0.3"
 
 [[deps.LoweredCodeUtils]]
 deps = ["JuliaInterpreter"]
-git-tree-sha1 = "eeaedcf337f33c039f9f3a209a8db992deefd7e9"
+git-tree-sha1 = "0b898aba6cb0b01fb96245fa5375accb651a241a"
 uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "2.4.8"
+version = "3.0.0"
 
 [[deps.MIMEs]]
 git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
@@ -842,12 +836,6 @@ version = "1.6.3"
 deps = ["Artifacts", "Libdl"]
 uuid = "efcefdf7-47ab-520b-bdef-62a2eaa19f15"
 version = "10.42.0+1"
-
-[[deps.Pango_jll]]
-deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "FriBidi_jll", "Glib_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "cb5a2ab6763464ae0f19c86c56c63d4a2b0f5bda"
-uuid = "36c8627f-9965-5494-a995-c6b170f724f3"
-version = "1.52.2+0"
 
 [[deps.Parsers]]
 deps = ["Dates", "PrecompileTools", "UUIDs"]
@@ -949,6 +937,24 @@ git-tree-sha1 = "492601870742dcd38f233b23c3ec629628c1d724"
 uuid = "c0090381-4147-56d7-9ebc-da0b1113ec56"
 version = "6.7.1+1"
 
+[[deps.Qt6Declarative_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Qt6Base_jll", "Qt6ShaderTools_jll"]
+git-tree-sha1 = "e5dd466bf2569fe08c91a2cc29c1003f4797ac3b"
+uuid = "629bc702-f1f5-5709-abd5-49b8460ea067"
+version = "6.7.1+2"
+
+[[deps.Qt6ShaderTools_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Qt6Base_jll"]
+git-tree-sha1 = "1a180aeced866700d4bebc3120ea1451201f16bc"
+uuid = "ce943373-25bb-56aa-8eca-768745ed7b5a"
+version = "6.7.1+1"
+
+[[deps.Qt6Wayland_jll]]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Qt6Base_jll", "Qt6Declarative_jll"]
+git-tree-sha1 = "729927532d48cf79f49070341e1d918a65aba6b0"
+uuid = "e99dba38-086e-5de3-a5b1-6e4c66e897c3"
+version = "6.7.1+1"
+
 [[deps.REPL]]
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
@@ -994,9 +1000,9 @@ version = "1.3.0"
 
 [[deps.Revise]]
 deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "Pkg", "REPL", "Requires", "UUIDs", "Unicode"]
-git-tree-sha1 = "85ddd93ea15dcd8493400600e09104a9e94bb18d"
+git-tree-sha1 = "677b65e17aeb6b4a0be1982e281ec03b0f55155c"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.5.15"
+version = "3.5.16"
 
 [[deps.RoundingEmulator]]
 git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
@@ -1084,14 +1090,18 @@ deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[deps.TranscodingStreams]]
-git-tree-sha1 = "e84b3a11b9bece70d14cce63406bbc79ed3464d2"
+git-tree-sha1 = "96612ac5365777520c3c5396314c8cf7408f436a"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
-version = "0.11.2"
+version = "0.11.1"
+weakdeps = ["Random", "Test"]
+
+    [deps.TranscodingStreams.extensions]
+    TestExt = ["Test", "Random"]
 
 [[deps.Tricks]]
-git-tree-sha1 = "eae1bb484cd63b36999ee58be2de6c178105112f"
+git-tree-sha1 = "7822b97e99a1672bfb1b49b668a6d46d58d8cbcb"
 uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
-version = "0.1.8"
+version = "0.1.9"
 
 [[deps.URIs]]
 git-tree-sha1 = "67db6cc7b3821e19ebe75791a9dd19c9b1188f2b"
@@ -1361,12 +1371,6 @@ version = "0.15.1+0"
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
 version = "5.8.0+1"
-
-[[deps.libdecor_jll]]
-deps = ["Artifacts", "Dbus_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pango_jll", "Wayland_jll", "xkbcommon_jll"]
-git-tree-sha1 = "9bf7903af251d2050b467f76bdbe57ce541f7f4f"
-uuid = "1183f4f0-6f2a-5f1a-908b-139f9cdfea6f"
-version = "0.2.2+0"
 
 [[deps.libevdev_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.19.43
 
 #> [frontmatter]
 #> homework_number = 2
@@ -80,7 +80,7 @@ md"""
 
 # ╔═╡ 8b9a0f39-21f0-4288-bb2b-a594d6712292
 md"""
-**3.** Using the $1$-norm on $\mathbb{R}^3$, show that the constant function $Z_2(r) = 2\mu \left\Vert A \right\Vert_1$ satisfies the assumption of the Newton-Kantorovich theorem.
+**3.** Using the $1$-norm on $\mathbb{R}^3$, show that the constant $Z_2 = 2\mu \left\Vert A \right\Vert_1$ satisfies the assumption of the Newton-Kantorovich theorem.
 """
 
 # ╔═╡ 3d27e2d3-e5e8-4e95-9294-23e416608b6a
@@ -98,7 +98,7 @@ md"""
 # Z₁ = ...
 
 # ╔═╡ a4b2181e-d7dd-4c49-8c45-d6864cf878c6
-r_star = Inf # since Z₂ is constant
+r_star = Inf # since DF is linear
 
 # ╔═╡ 2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
 # Z₂ = ...
@@ -121,7 +121,7 @@ RadiiPolynomial = "~0.8.12"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.2"
 manifest_format = "2.0"
 project_hash = "6b5a1c65b08c1cb67df2036186b2c2a085cfc3db"
 
@@ -162,7 +162,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.1+0"
+version = "1.1.0+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
