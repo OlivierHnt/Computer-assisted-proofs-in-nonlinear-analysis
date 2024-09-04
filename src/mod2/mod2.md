@@ -6,4 +6,4 @@ layout: "md.jlmd"
 tags: ["module2"]
 ---
 
-## Jay's section
+##

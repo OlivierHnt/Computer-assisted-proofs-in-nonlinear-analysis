@@ -6,4 +6,4 @@ layout: "md.jlmd"
 tags: ["module4"]
 ---
 
-## Jean-Philippe's section
+##
