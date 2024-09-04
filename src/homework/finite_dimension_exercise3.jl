@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.19.43
 
 #> [frontmatter]
 #> homework_number = 3
@@ -29,7 +29,7 @@ main {
 
 # ╔═╡ c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
 md"""
-**1.** Consider a matrix $M$, and an approximate eigenpair $(\bar{\lambda},\bar{u})$ of $M$. Assuming the corresponding exact eigenvalue $\lambda$ is simple, define a suitable $F=0$ problem, and derive the bounds needed to apply the Newton-Kantorovich theorem in that context.
+**1.** Consider a matrix $M$, and an approximate eigenpair $(\bar{\lambda},\bar{u})$ of $M$. The goal of this exercise is to *capify* $(\bar{\lambda},\bar{u})$, i.e., to prove that there exists an exact eigenpair $(\lambda,u)$ nearby. Assuming the corresponding exact eigenvalue $\lambda$ is simple, define a suitable $F=0$ problem, and derive the bounds needed to apply the Newton-Kantorovich theorem in that context.
 """
 
 # ╔═╡ 7748e568-afc9-43cc-b2bd-5a231d86f455
@@ -106,7 +106,7 @@ RadiiPolynomial = "~0.8.12"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.2"
 manifest_format = "2.0"
 project_hash = "49d29ae341b6f6390131461e857efcdfb8528a3c"
 
@@ -147,7 +147,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.1+0"
+version = "1.1.0+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
