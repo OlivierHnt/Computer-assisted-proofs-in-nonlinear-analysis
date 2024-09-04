@@ -64,8 +64,11 @@ function DF(x, μ)
 		 -1              0              μ * (1 - 2x₂)])
 end
 
+# ╔═╡ 2b4ebcc2-e58c-49d3-a298-cecfd666b6ea
+μ = 3.9
+
 # ╔═╡ 698891fa-5637-40de-8756-f507551c25d4
-# initial_data = ...
+# initial_data = Sequence(rand(Float64, (3)))
 
 # ╔═╡ 5ee47406-c6cc-40d8-adb9-c37146f9db01
 # x̄, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
@@ -76,7 +79,7 @@ md"""
 """
 
 # ╔═╡ fdd9fd8b-a3df-455d-bfe8-321723f5c566
-# A = ...
+# A = ... (you can call the inv function to invert a linear operator)
 
 # ╔═╡ 8b9a0f39-21f0-4288-bb2b-a594d6712292
 md"""
@@ -519,6 +522,7 @@ version = "17.4.0+2"
 # ╟─f283c615-fcde-4752-8d02-fafaa0e73b7d
 # ╠═3b098d28-5fc8-4463-a59b-08bca638d5be
 # ╠═dda38796-c299-4d38-b479-fde4c1496941
+# ╠═2b4ebcc2-e58c-49d3-a298-cecfd666b6ea
 # ╠═698891fa-5637-40de-8756-f507551c25d4
 # ╠═5ee47406-c6cc-40d8-adb9-c37146f9db01
 # ╟─7b944744-628c-4ac9-8528-6dc19789ddb0
