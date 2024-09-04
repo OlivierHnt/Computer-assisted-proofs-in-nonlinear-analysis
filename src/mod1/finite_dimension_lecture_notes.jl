@@ -102,11 +102,11 @@ The specific form of $T$ may vary depending on the nature of the problem, but we
 # ╔═╡ 6eeb3554-a50c-4f3d-b676-95368021204c
 Markdown.MD(Markdown.Admonition("tip", "Theorem",
 [md"""
-Let $X$ be a Banach space, $\bar{x} \in \mathcal{X}$, and $T : \mathcal{X} \to \mathcal{X}$ a continously differentiable map. Assume there exists a constant $Y$ and a non-decreasing map $Z : [0, \infty) \to [0, \infty)$ such that
+Let $\mathcal{X}$ be a Banach space, $\bar{x} \in \mathcal{X}$, and $T : \mathcal{X} \to \mathcal{X}$ a continuously differentiable map. Assume there exists a constant $Y$ and a non-decreasing map $Z : [0, \infty) \to [0, \infty)$ such that
 
 $\begin{align}
 \Vert T(\bar{x}) - \bar{x} \Vert &\leq Y, \\
-\Vert DT(x) \Vert &\leq Z(\Vert x-\bar{x}\Vert), \quad \forall x \in X.
+\Vert DT(x) \Vert &\leq Z(\Vert x-\bar{x}\Vert), \quad \forall x \in \mathcal{X}.
 \end{align}$
 
 If there exists $r>0$ such that
@@ -116,7 +116,7 @@ Y + \int_0^r Z(s) \mathrm{d}s &\leq r, \\
 Z(r) &< 1,
 \end{align}$
 
-then $T$ has a unique fixed point $\tilde{x}$ such that $\Vert \tilde{x} - \bar{x} \Vert \le r$.
+then $T$ has a unique fixed point $x^*$ such that $\Vert x^* - \bar{x} \Vert \le r$.
 """]))
 
 # ╔═╡ 94e323ed-5e13-413b-8bcb-1909dd6e14a5
@@ -138,22 +138,22 @@ For finite dimensional problems of moderate size, computing the inverse of $DF(\
 # ╔═╡ 542de1ab-1b8b-49c8-8960-704c2351407a
 Markdown.MD(Markdown.Admonition("tip", "Corollary",
 [md"""
-Let $\mathcal{X}$ and $\mathcal{Y}$ be two Banach spaces, $\bar{x}\in \mathcal{X}$, $F : \mathcal{X} \to \mathcal{Y}$ a continously differentiable map, $A : \mathcal{Y} \to \mathcal{X}$ an injective linear map, and $r_* > 0$. Assume there exist constants $Y$, $Z_1$ and  $Z_2$ such that
+Let $\mathcal{X}$ and $\mathcal{Y}$ be two Banach spaces, $\bar{x}\in \mathcal{X}$, $F : \mathcal{X} \to \mathcal{Y}$ a continuously differentiable map, $A : \mathcal{Y} \to \mathcal{X}$ an injective linear map, and $r_* > 0$. Assume there exist constants $Y$, $Z_1$ and  $Z_2$ such that
 
 $\begin{align}
 \Vert AF(\bar{x}) \Vert &\le Y, \\
 \Vert I-ADF(\bar{x}) \Vert &\le Z_1, \\
-\Vert A(DF(x)-DF(\bar{x})) \Vert &\leq Z_2\Vert x-\bar{x}\Vert, \quad \forall x \in X \text{ such that } \Vert x-\bar{x}\Vert \le r_*.
+\Vert A(DF(x)-DF(\bar{x})) \Vert &\leq Z_2\Vert x-\bar{x}\Vert, \quad \forall x \in \mathcal{X} \text{ such that } \Vert x-\bar{x}\Vert \le r_*.
 \end{align}$
 
-If there exists $r>0$ such that
+If there exists $r\in(0,r_*]$ such that
 
 $\begin{align}
 Y + Z_1 r + \frac{1}{2} Z_2 r^2 &\le r, \\
 Z_1 + Z_2 r &< 1,
 \end{align}$
 
-then $F$ has a unique zero $\tilde{x}$ such that $\Vert \tilde{x} - \bar{x} \Vert \le r$.
+then $F$ has a unique zero $x^*$ such that $\Vert x^* - \bar{x} \Vert \le r$.
 """]))
 
 # ╔═╡ 23923d27-9905-4f26-8ef5-53f183d290da
@@ -377,6 +377,12 @@ version = "0.18.20"
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 
+[[deps.Dbus_jll]]
+deps = ["Artifacts", "Expat_jll", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "fc173b380865f70627d7dd1190dc2fce6cc105af"
+uuid = "ee1fde0b-3d02-5ea6-8484-8dfef6360eab"
+version = "1.14.10+0"
+
 [[deps.DelimitedFiles]]
 deps = ["Mmap"]
 git-tree-sha1 = "9e2f36d3c96a820c678f2f1f1782582fcf685bae"
@@ -461,7 +467,7 @@ uuid = "559328eb-81f9-559d-9380-de523a88c83c"
 version = "1.0.14+0"
 
 [[deps.GLFW_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll", "xkbcommon_jll"]
+deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll", "libdecor_jll", "xkbcommon_jll"]
 git-tree-sha1 = "3f74912a156096bd8fdbef211eff66ab446e7297"
 uuid = "0656b61e-2033-5cc2-a64a-77c0f6c09b89"
 version = "3.4.0+0"
@@ -836,6 +842,12 @@ version = "1.6.3"
 deps = ["Artifacts", "Libdl"]
 uuid = "efcefdf7-47ab-520b-bdef-62a2eaa19f15"
 version = "10.42.0+1"
+
+[[deps.Pango_jll]]
+deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "FriBidi_jll", "Glib_jll", "HarfBuzz_jll", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "9dd97171646850ee607593965ce1f55063d8d3f9"
+uuid = "36c8627f-9965-5494-a995-c6b170f724f3"
+version = "1.54.0+0"
 
 [[deps.Parsers]]
 deps = ["Dates", "PrecompileTools", "UUIDs"]
@@ -1371,6 +1383,12 @@ version = "0.15.1+0"
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
 version = "5.8.0+1"
+
+[[deps.libdecor_jll]]
+deps = ["Artifacts", "Dbus_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pango_jll", "Wayland_jll", "xkbcommon_jll"]
+git-tree-sha1 = "9bf7903af251d2050b467f76bdbe57ce541f7f4f"
+uuid = "1183f4f0-6f2a-5f1a-908b-139f9cdfea6f"
+version = "0.2.2+0"
 
 [[deps.libevdev_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
