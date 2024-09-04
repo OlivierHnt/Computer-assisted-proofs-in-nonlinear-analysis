@@ -87,7 +87,7 @@ md"""
 """
 
 # ╔═╡ 3d27e2d3-e5e8-4e95-9294-23e416608b6a
-Foldable("Hint",	md"You may first compute $D^2F(\bar{x})(u,v)$ and show that $\Vert D^2F(\bar{x})(u,v) \Vert_1 \leq 2\mu  \Vert u\Vert_1 \Vert v\Vert_1$.")
+Foldable("Hint",	md"For this example, one can easily compute $\Vert DF(x) - DF(\bar{x}) \Vert_1$.")
 
 # ╔═╡ 03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
 md"""
