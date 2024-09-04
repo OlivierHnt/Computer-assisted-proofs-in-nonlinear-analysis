@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.19.43
 
 #> [frontmatter]
 #> homework_number = 5
@@ -29,23 +29,21 @@ main {
 
 # ╔═╡ 45e10c91-f161-43a5-9c9e-5b4dca6a8e53
 md"""
-Exercise 3 can be used to enclose eigenvalues of a given matrix one by one. We now present an alternate strategy to enclose the entire spectrum at once (but not the corresponding eigenvectors), which can sometimes also be adapted in infinite dimension.
+Exercise 3 can be used to enclose eigenvalues of a given matrix one by one. We now present an alternate strategy to enclose the entire spectrum at once (but not the corresponding eigenvectors), which can sometimes also be adapted in infinite dimension. This strategy relies on the Gershgorin circle theorem, which we recall below.
 """
 
-# ╔═╡ b0590931-8d44-47b9-9153-00da2a418b00
-md"""
-We recall the Gershgorin circle theorem: for any matrix $A=\left(A_{i,j}\right)_{1\leq i,j\leq d}$,
+# ╔═╡ 916f5d37-2bde-4a35-923a-2ff9e606371d
+Markdown.MD(Markdown.Admonition("tip", "Theorem", [md"For any matrix $A=\left(A_{i,j}\right)_{1\leq i,j\leq d}$, its spectrum $\sigma(A)$ is controlled as follows.
 
 $\begin{align}
 \sigma(A) \subset \bigcup_{i=1}^d D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right),
 \end{align}$
 
-where $D(z,r)$ denotes the closed disk of center $z$ in radius $r$ in the complex plane. Moreover, if $I \subset \{1,\ldots,d\}$ is such that $\bigcup_{i \in I} D\left(A_{i,i},\, \sum_{j \ne i} \vert A_{i,j} \vert\right)$ is disjoint from $\bigcup_{i \notin I} D\left(A_{i,i},\, \sum_{j \ne i} \vert A_{i,j} \vert\right)$, then $\bigcup_{i \in I} D\left(A_{i,i},\, \sum_{j \ne i} \vert A_{i,j} \vert\right)$ contains exactly $\vert I \vert$ eigenvalues.
-"""
+where $D(z,r)$ denotes the closed disk of center $z$ and radius $r$ in the complex plane. Moreover, if $I \subset \{1,\ldots,d\}$ is such that $\bigcup_{i \in I} D\left(A_{i,i},\, \sum_{j \ne i} \vert A_{i,j} \vert\right)$ is disjoint from $\bigcup_{i \notin I} D\left(A_{i,i},\, \sum_{j \ne i} \vert A_{i,j} \vert\right)$, then $\bigcup_{i \in I} D\left(A_{i,i},\, \sum_{j \ne i} \vert A_{i,j} \vert\right)$ contains exactly $\vert I \vert$ eigenvalues."]))
 
 # ╔═╡ d01c5817-c4b6-4502-81f6-51ae5715117b
 md"""
-**1.** Using the [Gershgorin circle theorem](https://en.wikipedia.org/wiki/Gershgorin_circle_theorem), get as tight as possible rigorous enclosures of all eigenvalues of $W_{3}$ (defined in Exercise 3).
+**1.** Using the Gershgorin circle theorem, get as tight as possible rigorous enclosures of all eigenvalues of $W_{3}$ (defined in Exercise 3).
 """
 
 # ╔═╡ 02939955-c9aa-4152-8e08-f31e1e0c0e9c
@@ -76,7 +74,7 @@ RadiiPolynomial = "~0.8.12"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.2"
 manifest_format = "2.0"
 project_hash = "6b5a1c65b08c1cb67df2036186b2c2a085cfc3db"
 
@@ -117,7 +115,7 @@ version = "0.11.5"
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.1+0"
+version = "1.1.0+0"
 
 [[deps.Dates]]
 deps = ["Printf"]
@@ -471,7 +469,7 @@ version = "17.4.0+2"
 # ╠═9099f41e-6239-4f7f-a3ec-82e7d4787f8f
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╟─45e10c91-f161-43a5-9c9e-5b4dca6a8e53
-# ╟─b0590931-8d44-47b9-9153-00da2a418b00
+# ╟─916f5d37-2bde-4a35-923a-2ff9e606371d
 # ╟─d01c5817-c4b6-4502-81f6-51ae5715117b
 # ╟─02939955-c9aa-4152-8e08-f31e1e0c0e9c
 # ╟─bc052916-db0e-43a2-bbb0-76b917d6f638
