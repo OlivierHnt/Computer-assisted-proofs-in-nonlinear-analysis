@@ -3,8 +3,8 @@
 
 #> [frontmatter]
 #> homework_number = 2
-#> order = 1.5
-#> title = "Back to period 3 implies chaos"
+#> order = 2.5
+#> title = "Back to period 3 implies chaos - correction"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
 
