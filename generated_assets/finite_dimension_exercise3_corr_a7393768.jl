@@ -2,20 +2,20 @@
 # v0.19.43
 
 #> [frontmatter]
-#> homework_number = 2
-#> order = 1.5
-#> title = "Back to period 3 implies chaos"
+#> homework_number = 3
+#> order = 3.5
+#> title = "Rigorous computation of an eigenpair - correction"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 755f440a-f42d-4de2-9cd2-826ea2114ab7
+# ╔═╡ 70740a99-ec98-45c8-ba8f-06d63dd396b0
 using PlutoTeachingTools
 
 # ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial
+using RadiiPolynomial, LinearAlgebra
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""<style>
@@ -27,91 +27,118 @@ main {
 }
 """
 
-# ╔═╡ aff38e1d-416c-472b-81ea-820d7430dded
+# ╔═╡ c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
 md"""
-To study period 3 orbits of the dynamical system $x_{n+1} = \mu x_n (1-x_n)$, we consider the map
+**1.** Consider a matrix $M$, and an approximate eigenpair $(\bar{\lambda},\bar{u})$ of $M$. The goal of this exercise is to *capify* $(\bar{\lambda},\bar{u})$, i.e., to prove that there exists an exact eigenpair $(\lambda,u)$ nearby. Assuming the corresponding exact eigenvalue $\lambda$ is simple, define a suitable $F=0$ problem, and derive the bounds needed to apply the Newton-Kantorovich theorem in that context.
+"""
+
+# ╔═╡ 7748e568-afc9-43cc-b2bd-5a231d86f455
+Foldable("Hint",
+md"The *natural* zero finding problem is $G(\lambda,u) = (M-\lambda I)u$, but it has one too many unknowns. This is consistent with the fact that zeros of $G$ are not isolated (one can always rescale the eigenvector). Therefore, a suitable zero finding problem needs to incorporate a normalization condition, for instance:
 
 $\begin{align}
-F : \ \left\{
-\begin{aligned}
-\mathbb{R}^3 &\to \mathbb{R}^3, \\
-\begin{pmatrix} x_0 \\ x_1 \\ x_2 \end{pmatrix}  &\mapsto
-\begin{pmatrix} \mu x_0(1-x_0) - x_1 \\ \mu x_1(1-x_1) - x_2 \\ \mu x_2(1-x_2) - x_0 \end{pmatrix}.
-\end{aligned} \right.
+F(\lambda,u) =
+\begin{pmatrix}
+\langle u,\bar{u} \rangle -1 \\
+(M-\lambda I)u
+\end{pmatrix}.
 \end{align}$
-"""
+"
+)
 
-# ╔═╡ f283c615-fcde-4752-8d02-fafaa0e73b7d
-md"""
-**1.** Using the implementation of $F$ and $DF$ provided in the following cells, and the function `newton` from the RadiiPolynomial library, find an approximate period 3 orbit $\bar{x}$ for $\mu = 3.9$.
-"""
-
-# ╔═╡ 3b098d28-5fc8-4463-a59b-08bca638d5be
-function F(x, μ)
-	x₀, x₁, x₂ = x
+# ╔═╡ 8e04cef7-d8ae-4284-98cc-61318e13e326
+function F(X, M, ū)
+	λ = X[1]
+	u = X[2:end]
 	return Sequence(
-		[μ * x₀ * (1 - x₀) - x₁,
-		 μ * x₁ * (1 - x₁) - x₂,
-		 μ * x₂ * (1 - x₂) - x₀])
+		[sum(u.*conj(ū)) - 1;
+		 M*u-λ*u])
 end
 
-# ╔═╡ dda38796-c299-4d38-b479-fde4c1496941
-function DF(x, μ)
-	x₀, x₁, x₂ = x
-	return LinearOperator(
-		[ μ * (1 - 2x₀) -1              0
-		  0              μ * (1 - 2x₁) -1
-		 -1              0              μ * (1 - 2x₂)])
+# ╔═╡ c26c7bf0-38d6-4990-879d-c6ca8bb29e20
+function DF(X, M, ū)
+	λ = X[1]
+	u = X[2:end]
+	n = length(X) - 1
+	temp = zeros(eltype(X), n+1, n+1)
+	temp[2:end,1] = -u
+	temp[1,2:end] = ū'
+	temp[2:end,2:end] = M - λ*I
+	return LinearOperator(temp)
 end
 
-# ╔═╡ 2b4ebcc2-e58c-49d3-a298-cecfd666b6ea
-μ = 3.9
+# ╔═╡ 6052a4ee-333e-45f6-a7f4-9756f4357377
+function validate_eigenpair(λ, u, M)
+	X = [λ ; u]
+	ū = u
+	iA = interval.(inv(DF(X, M, ū)))
+	iX = interval.(X)
+	Y = norm(iA * F(iX, M, ū), 1)
+	Z₁ = opnorm(I - iA * DF(iX, M, ū), 1)
+	Z₂ = opnorm(iA, 1)
+	return interval_of_existence(Y, Z₁, Z₂, Inf)
+end
 
-# ╔═╡ 698891fa-5637-40de-8756-f507551c25d4
-# initial_data = Sequence(rand(Float64, (3)))
-
-# ╔═╡ 5ee47406-c6cc-40d8-adb9-c37146f9db01
-# x̄, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
-
-# ╔═╡ 7b944744-628c-4ac9-8528-6dc19789ddb0
+# ╔═╡ cab728f1-9ff5-4bdd-8101-5c39718c4d53
 md"""
-**2.** Define a suitable $A$ to be used later in the Newton-Kantorovich argument.
+**2.** For any positive integer $N$, the Wilkinson matrix $W_{N}$ is the following $(2N+1)\times(2N+1)$ tridiagonal matrix:
+
+$\begin{align}
+W_{N} =
+\begin{pmatrix}
+N & 1 & & & & & \\
+1 & N-1 & 1 & & & & \\
+ & 1 & \ddots & \ddots & & & \\
+ & & \ddots & 0 & \ddots & & \\
+ & & & \ddots & \ddots & 1 & \\
+ & & & & 1 & N-1 & 1 \\
+ & & & & & 1 & N
+\end{pmatrix}
+\end{align}$
+
+We provide below approximate eigenvalues and eigenvectors of $W_3$. Rigorously enclose all eigenpairs of $W_3$.
 """
 
-# ╔═╡ fdd9fd8b-a3df-455d-bfe8-321723f5c566
-# A = ... (you can call the inv function to invert a linear operator)
+# ╔═╡ d61514c3-3b0e-4658-8b31-de9f9514a9c3
+function W(N)
+	M = zeros(2N+1, 2N+1)
+	for i = 1:2N+1
+		M[i,i] = abs(N - i + 1)
+		if i+1 ≤ 2N+1
+			M[i,i+1] = 1
+		end
+		if i-1 ≥ 1
+			M[i,i-1] = 1
+		end
+	end
+	return M
+end
 
-# ╔═╡ 8b9a0f39-21f0-4288-bb2b-a594d6712292
-md"""
-**3.** Using the $1$-norm on $\mathbb{R}^3$, show that the constant $Z_2 = 2\mu \left\Vert A \right\Vert_1$ satisfies the assumption of the Newton-Kantorovich theorem.
-"""
+# ╔═╡ 1bba510b-be86-44b0-a3c9-419b3b6ada37
+N = 10
 
-# ╔═╡ 3d27e2d3-e5e8-4e95-9294-23e416608b6a
-Foldable("Hint",	md"For this example, one can easily compute $\Vert DF(x) - DF(\bar{x}) \Vert_1$.")
+# ╔═╡ fe0054f0-4fd5-489f-9fcb-3af086876699
+W(N)
 
-# ╔═╡ 03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
-md"""
-**4.** Implement and evaluate suitable bounds $Y$, $Z_1$ and $Z_2$, and use the function `interval_of_existence` from RadiiPolynomial in order to prove the existence of a period 3 orbit for $\mu = 3.9$.
-"""
+# ╔═╡ 3509fe96-4a83-461f-8fed-23343d74dc8c
+eigenvalues, eigenvectors = eigen(W(N))
 
-# ╔═╡ 4c78f87b-7191-47f4-8bd7-cd9d13c5b4c6
-# Y = ...
-
-# ╔═╡ 4ac782db-4d32-4bf8-bddf-cc8f8b5e6217
-# Z₁ = ...
-
-# ╔═╡ a4b2181e-d7dd-4c49-8c45-d6864cf878c6
-r_star = Inf # since DF is linear
-
-# ╔═╡ 2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
-# Z₂ = ...
-
-# ╔═╡ 5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
-# interval_of_existence(Y, Z₁, Z₂, r_star)
+# ╔═╡ 0efa6e4e-cd15-496e-b51a-9fefd8cf42d1
+begin
+	M = W(N)
+	radii = zeros(Interval{Float64}, 2*N+1)
+	for n = 1:2*N+1
+		λ = eigenvalues[n]
+		u = eigenvectors[:,n]
+		radii[n] = validate_eigenpair(λ, u, M)
+		println("λ̄ = ", λ, ", validation radius: ", inf(radii[n]))
+	end
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
 RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
@@ -126,7 +153,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.2"
 manifest_format = "2.0"
-project_hash = "6b5a1c65b08c1cb67df2036186b2c2a085cfc3db"
+project_hash = "49d29ae341b6f6390131461e857efcdfb8528a3c"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -152,9 +179,9 @@ version = "1.0.1+0"
 
 [[deps.CodeTracking]]
 deps = ["InteractiveUtils", "UUIDs"]
-git-tree-sha1 = "7eee164f122511d3e4e1ebadb7956939ea7e1c77"
+git-tree-sha1 = "c0216e792f518b39b22212127d4a84dc31e4e386"
 uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
-version = "1.3.6"
+version = "1.3.5"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
@@ -246,9 +273,9 @@ version = "0.21.4"
 
 [[deps.JuliaInterpreter]]
 deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "7ae67d8567853d367e3463719356b8989e236069"
+git-tree-sha1 = "5d3a5a206297af3868151bb4a2cf27ebce46f16d"
 uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.9.34"
+version = "0.9.33"
 
 [[deps.LaTeXStrings]]
 git-tree-sha1 = "50901ebc375ed41dbf8058da26f9de442febbbec"
@@ -305,9 +332,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.LoweredCodeUtils]]
 deps = ["JuliaInterpreter"]
-git-tree-sha1 = "1ce1834f9644a8f7c011eb0592b7fd6c42c90653"
+git-tree-sha1 = "0b898aba6cb0b01fb96245fa5375accb651a241a"
 uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "3.0.1"
+version = "3.0.0"
 
 [[deps.MIMEs]]
 git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
@@ -427,10 +454,10 @@ uuid = "ae029012-a4dd-5104-9daa-d747884805df"
 version = "1.3.0"
 
 [[deps.Revise]]
-deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "REPL", "Requires", "UUIDs", "Unicode"]
-git-tree-sha1 = "7b7850bb94f75762d567834d7e9802fc22d62f9c"
+deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "Pkg", "REPL", "Requires", "UUIDs", "Unicode"]
+git-tree-sha1 = "677b65e17aeb6b4a0be1982e281ec03b0f55155c"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.5.18"
+version = "3.5.16"
 
 [[deps.RoundingEmulator]]
 git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
@@ -477,9 +504,9 @@ deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[deps.Tricks]]
-git-tree-sha1 = "7822b97e99a1672bfb1b49b668a6d46d58d8cbcb"
+git-tree-sha1 = "eae1bb484cd63b36999ee58be2de6c178105112f"
 uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
-version = "0.1.9"
+version = "0.1.8"
 
 [[deps.URIs]]
 git-tree-sha1 = "67db6cc7b3821e19ebe75791a9dd19c9b1188f2b"
@@ -516,24 +543,18 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╠═755f440a-f42d-4de2-9cd2-826ea2114ab7
+# ╟─70740a99-ec98-45c8-ba8f-06d63dd396b0
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
-# ╟─aff38e1d-416c-472b-81ea-820d7430dded
-# ╟─f283c615-fcde-4752-8d02-fafaa0e73b7d
-# ╠═3b098d28-5fc8-4463-a59b-08bca638d5be
-# ╠═dda38796-c299-4d38-b479-fde4c1496941
-# ╠═2b4ebcc2-e58c-49d3-a298-cecfd666b6ea
-# ╠═698891fa-5637-40de-8756-f507551c25d4
-# ╠═5ee47406-c6cc-40d8-adb9-c37146f9db01
-# ╟─7b944744-628c-4ac9-8528-6dc19789ddb0
-# ╠═fdd9fd8b-a3df-455d-bfe8-321723f5c566
-# ╟─8b9a0f39-21f0-4288-bb2b-a594d6712292
-# ╟─3d27e2d3-e5e8-4e95-9294-23e416608b6a
-# ╟─03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
-# ╠═4c78f87b-7191-47f4-8bd7-cd9d13c5b4c6
-# ╠═4ac782db-4d32-4bf8-bddf-cc8f8b5e6217
-# ╠═a4b2181e-d7dd-4c49-8c45-d6864cf878c6
-# ╠═2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
-# ╠═5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
+# ╟─c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
+# ╟─7748e568-afc9-43cc-b2bd-5a231d86f455
+# ╠═8e04cef7-d8ae-4284-98cc-61318e13e326
+# ╠═c26c7bf0-38d6-4990-879d-c6ca8bb29e20
+# ╠═6052a4ee-333e-45f6-a7f4-9756f4357377
+# ╟─cab728f1-9ff5-4bdd-8101-5c39718c4d53
+# ╠═d61514c3-3b0e-4658-8b31-de9f9514a9c3
+# ╠═1bba510b-be86-44b0-a3c9-419b3b6ada37
+# ╠═fe0054f0-4fd5-489f-9fcb-3af086876699
+# ╠═3509fe96-4a83-461f-8fed-23343d74dc8c
+# ╠═0efa6e4e-cd15-496e-b51a-9fefd8cf42d1
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -3,7 +3,7 @@
 
 #> [frontmatter]
 #> homework_number = 1
-#> order = 1.5
+#> order = 1
 #> title = "Operator norms"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
