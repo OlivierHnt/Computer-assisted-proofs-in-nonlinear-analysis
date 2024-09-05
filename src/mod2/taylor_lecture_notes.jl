@@ -258,7 +258,7 @@ function Z1Bound(a, A, N)
 	for n = 1:N
 		sum = sum + abs(a[n+1])
 	end
-	return interval(1) + sum/a[1] + maximum(interval(ones(1, N+1)) * abs.(I - A * DF(a, N)))
+	return sum/a[1] + maximum(interval(ones(1, N+1)) * abs.(I - A * DF(a, N)))
 end
 
 # ╔═╡ e782bccc-71fe-4170-9ac1-0027bbf1ad8a
