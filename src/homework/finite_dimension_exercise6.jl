@@ -3,7 +3,7 @@
 
 #> [frontmatter]
 #> homework_number = 6
-#> order = 1.5
+#> order = 6
 #> title = "Toward rigorous continuation"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
