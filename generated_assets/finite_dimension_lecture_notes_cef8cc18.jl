@@ -3,7 +3,7 @@
 
 #> [frontmatter]
 #> chapter = 1
-#> order = 1
+#> order = 0.5
 #> title = "Lecture notes: Finite-dimensional problems"
 #> tags = ["module1"]
 #> layout = "layout.jlhtml"
