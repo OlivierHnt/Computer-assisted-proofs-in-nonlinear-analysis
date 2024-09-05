@@ -3,7 +3,7 @@
 
 #> [frontmatter]
 #> homework_number = 4
-#> order = 1.5
+#> order = 4
 #> title = "Rigorous inverse of a matrix"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
