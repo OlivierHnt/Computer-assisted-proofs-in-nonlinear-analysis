@@ -115,7 +115,7 @@ function W(N)
 end
 
 # ╔═╡ 1bba510b-be86-44b0-a3c9-419b3b6ada37
-N = 10
+N = 3
 
 # ╔═╡ fe0054f0-4fd5-489f-9fcb-3af086876699
 W(N)
