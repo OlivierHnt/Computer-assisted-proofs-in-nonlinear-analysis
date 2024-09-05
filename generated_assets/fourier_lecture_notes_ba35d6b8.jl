@@ -505,7 +505,7 @@ begin
 	# for testing without intervals:
     # Ia0 = a0
     # Ibeta = Fbeta
-	# IA = AN
+	# IAN = AN
 	# Inu = mid(nu)
 end
 
@@ -874,7 +874,7 @@ ToeplitzMatrices = "~0.8.4"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.4"
+julia_version = "1.10.5"
 manifest_format = "2.0"
 project_hash = "db3d94c0ad35dd4b82a364910d1cea9158e423fd"
 
@@ -2129,7 +2129,7 @@ version = "0.15.1+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.8.0+1"
+version = "5.11.0+0"
 
 [[deps.libdecor_jll]]
 deps = ["Artifacts", "Dbus_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pango_jll", "Wayland_jll", "xkbcommon_jll"]
