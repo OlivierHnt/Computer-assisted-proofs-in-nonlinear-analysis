@@ -3,7 +3,7 @@
 
 #> [frontmatter]
 #> homework_number = 3
-#> order = 1.5
+#> order = 3
 #> title = "Rigorous computation of an eigenpair"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
