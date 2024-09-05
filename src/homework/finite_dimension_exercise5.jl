@@ -3,7 +3,7 @@
 
 #> [frontmatter]
 #> homework_number = 5
-#> order = 1.5
+#> order = 5
 #> title = "Rigorous control of the entire spectrum"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
