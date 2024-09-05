@@ -3,8 +3,8 @@
 
 #> [frontmatter]
 #> homework_number = 3
-#> order = 1.5
-#> title = "Rigorous computation of an eigenpair"
+#> order = 3.5
+#> title = "Rigorous computation of an eigenpair - correction"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
 
