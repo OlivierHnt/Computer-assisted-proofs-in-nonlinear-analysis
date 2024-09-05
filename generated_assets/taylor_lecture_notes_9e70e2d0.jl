@@ -85,14 +85,14 @@ function cauchy_product(a, b, nab = length(a)+length(b)-2)
 
     na = length(a)-1
     nb = length(b)-1
-	
+
 	c = zeros(eltype(a), nab+1)
 	for n = 0:nab
 		for k = max(n-na, 0):min(n, nb)
 			c[n+1] += a[n-k+1]*b[k+1]
 		end
 	end
-	
+
 	return c
 end
 
@@ -139,7 +139,7 @@ function cauchy_matrix(a, N)
             Da[k+1, n+1] = a[k-n+1]
         end
     end
-	
+
 	return Da
 end
 
@@ -186,7 +186,7 @@ F(a, b, Nf = length(a)-1) = cauchy_product(a, a, Nf) - [b ; zeros(eltype(b), Nf 
 
 # ╔═╡ d3221c19-2720-43d5-9573-958ff69c5730
 md"""
-The derivative of $F(a)=a*a-b$ can now be written compactly as 
+The derivative of $F(a)=a*a-b$ can now be written compactly as
 
 $\begin{align}
 DF(a)c = 2a*c.
@@ -209,19 +209,19 @@ We choose $b_n = 1/3^n$.
 # ╔═╡ 4fa97d29-4415-45e0-ac95-34cb1e74e55f
 begin
 	N = 35
-	
+
 	tauBar = interval(1)/interval(3)
-	
+
 	bbar = zeros(Interval{Float64}, N+1)
 	for n = 0:N
 		bbar[n+1] = tauBar^interval(n)
 	end
-	
+
 	b = zeros(Float64, N+1)
 	for n = 0:N
 		b[n+1] = mid(tauBar)^n
 	end
-	
+
 	epsilonN = tauBar^interval(N+1) / (interval(1) - tauBar)
 end
 
@@ -230,7 +230,7 @@ begin
 	a = zeros(Float64, N+1)
 	a[1] = sqrt(b[1])
 	a, _ = newton(a -> (F(a, b, N), DF(a, N)), a)
-	
+
 	abar = interval(a)
 end
 
@@ -246,23 +246,23 @@ begin
 end
 
 # ╔═╡ 55580d08-5668-4a98-9082-20792e7a58c8
-begin	
+begin
 	YN = sum(abs.(A*F(abar, bbar, N)))
 	Yinf = sum(abs.(F(abar, bbar, 2N)[N+2:end]))
 	Y_bound = YN + Yinf + epsilonN
 end
 
 # ╔═╡ 8bd6e02f-2b26-4ba4-affc-19038ea60e31
-function Z1Bound(a, N)
+function Z1Bound(a, A, N)
 	sum = zero(eltype(a))
 	for n = 1:N
-		sum = sum + abs(a[n+1]) 
+		sum = sum + abs(a[n+1])
 	end
-	return interval(1)/interval(2)*(interval(1) + sum/a[1])
+	return interval(1) + sum/a[1] + maximum(interval(ones(1, N+1)) * abs.(I - A * DF(a, N)))
 end
 
 # ╔═╡ e782bccc-71fe-4170-9ac1-0027bbf1ad8a
-Z1_bound = Z1Bound(abar, N)
+Z1_bound = Z1Bound(abar, A, N)
 
 # ╔═╡ 310397bd-ff77-44a3-b70c-7954ed944f37
 Z2_bound = interval(2)*normA
