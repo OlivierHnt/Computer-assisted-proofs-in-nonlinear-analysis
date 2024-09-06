@@ -15,7 +15,7 @@ using InteractiveUtils
 using PlutoTeachingTools, PlutoUI
 
 # ╔═╡ 018ecc45-8638-4a59-b561-efb086bdc751
-using RadiiPolynomial, LinearAlgebra, ToeplitzMatrices, Plots
+using RadiiPolynomial, LinearAlgebra
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""<style>
