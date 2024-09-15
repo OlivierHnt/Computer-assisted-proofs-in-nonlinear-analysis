@@ -2,22 +2,19 @@
 # v0.19.46
 
 #> [frontmatter]
-#> chapter = 2
+#> chapter = 3
 #> order = 1
-#> title = "Lecture notes: Taylor sequence"
-#> tags = ["module2"]
+#> title = "Lecture notes: Taylor integration"
+#> tags = ["module3"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ d0e623ee-b096-4a27-977d-dc32567d6020
-using PlutoTeachingTools, PlutoUI
-
-# ╔═╡ 018ecc45-8638-4a59-b561-efb086bdc751
+# ╔═╡ 4dfe3d7f-aed8-487b-952c-8d8d502a7e46
 using RadiiPolynomial, Plots
 
-# ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
+# ╔═╡ 551ab699-e4c5-4748-b567-9a29b8783b33
 html"""<style>
 main {
     max-width: 1000px;
@@ -27,221 +24,126 @@ main {
 }
 """
 
-# ╔═╡ d5a510a3-c518-47ed-96bc-7bb22e3b08b5
+# ╔═╡ 3e086655-fc49-42bb-803e-27b82c7a7577
 md"""
-In this lecture we will learn how to perform a rigorous square root operation for Taylor series.
-This constitutes the first example of infinite dimensional problems.
+In this lecture we will learn how to solve initial value problems for ODEs using Taylor series.
 
-# Simple example: square root in $\ell^1$
-
-## Introduction and setup
-
-We consider the simple quadratic equation
-
-```math
-a*a = b,
-```
-
-where $a, b \in \ell^1$. That is, given $b \in \ell^1$ compute the square root $a \in \ell^1$ relative to the Cauchy product operation.
-
-#### Cauchy product
-
-The Cauchy product is given by
-
-```math
-(a*b)_n \overset{\text{def}}{=} \sum_{k=0}^n a_k b_{n-k}, \qquad n \ge 0.
-```
+# Solving the logistic equation
 """
 
-# ╔═╡ f68f02a2-43cb-492a-a97f-0614c5266e03
-Markdown.MD(Markdown.Admonition("tip", "Lemma",
-[md"""
-If $u(t) = \sum_{n \ge 0} a_n t^n$ and $v(t) = \sum_{n \ge 0} b_n t^n$ then for their product we have $u(t) v(t) = \sum_{n \ge 0} (a*b)_n t^n$.
-"""]))
+# ╔═╡ 4e6473ec-02c6-4ed5-ab05-8f0086853313
+f(x) = x * (1 - x)
 
-# ╔═╡ 10958af8-a261-42d7-aa32-6f412142d2f0
+# ╔═╡ abc4b3dd-518c-4239-87bb-e9688b34a8db
+Df(x) = 1 - 2x
+
+# ╔═╡ c454f8a4-5553-494a-8d08-7c7d756805a0
 md"""
-An implementation of the Cauchy product is given below.
+## Zero-finding problem: Taylor integration
 """
 
-# ╔═╡ 0e917ec7-6f7b-498a-a544-c84f8e17d93f
+# ╔═╡ d53d988f-da50-4839-aae6-d7bdac46d4ac
+F(x, x0, τ, N) = project(x - x0 - τ * integrate(f(x)), Taylor(N))
+
+# ╔═╡ 7e5be3bf-ea25-4269-b05f-8263d5ede515
+DF(x, τ, N, M) = project(I -
+    τ * (Integral(1) * project(Multiplication(Df(x)), Taylor(N), Taylor(N))),
+    Taylor(N), Taylor(M))
+
+# ╔═╡ 8c99fd06-bea2-462e-ba47-aaa9da05d740
 begin
-	poly = Sequence(Taylor(1), [1.0, 1.0]) # 1 + x
-	poly * poly
+# Numerical approximation
+
+N = 140 # order of the Taylor series
+
+x0 = 0.5 # initial condition
+
+τ = 2.5 # time rescaling
+
+initialguess = ones(Taylor(N))
+
+bx, success = newton(x -> (F(x, x0, τ, N), DF(x, τ, N, N)), initialguess)
 end
 
-# ╔═╡ b33d8335-0abd-4018-adfa-63707eac6a22
-md"""
-#### Norm
-
-We will work in the sequence space
-
-```math
-X
-\overset{\text{def}}{=}
-\left\{
-a \in \mathbb{R}^\mathbb{N} \, : \, \|a\|_X \overset{\text{def}}{=} \sum_{n \ge 0} |a_n| < \infty
-\right\}.
-```
-"""
-
-# ╔═╡ 4bd0c9e7-ffb2-4c13-b93d-96cfc530bff7
-Foldable("Is X with this norm a Banach space?", md"""**Exercise**: Yes""")
-
-# ╔═╡ 6bb627ea-0b12-4495-8b39-c79bc5a35890
-md"""
-The space $X$ together with $*$ forms a Banach algebra.
-"""
-
-# ╔═╡ e5754113-7f92-4946-a684-99d9bd5d830f
-Markdown.MD(Markdown.Admonition("tip", "Lemma (Banach algebra property)", [md"""For any $a, b \in X$ we have $\|a*b\|_X \le \|a\|_X \|b\|_X$."""]))
-
-# ╔═╡ 2f541fb5-79a8-4755-a611-a14fdf3f532b
-Foldable("""Proof""", md"""**Exercise** (rearrange the series and use the triangle inequality)""")
-
-# ╔═╡ 9f5cf201-871a-4afb-95ed-4bdba6152d23
-md"""
-The multiplication operator $M_a (b) := a * b$ can be represented by an infinite dimensional matrix. For our proof we will only need to construct a finite part of it.
-"""
-
-# ╔═╡ 27de2c2a-f7b6-46c5-97e7-e15341706cd5
-project(Multiplication(poly), space(poly), space(poly))
-
-# ╔═╡ 90fe50ee-89e8-4047-a115-533c90082957
-md"""
-## Zero-finding problem
-
-We define the zero-finding problem $F(a)=0$ on $X$ by
-
-```math
-F_n(a) \overset{\text{def}}{=} (a*a)_n - b_n, \qquad n \ge 0.
-```
-
-#### Finite dimensional projection
-
-We introduce a projection operator on a finite number of modes ($N+1$ coefficients) and its complement:
-
-$\begin{align}
-(\pi^{\leq N} a)_n := \begin{cases}
-a_n, & n \le N, \\
-0, & n > N,
-\end{cases}
-& \qquad\qquad
-(\pi^{>N} a)_n := \begin{cases}
-0, & n \le N, \\
-a_n, & n > N,
-\end{cases}
-\end{align}$
-
-so that $a=\pi^{\leq N}a+\pi^{>N}a$ and $\pi^{\leq N}\pi^{>N}=0=\pi^{>N} \pi^{\le N}$.
-"""
-
-# ╔═╡ 2c076e0d-5f35-40e3-9612-d5351b019559
-F(a, b, space) = project(a*a - b, space)
-
-# ╔═╡ d3221c19-2720-43d5-9573-958ff69c5730
-md"""
-The derivative of $F(a)=a*a-b$ can now be written compactly as
-
-$\begin{align}
-DF(a)c = 2a*c.
-\end{align}$
-"""
-
-# ╔═╡ f688e26c-dc4f-4faa-bd69-82c2366bd696
-DF(a, space) = project(Multiplication(2a), space, space)
-
-# ╔═╡ af117c60-f433-4751-92ff-6d5a3744fbb1
-md"""
-## The Newton-Kantorovich proof
-
-We choose $b_n = 1/3^n$.
-"""
-
-# ╔═╡ 4fa97d29-4415-45e0-ac95-34cb1e74e55f
+# ╔═╡ 25e484d2-e228-45a8-9a8f-53ec54326fd9
 begin
-	N = 35
-
-	tauBar = interval(1)/interval(3)
-
-	bbar = zeros(Interval{Float64}, Taylor(N))
-	for n = 0:N
-		bbar[n] = tauBar^interval(n)
-	end
-
-	b = zeros(Taylor(N))
-	for n = 0:N
-		b[n] = mid(tauBar)^n
-	end
-
-	epsilonN = tauBar^interval(N+1) / (interval(1) - tauBar)
-end
-
-# ╔═╡ db4c62ae-bef8-4c90-8e54-e38e7ec357b0
-begin
-	a = zeros(Taylor(N))
-	a[0] = sqrt(b[0])
-	a, _ = newton(a -> (F(a, b, space(a)), DF(a, space(a))), a)
-
-	abar = interval.(a)
-end
-
-# ╔═╡ db76f769-0281-4502-8065-e94f701bfa7a
-begin
-	plot(LinRange(-1, 1, 101), t -> a(t); legend = false)
+	plot(LinRange(-τ, τ, 101), t -> bx(t/τ); legend = false)
 	xlabel!("t")
 	ylabel!("u")
-	xlims!(-1, 1)
+	xlims!(-τ, τ)
 end
 
-# ╔═╡ cde7982c-8cd1-4369-be74-1c543704f933
+# ╔═╡ 641caade-ff17-4484-af95-988b92977bb5
 md"""
-We construct a numerical approximation of $\big(\pi^{\le N} DF(\bar{a}) \pi^{\le N}\big)^{-1}$.
+## The Newton-Kantorovich proof
 """
 
-# ╔═╡ f3d4ab9f-24f6-4d65-93fc-e8155fe4f055
+# ╔═╡ c4254d37-06d5-4502-9136-717f9404a7ff
+function tail(x, N)
+    # get the tail of a Taylor series
+    y = zeros(eltype(x), space(x))
+    for n = N+1:order(x)
+        y[n] = x[n]
+    end
+    return y
+end
+
+# ╔═╡ 84d0a349-66a1-45e4-887f-2bd19b5ccf4a
 begin
-	A = interval.(inv(DF(a, Taylor(N))))
-	normA = opnorm(A, 1) # matrix 1-norm
+	#- approximate inverse
+
+A_finite = interval.( inv(DF(bx, τ, N, N)) )
+opnormA_finite = opnorm(A_finite, 1)
+opnormA_tail = interval(1)
+opnormA = max(opnormA_finite, opnormA_tail)
 end
 
-# ╔═╡ 55580d08-5668-4a98-9082-20792e7a58c8
+# ╔═╡ 34152734-45ff-4dfe-bc25-3d60ba4c9d19
 begin
-	YN = sum(abs.(A*F(abar, bbar, Taylor(N))))
-	Yinf = sum(abs.(F(abar, bbar, Taylor(2N))[N+1:end]))
-	Y_bound = YN + Yinf + epsilonN
+	#- Y bound
+
+full_F = F(interval.(bx), interval(x0), interval(τ), 2N+1) # the order of F is 2N+1
+Y = norm(A_finite * project(full_F, Taylor(N)), 1) + norm(tail(full_F, N), 1)
 end
 
-# ╔═╡ 8bd6e02f-2b26-4ba4-affc-19038ea60e31
-function Z1Bound(a, A, N)
-	sum = zero(eltype(a))
-	for n = 1:N
-		sum = sum + abs(a[n])
-	end
-	return sum/a[0] + opnorm(I - A * DF(a, Taylor(N)), 1)
+# ╔═╡ 4bce0a13-ca2f-46c4-9ef3-12f07d525fbf
+begin
+#- Z₁ bound
+
+Df_bx = Df(interval.(bx))
+
+Z₁ = opnorm(I - A_finite * DF(interval.(bx), τ, N, N), 1) +
+    τ * norm(Df_bx, 1) / (interval(N + 1))
+
 end
 
-# ╔═╡ e782bccc-71fe-4170-9ac1-0027bbf1ad8a
-Z1_bound = Z1Bound(abar, A, N)
+# ╔═╡ 031ab1e8-d479-4197-919c-20416f19aa9f
+begin
+	#- Z₂ bound
 
-# ╔═╡ 310397bd-ff77-44a3-b70c-7954ed944f37
-Z2_bound = interval(2)*normA
+Z₂ = 2 * τ * opnormA
+end
 
-# ╔═╡ c187aff6-087d-43f5-8042-d3ea1d09ba7a
-r = interval_of_existence(Y_bound, Z1_bound, Z2_bound, Inf)
+# ╔═╡ 7fc34159-4b00-4e5e-b969-b4550b38ab53
+#- interval of existence (cf. Radii Polynomial Theorem)
+# r_star = Inf # since the second-order derivative is constant
+r = interval_of_existence(Y, Z₁, Z₂, Inf)
+
+# ╔═╡ a618d08d-3f68-4a84-ac24-f6fbd2d93818
+md"""
+# Next steps and further reading
+
+We remark that we need a large number of Taylor coefficients for our proof to succeed despite a relatively small length of integration ($N = 140$ to have last Taylor coefficient of order $10^{-14}$). One should consider using Chebyshev series instead.
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
-PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
 Plots = "~1.40.8"
-PlutoTeachingTools = "~0.2.15"
-PlutoUI = "~0.7.60"
 RadiiPolynomial = "~0.8.13"
 """
 
@@ -251,13 +153,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.5"
 manifest_format = "2.0"
-project_hash = "a064359e34f654ceb201746cdb4cbc9e20b50f00"
-
-[[deps.AbstractPlutoDingetjes]]
-deps = ["Pkg"]
-git-tree-sha1 = "6e1d2a35f2f90a4bc7c2ed98079b2ba09c35b83a"
-uuid = "6e696c72-6542-2067-7265-42206c756150"
-version = "1.3.2"
+project_hash = "e1ca7295eb1603c5baae42ced044def1c1929877"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -291,12 +187,6 @@ deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jl
 git-tree-sha1 = "a2f1c8c668c8e3cb4cca4e57a8efdb09067bb3fd"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.18.0+2"
-
-[[deps.CodeTracking]]
-deps = ["InteractiveUtils", "UUIDs"]
-git-tree-sha1 = "7eee164f122511d3e4e1ebadb7956939ea7e1c77"
-uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
-version = "1.3.6"
 
 [[deps.CodecZlib]]
 deps = ["TranscodingStreams", "Zlib_jll"]
@@ -386,10 +276,6 @@ deps = ["Mmap"]
 git-tree-sha1 = "9e2f36d3c96a820c678f2f1f1782582fcf685bae"
 uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 version = "1.9.1"
-
-[[deps.Distributed]]
-deps = ["Random", "Serialization", "Sockets"]
-uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -517,24 +403,6 @@ git-tree-sha1 = "401e4f3f30f43af2c8478fc008da50096ea5240f"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
 version = "8.3.1+0"
 
-[[deps.Hyperscript]]
-deps = ["Test"]
-git-tree-sha1 = "179267cfa5e712760cd43dcae385d7ea90cc25a4"
-uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
-version = "0.0.5"
-
-[[deps.HypertextLiteral]]
-deps = ["Tricks"]
-git-tree-sha1 = "7134810b1afce04bbc1045ca1985fbe81ce17653"
-uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-version = "0.9.5"
-
-[[deps.IOCapture]]
-deps = ["Logging", "Random"]
-git-tree-sha1 = "b6d6bfdd7ce25b0f9b2f6b3dd56b2673a66c8770"
-uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
-version = "0.2.5"
-
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
@@ -587,12 +455,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "c84a835e1a09b289ffcd2271bf2a337bbdda6637"
 uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
 version = "3.0.3+0"
-
-[[deps.JuliaInterpreter]]
-deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "2984284a8abcfcc4784d95a9e2ea4e352dd8ede7"
-uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.9.36"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -742,17 +604,6 @@ deps = ["Dates", "Logging"]
 git-tree-sha1 = "c1dd6d7978c12545b4179fb6153b9250c96b0075"
 uuid = "e6f89c97-d47a-5376-807f-9c37f3926c36"
 version = "1.0.3"
-
-[[deps.LoweredCodeUtils]]
-deps = ["JuliaInterpreter"]
-git-tree-sha1 = "c2b5e92eaf5101404a58ce9c6083d595472361d6"
-uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "3.0.2"
-
-[[deps.MIMEs]]
-git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
-uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
-version = "0.1.4"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
@@ -907,30 +758,6 @@ version = "1.40.8"
     ImageInTerminal = "d8c32880-2388-543b-8c61-d9f865259254"
     Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
-[[deps.PlutoHooks]]
-deps = ["InteractiveUtils", "Markdown", "UUIDs"]
-git-tree-sha1 = "072cdf20c9b0507fdd977d7d246d90030609674b"
-uuid = "0ff47ea0-7a50-410d-8455-4348d5de0774"
-version = "0.0.5"
-
-[[deps.PlutoLinks]]
-deps = ["FileWatching", "InteractiveUtils", "Markdown", "PlutoHooks", "Revise", "UUIDs"]
-git-tree-sha1 = "8f5fa7056e6dcfb23ac5211de38e6c03f6367794"
-uuid = "0ff47ea0-7a50-410d-8455-4348d5de0420"
-version = "0.1.6"
-
-[[deps.PlutoTeachingTools]]
-deps = ["Downloads", "HypertextLiteral", "LaTeXStrings", "Latexify", "Markdown", "PlutoLinks", "PlutoUI", "Random"]
-git-tree-sha1 = "5d9ab1a4faf25a62bb9d07ef0003396ac258ef1c"
-uuid = "661c6b06-c737-4d37-b85c-46df65de6f69"
-version = "0.2.15"
-
-[[deps.PlutoUI]]
-deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
-git-tree-sha1 = "eba4810d5e6a01f612b948c9fa94f905b49087b0"
-uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.60"
-
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
 git-tree-sha1 = "5aa36f7049a63a1528fe8f7c3f2113413ffd4e1f"
@@ -1013,12 +840,6 @@ deps = ["UUIDs"]
 git-tree-sha1 = "838a3a4188e2ded87a4f9f184b4b0d78a1e91cb7"
 uuid = "ae029012-a4dd-5104-9daa-d747884805df"
 version = "1.3.0"
-
-[[deps.Revise]]
-deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "REPL", "Requires", "UUIDs", "Unicode"]
-git-tree-sha1 = "7b7850bb94f75762d567834d7e9802fc22d62f9c"
-uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.5.18"
 
 [[deps.RoundingEmulator]]
 git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
@@ -1109,11 +930,6 @@ uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 git-tree-sha1 = "e84b3a11b9bece70d14cce63406bbc79ed3464d2"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.11.2"
-
-[[deps.Tricks]]
-git-tree-sha1 = "7822b97e99a1672bfb1b49b668a6d46d58d8cbcb"
-uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
-version = "0.1.9"
 
 [[deps.URIs]]
 git-tree-sha1 = "67db6cc7b3821e19ebe75791a9dd19c9b1188f2b"
@@ -1456,34 +1272,23 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╠═d0e623ee-b096-4a27-977d-dc32567d6020
-# ╠═018ecc45-8638-4a59-b561-efb086bdc751
-# ╟─d5a510a3-c518-47ed-96bc-7bb22e3b08b5
-# ╟─f68f02a2-43cb-492a-a97f-0614c5266e03
-# ╟─10958af8-a261-42d7-aa32-6f412142d2f0
-# ╠═0e917ec7-6f7b-498a-a544-c84f8e17d93f
-# ╟─b33d8335-0abd-4018-adfa-63707eac6a22
-# ╟─4bd0c9e7-ffb2-4c13-b93d-96cfc530bff7
-# ╟─6bb627ea-0b12-4495-8b39-c79bc5a35890
-# ╟─e5754113-7f92-4946-a684-99d9bd5d830f
-# ╟─2f541fb5-79a8-4755-a611-a14fdf3f532b
-# ╟─9f5cf201-871a-4afb-95ed-4bdba6152d23
-# ╠═27de2c2a-f7b6-46c5-97e7-e15341706cd5
-# ╟─90fe50ee-89e8-4047-a115-533c90082957
-# ╠═2c076e0d-5f35-40e3-9612-d5351b019559
-# ╟─d3221c19-2720-43d5-9573-958ff69c5730
-# ╠═f688e26c-dc4f-4faa-bd69-82c2366bd696
-# ╟─af117c60-f433-4751-92ff-6d5a3744fbb1
-# ╠═4fa97d29-4415-45e0-ac95-34cb1e74e55f
-# ╠═db4c62ae-bef8-4c90-8e54-e38e7ec357b0
-# ╟─db76f769-0281-4502-8065-e94f701bfa7a
-# ╟─cde7982c-8cd1-4369-be74-1c543704f933
-# ╠═f3d4ab9f-24f6-4d65-93fc-e8155fe4f055
-# ╠═55580d08-5668-4a98-9082-20792e7a58c8
-# ╠═8bd6e02f-2b26-4ba4-affc-19038ea60e31
-# ╠═e782bccc-71fe-4170-9ac1-0027bbf1ad8a
-# ╠═310397bd-ff77-44a3-b70c-7954ed944f37
-# ╠═c187aff6-087d-43f5-8042-d3ea1d09ba7a
+# ╟─551ab699-e4c5-4748-b567-9a29b8783b33
+# ╠═4dfe3d7f-aed8-487b-952c-8d8d502a7e46
+# ╟─3e086655-fc49-42bb-803e-27b82c7a7577
+# ╠═4e6473ec-02c6-4ed5-ab05-8f0086853313
+# ╠═abc4b3dd-518c-4239-87bb-e9688b34a8db
+# ╟─c454f8a4-5553-494a-8d08-7c7d756805a0
+# ╠═d53d988f-da50-4839-aae6-d7bdac46d4ac
+# ╠═7e5be3bf-ea25-4269-b05f-8263d5ede515
+# ╠═8c99fd06-bea2-462e-ba47-aaa9da05d740
+# ╟─25e484d2-e228-45a8-9a8f-53ec54326fd9
+# ╟─641caade-ff17-4484-af95-988b92977bb5
+# ╠═c4254d37-06d5-4502-9136-717f9404a7ff
+# ╠═84d0a349-66a1-45e4-887f-2bd19b5ccf4a
+# ╠═34152734-45ff-4dfe-bc25-3d60ba4c9d19
+# ╠═4bce0a13-ca2f-46c4-9ef3-12f07d525fbf
+# ╟─031ab1e8-d479-4197-919c-20416f19aa9f
+# ╠═7fc34159-4b00-4e5e-b969-b4550b38ab53
+# ╟─a618d08d-3f68-4a84-ac24-f6fbd2d93818
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
