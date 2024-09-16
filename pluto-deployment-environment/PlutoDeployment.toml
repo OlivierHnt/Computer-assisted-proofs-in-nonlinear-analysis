@@ -19,7 +19,7 @@ exclude=[
     # these are in the repo but not used on the website
     "tools/*",
     "PlutoPages.jl",
-    
+
     # notebooks not interactive
 
     # don't run homeworks

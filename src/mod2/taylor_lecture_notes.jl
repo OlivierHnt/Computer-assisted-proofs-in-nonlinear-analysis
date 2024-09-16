@@ -12,7 +12,7 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ d0e623ee-b096-4a27-977d-dc32567d6020
-using PlutoTeachingTools, PlutoUI
+using PlutoTeachingTools, PlutoUI# packages for the notebook
 
 # ╔═╡ 018ecc45-8638-4a59-b561-efb086bdc751
 using RadiiPolynomial, Plots
@@ -26,6 +26,9 @@ main {
     text-align: justify;
 }
 """
+
+# ╔═╡ 91bb507e-5871-46f4-9042-0ce4cc97617c
+TableOfContents(title="Table of Contents"; indent=true, depth=4, aside=true)
 
 # ╔═╡ d5a510a3-c518-47ed-96bc-7bb22e3b08b5
 md"""
@@ -1459,6 +1462,7 @@ version = "1.4.1+1"
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
 # ╠═d0e623ee-b096-4a27-977d-dc32567d6020
 # ╠═018ecc45-8638-4a59-b561-efb086bdc751
+# ╟─91bb507e-5871-46f4-9042-0ce4cc97617c
 # ╟─d5a510a3-c518-47ed-96bc-7bb22e3b08b5
 # ╟─f68f02a2-43cb-492a-a97f-0614c5266e03
 # ╟─10958af8-a261-42d7-aa32-6f412142d2f0

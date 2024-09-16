@@ -24,6 +24,9 @@ main {
 }
 """
 
+# ╔═╡ 5ed309bf-dc26-4008-b199-f1de5078130e
+TableOfContents(title="Table of Contents"; indent=true, depth=4, aside=true)
+
 # ╔═╡ 3e086655-fc49-42bb-803e-27b82c7a7577
 md"""
 In this lecture we will learn how to solve initial value problems for ODEs using Taylor series.
@@ -1274,6 +1277,7 @@ version = "1.4.1+1"
 # ╔═╡ Cell order:
 # ╟─551ab699-e4c5-4748-b567-9a29b8783b33
 # ╠═4dfe3d7f-aed8-487b-952c-8d8d502a7e46
+# ╟─5ed309bf-dc26-4008-b199-f1de5078130e
 # ╟─3e086655-fc49-42bb-803e-27b82c7a7577
 # ╠═4e6473ec-02c6-4ed5-ab05-8f0086853313
 # ╠═abc4b3dd-518c-4239-87bb-e9688b34a8db

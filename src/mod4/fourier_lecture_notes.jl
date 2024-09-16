@@ -27,6 +27,9 @@ main {
 }
 """
 
+# ╔═╡ 2ae8d07b-a05e-4136-a121-6317641916fe
+TableOfContents(title="Table of Contents"; indent=true, depth=4, aside=true)
+
 # ╔═╡ c33dc650-3f94-11ef-398a-8bbc4a2b69b8
 md"""
 We continue to do CAPs to find solutions of ODEs, but rather than looking at an initial value problem, we now look for *periodic* solutions. The setting is again infinite dimensional, with some small differences:
@@ -1950,6 +1953,7 @@ version = "1.4.1+1"
 # ╟─044aabf3-b817-4266-93a9-a4cabce1ec4e
 # ╠═4b949c9b-4669-4d5a-b74c-0840bf375ddd
 # ╠═db7c8b55-56bf-493c-a4ff-1ba9610a41ed
+# ╟─2ae8d07b-a05e-4136-a121-6317641916fe
 # ╟─c33dc650-3f94-11ef-398a-8bbc4a2b69b8
 # ╟─1bfcc76a-266a-4784-b76b-3871445e603e
 # ╟─8f3e96dc-0cdc-411e-8f94-e9e47488abf3

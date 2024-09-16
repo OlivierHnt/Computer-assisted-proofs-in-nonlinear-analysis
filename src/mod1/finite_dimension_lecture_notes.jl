@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.46
 
 #> [frontmatter]
 #> chapter = 1
@@ -21,21 +21,14 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
-html"""<style>
-main {
-    max-width: 1000px;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: justify;
-}
-"""
-
 # ╔═╡ d0e623ee-b096-4a27-977d-dc32567d6020
-using PlutoTeachingTools, PlutoUI
+using PlutoTeachingTools, PlutoUI# packages for the notebook
 
 # ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
 using RadiiPolynomial, Plots
+
+# ╔═╡ b3845641-1537-4a27-8550-1eff30900a6b
+TableOfContents(title="Table of Contents"; indent=true, depth=4, aside=true)
 
 # ╔═╡ c33dc650-3f94-11ef-398a-8bbc4a2b69b8
 md"""
@@ -1458,9 +1451,9 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╟─7fc40507-eda3-474d-a454-04e9173a7adb
 # ╠═d0e623ee-b096-4a27-977d-dc32567d6020
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
+# ╟─b3845641-1537-4a27-8550-1eff30900a6b
 # ╟─c33dc650-3f94-11ef-398a-8bbc4a2b69b8
 # ╟─2fe25b56-0fcc-41a0-b74a-2bd650c387d5
 # ╟─05df1902-b4b8-4fd7-ab91-ad01f4fa413e

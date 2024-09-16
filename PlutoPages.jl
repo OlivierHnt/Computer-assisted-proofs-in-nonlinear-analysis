@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
@@ -18,7 +18,7 @@ end
 begin
 	import Pkg
 	Pkg.activate("./pluto-deployment-environment")
-	
+
 	import PlutoSliderServer
 	import Pluto
 	using MarkdownLiteral
@@ -54,29 +54,6 @@ import ProgressLogging
 # ╔═╡ cd576da6-59ae-4d1b-b812-1a35023b6875
 import ThreadsX
 
-# ╔═╡ 86471faf-af03-4f35-8b95-c4011ceaf7c3
-function progressmap_generic(mapfn, f, itr; kwargs...)
-	l = length(itr)
-	id = gensym()
-	num_iterations = Threads.Atomic{Int}(0)
-	
-	function log(x)
-		Threads.atomic_add!(num_iterations, x)
-		Logging.@logmsg(ProgressLogging.ProgressLevel, "", progress=num_iterations[] / l, id=id)
-	end
-
-	log(0)
-	
-	output = mapfn(enumerate(itr); kwargs...) do (i,x)
-		result = f(x)
-		log(1)
-		result
-	end
-
-	log(0)
-	output
-end
-
 # ╔═╡ e0ae20f5-ffe7-4f0e-90be-168924526e03
 "Like `Base.map`, but with ProgressLogging."
 function progressmap(f, itr)
@@ -95,23 +72,46 @@ function progressmap_threaded(f, itr; kwargs...)
 	progressmap_generic(ThreadsX.map, f, itr; kwargs...)
 end
 
+# ╔═╡ 86471faf-af03-4f35-8b95-c4011ceaf7c3
+function progressmap_generic(mapfn, f, itr; kwargs...)
+	l = length(itr)
+	id = gensym()
+	num_iterations = Threads.Atomic{Int}(0)
+
+	function log(x)
+		Threads.atomic_add!(num_iterations, x)
+		Logging.@logmsg(ProgressLogging.ProgressLevel, "", progress=num_iterations[] / l, id=id)
+	end
+
+	log(0)
+
+	output = mapfn(enumerate(itr); kwargs...) do (i,x)
+		result = f(x)
+		log(1)
+		result
+	end
+
+	log(0)
+	output
+end
+
 # ╔═╡ 6c8e76ea-d648-449a-89de-cb6632cdd6b9
 md"""
 # Template systems
 
-A **template** system is will turn an input file (markdown, julia, nunjucks, etc.) into an (HTML) output. This architecture is based on [eleventy](https://www.11ty.dev/docs/).
+A **template** system will turn an input file (markdown, julia, nunjucks, etc.) into an HTML output. This architecture is based on [eleventy](https://www.11ty.dev/docs/).
 
 To register a template handler for a file extension, you add a method to `template_handler`, e.g.
 
 ```julia
 function template_handler(
-	::Val{Symbol(".md")}, 
+	::Val{Symbol(".md")},
 	input::TemplateInput
 )::TemplateOutput
 
 	s = String(input.contents)
 	result = run_markdown(s)
-	
+
 	return TemplateOutput(;
 		contents=result.contents,
 		front_matter=result.front_matter,
@@ -121,6 +121,40 @@ end
 
 See `TemplateInput` and `TemplateOutput` for more info!
 """
+
+# ╔═╡ a166e8f3-542e-4068-a076-3f5fd4daa61c
+Base.@kwdef struct TemplateInput
+	contents::Vector{UInt8}
+	relative_path::String
+	absolute_path::String
+	frontmatter::FrontMatter=FrontMatter()
+end
+
+# ╔═╡ 6288f145-444b-41cb-b9e3-8f273f9517fb
+begin
+	Base.@kwdef struct TemplateOutput
+		contents::Union{Vector{UInt8},String,Nothing}
+		file_extension::String="html"
+		frontmatter::FrontMatter=FrontMatter()
+		search_index_data::Union{Nothing,String}=nothing
+	end
+	TemplateOutput(t::TemplateOutput; kwargs...) = TemplateOutput(;
+		contents=t.contents,
+		file_extension=t.file_extension,
+		frontmatter=t.frontmatter,
+		search_index_data=t.search_index_data,
+		kwargs...,
+	)
+end
+
+# ╔═╡ ff55f7eb-a23d-4ca7-b428-ab05dcb8f090
+# fallback method
+function template_handler(::Any, input::TemplateInput)::TemplateOutput
+	TemplateOutput(;
+		contents=nothing,
+		file_extension="nothing",
+	)
+end
 
 # ╔═╡ 4a2dc5a4-0bf2-4678-b984-4ecb7b397d72
 md"""
@@ -176,84 +210,20 @@ end)
 # ╔═╡ 08b42df7-9120-4b42-80ee-8e438752b50c
 # s_result.exported
 
-# ╔═╡ adb1ddac-d992-49ca-820f-e1ed8ca33bf8
-md"""
-## `.jl`: PlutoSliderServer.jl
-"""
+# ╔═╡ 7717e24f-62ee-4852-9dec-d09b734d0693
+s_result = run_mdx(s; data=Dict("num" => 3));
 
-# ╔═╡ bb905046-59b7-4da6-97ad-dbb9055d823a
-const pluto_deploy_settings = PlutoSliderServer.get_configuration(PlutoSliderServer.default_config_path())
+# ╔═╡ 9f945292-ff9e-4f29-93ea-69b10fc4428d
+s_result.contents |> HTML
 
-# ╔═╡ b638df55-fd74-4ae8-bdbd-ec7b18214b40
-function prose_from_code(s::String)::String
-	replace(replace(
-		replace(
-			replace(s, 
-				# remove embedded project/manifest
-				r"000000000001.+"s => ""),
-			# remove cell delimiters
-			r"^# [╔╟╠].*"m => ""), 
-		# remove some code-only punctiation
-		r"[\!\#\$\*\+\-\/\:\;\<\>\=\(\)\[\]\{\}\:\@\_]" => " "), 
-	# collapse repeated whitespace
-	r"\s+"s => " ")
-end
-
-# ╔═╡ 87b4431b-438b-4da4-9d06-79e7f3a2fe05
-prose_from_code("""
-[xs for y in ab(d)]
-fonsi
-""")
-
-# ╔═╡ cd4e479c-deb7-4a44-9eb0-c3819b5c4067
-find(f::Function, xs) = for x in xs
-	if f(x)
-		return x
-	end
-end
-
-# ╔═╡ 2e527d04-e4e7-4dc8-87e6-8b3dd3c7688a
-const FrontMatter = Dict{String,Any}
-
-# ╔═╡ a166e8f3-542e-4068-a076-3f5fd4daa61c
-Base.@kwdef struct TemplateInput
-	contents::Vector{UInt8}
-	relative_path::String
-	absolute_path::String
-	frontmatter::FrontMatter=FrontMatter()
-end
-
-# ╔═╡ 6288f145-444b-41cb-b9e3-8f273f9517fb
-begin
-	Base.@kwdef struct TemplateOutput
-		contents::Union{Vector{UInt8},String,Nothing}
-		file_extension::String="html"
-		frontmatter::FrontMatter=FrontMatter()
-		search_index_data::Union{Nothing,String}=nothing
-	end
-	TemplateOutput(t::TemplateOutput; kwargs...) = TemplateOutput(;
-		contents=t.contents,
-		file_extension=t.file_extension,
-		frontmatter=t.frontmatter,
-		search_index_data=t.search_index_data,
-		kwargs...,
-	)
-end
-
-# ╔═╡ ff55f7eb-a23d-4ca7-b428-ab05dcb8f090
-# fallback method
-function template_handler(::Any, input::TemplateInput)::TemplateOutput
-	TemplateOutput(;
-		contents=nothing,
-		file_extension="nothing",
-	)
-end
+# ╔═╡ 83366d96-4cd3-4def-a0da-16a22b40124f
+s_result.frontmatter
 
 # ╔═╡ 692c1e0b-07e1-41b3-abcd-2156bda65b41
 """
 Turn a MarkdownLiteral.jl string into HTML contents and front matter.
 """
-function run_mdx(s::String; 
+function run_mdx(s::String;
 		data::Dict{String,<:Any}=Dict{String,Any}(),
 		cm::Bool=true,
 		filename::AbstractString="unknown",
@@ -277,7 +247,7 @@ function run_mdx(s::String;
 	to_render, frontmatter = if !cm
 		result, FrontMatter()
 	else
-	
+
 		# we want to apply our own CM parser, so we do the MarkdownLiteral.jl trick manually:
 		result_str = repr(MIME"text/html"(), result)
 		cm_parser = CommonMark.Parser()
@@ -295,12 +265,12 @@ function run_mdx(s::String;
 			# but you probably want to be able to use those variables inside the document, so they have to be evaluated *before* running the expr.
 	        CommonMark.FrontMatterRule(yaml=YAML.load),
 	    ])
-	
+
 		ast = cm_parser(result_str)
 
 		ast, CommonMark.frontmatter(ast)
 	end
-	
+
 	contents = repr(MIME"text/html"(), to_render)
 
 	# TODO: might be nice:
@@ -308,22 +278,52 @@ function run_mdx(s::String;
 	# 	s_str = string(s)
 	# 	!(startswith(s_str, "#") || startswith(s_str, "anonymous"))
 	# end
-	
-	(; 
-		contents, 
-		frontmatter, 
+
+	(;
+		contents,
+		frontmatter,
 		# exported,
 	)
 end
 
-# ╔═╡ 7717e24f-62ee-4852-9dec-d09b734d0693
-s_result = run_mdx(s; data=Dict("num" => 3));
+# ╔═╡ adb1ddac-d992-49ca-820f-e1ed8ca33bf8
+md"""
+## `.jl`: PlutoSliderServer.jl
+"""
 
-# ╔═╡ 9f945292-ff9e-4f29-93ea-69b10fc4428d
-s_result.contents |> HTML
+# ╔═╡ bb905046-59b7-4da6-97ad-dbb9055d823a
+const pluto_deploy_settings = PlutoSliderServer.get_configuration(PlutoSliderServer.default_config_path())
 
-# ╔═╡ 83366d96-4cd3-4def-a0da-16a22b40124f
-s_result.frontmatter
+# ╔═╡ b638df55-fd74-4ae8-bdbd-ec7b18214b40
+function prose_from_code(s::String)::String
+	replace(replace(
+		replace(
+			replace(s,
+				# remove embedded project/manifest
+				r"000000000001.+"s => ""),
+			# remove cell delimiters
+			r"^# [╔╟╠].*"m => ""),
+		# remove some code-only punctiation
+		r"[\!\#\$\*\+\-\/\:\;\<\>\=\(\)\[\]\{\}\:\@\_]" => " "),
+	# collapse repeated whitespace
+	r"\s+"s => " ")
+end
+
+# ╔═╡ 87b4431b-438b-4da4-9d06-79e7f3a2fe05
+prose_from_code("""
+[xs for y in ab(d)]
+fonsi
+""")
+
+# ╔═╡ cd4e479c-deb7-4a44-9eb0-c3819b5c4067
+find(f::Function, xs) = for x in xs
+	if f(x)
+		return x
+	end
+end
+
+# ╔═╡ 2e527d04-e4e7-4dc8-87e6-8b3dd3c7688a
+const FrontMatter = Dict{String,Any}
 
 # ╔═╡ 94bb6730-a4ad-42d2-aa58-41b70a15cd0e
 md"""
@@ -351,6 +351,28 @@ end
 md"""
 ## Generated assets
 """
+
+# ╔═╡ 0d2b7382-2ddf-48c3-90c8-bc22de454c97
+"""
+```julia
+register_asset(contents, original_name::String)
+```
+
+Place an asset in the `/generated_assets/` subfolder of the output directory and return a [`RegisteredAsset`](@ref) referencing it for later use. (The original filename will be sanitized, and a content hash will be appended.)
+
+To be used inside `process_file` methods which need to generate additional files. You can use `registered_asset.url` to get a location-independent href to the result.
+"""
+function register_asset(contents, original_name::String)
+	h = myhash(contents)
+	n, e = splitext(basename(original_name))
+
+
+	mkpath(joinpath(output_dir, "generated_assets"))
+	newpath = joinpath(output_dir, "generated_assets", "$(legalize(n))_$(h)$(e)")
+	write(newpath, contents)
+	rel = relpath(newpath, output_dir)
+	return RegisteredAsset(joinpath(root_url, rel), rel, newpath)
+end
 
 # ╔═╡ 5e91e7dc-82b6-486a-b745-34f97b6fb20c
 struct RegisteredAsset
@@ -401,7 +423,7 @@ md"""
 @bind manual_update_trigger Button("Read input files again")
 
 # ╔═╡ e1a87788-2eba-47c9-ab4c-74f3344dce1d
-ignored_dirname(s; allow_special_dirs::Bool=false) = 
+ignored_dirname(s; allow_special_dirs::Bool=false) =
 	startswith(s, "_") && (!allow_special_dirs || s != "_includes")
 
 # ╔═╡ 485b7956-0774-4b25-a897-3d9232ef8590
@@ -412,7 +434,7 @@ function ignore(abs_path; allow_special_dirs::Bool=false)
 	p = relpath(abs_path, dir)
 
 	# (_cache, _site, _andmore)
-	any(x -> ignored_dirname(x; allow_special_dirs), splitpath(p)) || 
+	any(x -> ignored_dirname(x; allow_special_dirs), splitpath(p)) ||
 		startswith(p, ".git") ||
 		startswith(p, ".vscode") ||
 		abs_path == this_file
@@ -423,7 +445,7 @@ dir_changed_time = let
 	valx, set_valx = @use_state(time())
 
 	@info "Starting watch task"
-	
+
 	@use_task([dir]) do
 		BetterFileWatching.watch_folder(dir) do e
 			@debug "File event" e
@@ -448,7 +470,7 @@ allfiles = filter(PlutoSliderServer.list_files_recursive(dir)) do p
 	# reference to retrigger when files change
 	dir_changed_time
 	manual_update_trigger
-	
+
 	!ignore(joinpath(dir, p))
 end
 
@@ -527,7 +549,7 @@ function final_url(input::TemplateInput, output::TemplateOutput)::String
 		# Examples:
 		#   a/b.jl   	->    a/b/index.html
 		#   a/index.jl  ->    a/index.html
-		
+
 		in_dir, in_filename = splitdir(input.relative_path)
 		in_name, in_ext = splitext(in_filename)
 
@@ -609,15 +631,15 @@ SafeString(x::Vector{UInt8}) = String(copy(x))
 
 # ╔═╡ 995c6810-8df2-483d-a87a-2277af0d43bd
 function template_handler(
-	::Union{Val{Symbol(".jlhtml")}}, 
+	::Union{Val{Symbol(".jlhtml")}},
 	input::TemplateInput)::TemplateOutput
 	s = SafeString(input.contents)
-	result = run_mdx(s; 
-		data=input.frontmatter, 
+	result = run_mdx(s;
+		data=input.frontmatter,
 		cm=false,
 		filename=input.absolute_path,
 	)
-	
+
 	return TemplateOutput(;
 		contents=result.contents,
 		search_index_data=Gumbo.text(Gumbo.parsehtml(result.contents).root),
@@ -630,14 +652,14 @@ function template_handler(
 	::Union{
 		Val{Symbol(".jlmd")},
 		Val{Symbol(".md")}
-	}, 
+	},
 	input::TemplateInput)::TemplateOutput
 	s = SafeString(input.contents)
-	result = run_mdx(s; 
+	result = run_mdx(s;
 		data=input.frontmatter,
 		filename=input.absolute_path,
 	)
-	
+
 	return TemplateOutput(;
 		contents=result.contents,
 		search_index_data=Gumbo.text(Gumbo.parsehtml(result.contents).root),
@@ -645,42 +667,13 @@ function template_handler(
 	)
 end
 
-# ╔═╡ 4013400c-acb4-40fa-a826-fd0cbae09e7e
-reprhtml(x) = repr(MIME"text/html"(), x)
-
-# ╔═╡ 5b325b50-8984-44c6-8677-3c6bc5c2b0b1
-"A magic token that will turn into a relative URL pointing to the website root when used in output."
-const root_url = "++magic#root#url~$(string(rand(UInt128),base=62))++"
-
-# ╔═╡ 0d2b7382-2ddf-48c3-90c8-bc22de454c97
-"""
-```julia
-register_asset(contents, original_name::String)
-```
-
-Place an asset in the `/generated_assets/` subfolder of the output directory and return a [`RegisteredAsset`](@ref) referencing it for later use. (The original filename will be sanitized, and a content hash will be appended.)
-
-To be used inside `process_file` methods which need to generate additional files. You can use `registered_asset.url` to get a location-independent href to the result.
-"""
-function register_asset(contents, original_name::String)
-	h = myhash(contents)
-	n, e = splitext(basename(original_name))
-	
-	
-	mkpath(joinpath(output_dir, "generated_assets"))
-	newpath = joinpath(output_dir, "generated_assets", "$(legalize(n))_$(h)$(e)")
-	write(newpath, contents)
-	rel = relpath(newpath, output_dir)
-	return RegisteredAsset(joinpath(root_url, rel), rel, newpath)
-end
-
 # ╔═╡ e2510a44-df48-4c05-9453-8822deadce24
 function template_handler(
-	::Val{Symbol(".jl")}, 
+	::Val{Symbol(".jl")},
 	input::TemplateInput
 )::TemplateOutput
 
-	
+
 	if Pluto.is_pluto_notebook(input.absolute_path)
 		temp_out = mktempdir()
 		Logging.with_logger(Logging.NullLogger()) do
@@ -703,9 +696,9 @@ function template_handler(
 
 		# TODO these relative paths can't be right...
 		h = @htl """
-		<pluto-editor 
-			statefile=$(reg_s.url) 
-			notebookfile=$(reg_n.url) 
+		<pluto-editor
+			statefile=$(reg_s.url)
+			notebookfile=$(reg_n.url)
 			slider_server_url=$(pluto_deploy_settings.Export.slider_server_url)
 			binder_url=$(pluto_deploy_settings.Export.binder_url)
 			disable_ui
@@ -713,20 +706,20 @@ function template_handler(
 		"""
 
 		frontmatter = Pluto.frontmatter(input.absolute_path)
-		
+
 		return TemplateOutput(;
 			contents = repr(MIME"text/html"(), h),
 			search_index_data=prose_from_code(SafeString(input.contents)),
 			frontmatter,
 		)
 	else
-		
+
 		s = SafeString(input.contents)
-	
+
 		h = @htl """
 		<pre class="language-julia"><code>$(s)</code></pre>
 		"""
-		
+
 		return TemplateOutput(;
 			contents=repr(MIME"text/html"(), h),
 			search_index_data=prose_from_code(s),
@@ -744,7 +737,7 @@ template_results = let
 	# let's go! running all the template handlers
 	progressmap_async(allfiles; ntasks=NUM_PARALLEL_WORKERS) do f
 		absolute_path = joinpath(dir, f)
-		
+
 		input = TemplateInput(;
 			contents=read(absolute_path),
 			absolute_path,
@@ -753,7 +746,7 @@ template_results = let
 				"root_url" => root_url,
 			),
 		)
-		
+
 		output = try
 			template_handler(Val(Symbol(splitext(f)[2])), input)
 		catch e
@@ -803,10 +796,10 @@ Recursively apply the layout specified in the frontmatter, returning a new `Page
 """
 function process_layouts(page::Page)::Page
 	output = page.output
-	
+
 	if haskey(output.frontmatter, "layout")
 		@assert output.file_extension == "html" "Layout is not (yet) supported on non-HTML outputs."
-		
+
 		layoutname = output.frontmatter["layout"]
 		@assert layoutname isa String
 		layout_file = joinpath(dir, "_includes", layoutname)
@@ -824,12 +817,12 @@ function process_layouts(page::Page)::Page
 		  key = splitext(basename(data_file))[1]
 		  metadata[key] = include(data_file)
 	    end
-		
+
 		input = TemplateInput(;
 			contents=read(layout_file),
 			absolute_path=layout_file,
 			relative_path=relpath(layout_file, dir),
-			frontmatter=merge(output.frontmatter, 
+			frontmatter=merge(output.frontmatter,
 				FrontMatter(
 					"content" => content,
 					"page" => page,
@@ -841,11 +834,11 @@ function process_layouts(page::Page)::Page
 		)
 
 		result = template_handler(Val(Symbol(splitext(layout_file)[2])), input)
-		
+
 		@assert result.file_extension == "html" "Non-HTML output from Layouts is not (yet) supported."
 
 
-		
+
 		old_frontmatter = copy(output.frontmatter)
 		delete!(old_frontmatter, "layout")
 		new_frontmatter = merge(old_frontmatter, result.frontmatter)
@@ -873,7 +866,7 @@ collected_search_index_data = [
 	(
 		url=page.url::String,
 		title=get(
-			page.output.frontmatter, "title", 
+			page.output.frontmatter, "title",
 			splitext(basename(page.input.relative_path))[1]
 		)::String,
 		tags=get(page.output.frontmatter, "tags", String[]),
@@ -884,7 +877,7 @@ collected_search_index_data = [
 
 # ╔═╡ 1be06e4b-6072-46c3-a63d-aa95e51c43b4
 write(
-	joinpath(output_dir, "pp_search_data.json"), 
+	joinpath(output_dir, "pp_search_data.json"),
 	JSON.json(collected_search_index_data)
 )
 
@@ -892,20 +885,27 @@ write(
 process_results = map(rendered_results) do page
 	input = page.input
 	output = page.output
-	
+
 	if output !== nothing && output.contents !== nothing
-		
+
 		# TODO: use front matter for permalink
 
 		output_path2 = joinpath(output_dir, page.full_url)
 		mkpath(output_path2 |> dirname)
 		# Our magic root url:
 		# in Julia, you can safely call `String` and `replace` on arbitrary, non-utf8 data :)
-		write(output_path2, 
+		write(output_path2,
 			replace(SafeString(output.contents), root_url => relpath(output_dir, output_path2 |> dirname))
 		)
 	end
 end
+
+# ╔═╡ 4013400c-acb4-40fa-a826-fd0cbae09e7e
+reprhtml(x) = repr(MIME"text/html"(), x)
+
+# ╔═╡ 5b325b50-8984-44c6-8677-3c6bc5c2b0b1
+"A magic token that will turn into a relative URL pointing to the website root when used in output."
+const root_url = "++magic#root#url~$(string(rand(UInt128),base=62))++"
 
 # ╔═╡ 70fa9af8-31f9-4e47-b36b-828c88166b3d
 md"""
