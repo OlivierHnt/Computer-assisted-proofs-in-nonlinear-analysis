@@ -29,7 +29,7 @@ $(begin
 end)<html lang="en">
 <head>
 
-<title>$(f("title", splitext(basename(page.input.relative_path))[1])) — $(metadata["course_info"]["course_name"]) </title>
+<title>$(f("title", splitext(basename(page.input.relative_path))[1])) — Computer-assisted proofs in nonlinear analysis</title>
 $(let d = f("description", nothing)
     if d !== nothing
         @htl("""<meta name="description" content=$(d) />""")
@@ -62,23 +62,21 @@ $(pluto_head)
         <ul>
             <li class="sidebar-about">
                 <div class="course-title">
-                    <h1><a href="$(root_url)"><span>$(metadata["course_info"]["course_name"])</span></a></h1>
-                    <h2><span>$(metadata["course_info"]["course_subtitle"])</span></h2>
+                    <h1><a href="$(root_url)"><span>Computer-assisted proofs in nonlinear analysis</span></a></h1>
                 </div>
                 <div class="authors">
-                    by<br>$(let
-                        authors = metadata["course_info"]["authors"]
-                        nauthors = length(authors)
-                        map(enumerate(authors)) do (i, (author_name, author_link))
-                            sep = i == nauthors ?
-                                @htl("""<a href="$(author_link)" target="_blank">$(author_name)</a>""") :
-                                @htl("""<a href="$(author_link)" target="_blank">$(author_name)</a>,<br>""")
-                        end
-                    end)
+                    by<br>
+                    <a href="https://math.vu.nl/~janbouwe/" target="_blank">Jan Bouwe van den Berg</a>,
+                    <a href="https://sites.google.com/site/maximebreden/" target="_blank">Maxime Breden</a>,<br>
+                    <a href="https://olivierhnt.github.io/" target="_blank">Olivier Hénot</a>,<br>
+                    <a href="https://www.math.mcgill.ca/jplessard/Home.html" target="_blank">Jean-Philippe Lessard</a>,<br>
+                    <a href="http://cosweb1.fau.edu/~jmirelesjames/index.html" target="_blank">Jason D. Mireles James</a>
                 </div>
             </li>
         $(let
-            sections = metadata["sidebar"]
+            sidebar_data = Base.include(@__MODULE__, joinpath(@__DIR__, "..", "sidebar_data.jl"))
+            sections = sidebar_data["main"]
+
             [
                 @htl("""
                 <li>
@@ -111,47 +109,26 @@ $(pluto_head)
                         else
                             @htl("""<li class=$(class)><a href=$(href) title=$(desc)><span class="entry-number">Exercise $(homework_number):</span> $(name)</a></li>""")
                         end
-                    end for other_page in collections[section_id].pages
+                    end for other_page in pages
                 ])
                 </ul>
                 </li>
                 """)
-                for (section_id, section_name) in sections
+                for (section_name, pages) in sections
             ]
         end)
                 <li><hr></li>
-            <li class="sidebar-about">
-                <div class="semester-details">
-                    <a style="cursor: default">$(metadata["course_info"]["semester"])</a>
-                    <div class="course-numbers"><span>$(metadata["course_info"]["code"])</span></div>
-                </div>
-                <!-- <div class="logos">
-                    <picture title="$(metadata["course_info"]["institution"])">
-                        <img src="$(root_url)/assets/$(metadata["course_info"]["institution_logo"])">
-                    </picture>
-                    <picture title="Julia Programming Language">
-                        <source srcset="$(root_url)/assets/julia-logo-dark.svg" media="(prefers-color-scheme: dark)" />
-                        <img src="$(root_url)/assets/julia-logo-color.svg">
-                    </picture>
-                </div> -->
-            </li>
         </ul>
         </div>
         </nav>
         <div id="pages-content">
-           $(isempty(f("title", "")) ? nothing : @htl("""<div class="lecture-header" >
-                $(if !isempty(f("homework_number", ""))
-                @htl("""<p class="number">Exercise $(f("homework_number", ""))</p>""")
-                elseif !isempty(f("chapter", "")) && !isempty(f("section", ""))
-                @htl("""<p class="number">Section $(f("chapter", "-")).$(f("section", "-"))</p>""")
-                else
-                nothing
-                end)
+           $(any(contains("lecture"), f("tags", String[])) ? @htl("""
+           <div class="lecture-header" >
+                <p class="number">Section $(f("chapter", "-")).$(f("section", "-"))</p>
                 <h1>$(
                     f("title", basename(page.input.relative_path))
                 )</h1>
 
-                $(!isempty(f("youtube_id", "")) ? @htl("""
                 <div class="video">
 
                     <h4>Lecture Video</h4>
@@ -159,8 +136,8 @@ $(pluto_head)
                         <lite-youtube videoid=$(f("youtube_id", "notfound")) params="modestbranding=1&rel=0"></lite-youtube>
                     </div>
                 </div>
-                """) : nothing)
-            </div>"""))
+            </div>
+            """) : nothing)
         $(content)
         </div>
     </div>

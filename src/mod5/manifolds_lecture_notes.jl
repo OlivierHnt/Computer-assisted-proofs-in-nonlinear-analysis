@@ -20,7 +20,6 @@ using RadiiPolynomial, LinearAlgebra
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""<style>
 main {
-    max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
     text-align: justify;

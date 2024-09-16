@@ -12,15 +12,14 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ d0e623ee-b096-4a27-977d-dc32567d6020
-using PlutoTeachingTools, PlutoUI# packages for the notebook
+using PlutoTeachingTools, PlutoUI # packages for the notebook
 
 # ╔═╡ 018ecc45-8638-4a59-b561-efb086bdc751
 using RadiiPolynomial, Plots
 
-# ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
+# ╔═╡ 564092a6-546d-4772-a3a4-9f78a1801667
 html"""<style>
 main {
-    max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
     text-align: justify;
@@ -1459,7 +1458,7 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╟─7fc40507-eda3-474d-a454-04e9173a7adb
+# ╟─564092a6-546d-4772-a3a4-9f78a1801667
 # ╠═d0e623ee-b096-4a27-977d-dc32567d6020
 # ╠═018ecc45-8638-4a59-b561-efb086bdc751
 # ╟─91bb507e-5871-46f4-9042-0ce4cc97617c

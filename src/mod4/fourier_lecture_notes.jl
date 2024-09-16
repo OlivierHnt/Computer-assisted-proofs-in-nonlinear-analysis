@@ -20,7 +20,6 @@ using RadiiPolynomial, Plots
 # ╔═╡ 044aabf3-b817-4266-93a9-a4cabce1ec4e
 html"""<style>
 main {
-    max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
     text-align: justify;

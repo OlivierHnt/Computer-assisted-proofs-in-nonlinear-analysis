@@ -22,10 +22,19 @@ macro bind(def, element)
 end
 
 # ╔═╡ d0e623ee-b096-4a27-977d-dc32567d6020
-using PlutoTeachingTools, PlutoUI# packages for the notebook
+using PlutoTeachingTools, PlutoUI # packages for the notebook
 
 # ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
 using RadiiPolynomial, Plots
+
+# ╔═╡ a5169b4b-f0d4-4f66-8198-0aec5f8e135a
+html"""<style>
+main {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: justify;
+}
+"""
 
 # ╔═╡ b3845641-1537-4a27-8550-1eff30900a6b
 TableOfContents(title="Table of Contents"; indent=true, depth=4, aside=true)
@@ -1451,6 +1460,7 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
+# ╟─a5169b4b-f0d4-4f66-8198-0aec5f8e135a
 # ╠═d0e623ee-b096-4a27-977d-dc32567d6020
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╟─b3845641-1537-4a27-8550-1eff30900a6b

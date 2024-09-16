@@ -1,4 +1,10 @@
 ---
 tags: ["homepage"]
-layout: "welcome.jlmd"
+layout: "layout.jlhtml"
 ---
+
+<link rel="stylesheet" href="$(root_url)/assets/styles/homepage.css" type="text/css"/>
+
+<div id="title" class="banner">
+    <h1>Computer-assisted proofs in nonlinear analysis</h1>
+</div>
