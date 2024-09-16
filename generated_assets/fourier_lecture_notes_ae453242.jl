@@ -2,75 +2,121 @@
 # v0.19.46
 
 #> [frontmatter]
-#> chapter = 2
+#> chapter = 4
 #> order = 1
-#> title = "Lecture notes: Taylor sequence"
-#> tags = ["module2"]
+#> title = "Lecture notes: periodic orbit problems"
+#> tags = ["module4"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ d0e623ee-b096-4a27-977d-dc32567d6020
-using PlutoTeachingTools, PlutoUI
+# ╔═╡ 4b949c9b-4669-4d5a-b74c-0840bf375ddd
+using PlutoTeachingTools, PlutoUI # packages for the notebook
 
-# ╔═╡ 018ecc45-8638-4a59-b561-efb086bdc751
+# ╔═╡ db7c8b55-56bf-493c-a4ff-1ba9610a41ed
 using RadiiPolynomial, Plots
 
-# ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
+# ╔═╡ 044aabf3-b817-4266-93a9-a4cabce1ec4e
 html"""<style>
 main {
-    max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
 """
 
-# ╔═╡ d5a510a3-c518-47ed-96bc-7bb22e3b08b5
-md"""
-In this lecture we will learn how to perform a rigorous square root operation for Taylor series.
-This constitutes the first example of infinite dimensional problems.
+# ╔═╡ 2ae8d07b-a05e-4136-a121-6317641916fe
+TableOfContents(title="Table of Contents"; indent=true, depth=4, aside=true)
 
-# Simple example: square root in $\ell^1$
+# ╔═╡ c33dc650-3f94-11ef-398a-8bbc4a2b69b8
+md"""
+We continue to do CAPs to find solutions of ODEs, but rather than looking at an initial value problem, we now look for *periodic* solutions. The setting is again infinite dimensional, with some small differences:
+- we will use **Fourier series** rather than Taylor series
+- the Fourier coefficients are two-sided sequences of complex numbers
+- the convolution product is given by an infinite series
+- the problem of finding a closed orbit is global in the sense that there is no equivalent of "short time" integration
+
+# Simple example: a forced, damped, nonlinear pendulum
 
 ## Introduction and setup
 
-We consider the simple quadratic equation
+We consider the second order ODE
 
 ```math
-a*a = b,
+u''(t) + \beta_1 u'(t) + \beta_2 u(t) - u(t)^2 = \beta_3 \cos(t),
 ```
 
-where $a, b \in \ell^1$. That is, given $b \in \ell^1$ compute the square root $a \in \ell^1$ relative to the Cauchy product operation.
-
-#### Cauchy product
-
-The Cauchy product is given by
-
-```math
-(a*b)_n \overset{\text{def}}{=} \sum_{k=0}^n a_k b_{n-k}, \qquad n \ge 0.
-```
+where $\beta_1, \beta_2, \beta_3$ are parameters, and we aim to find a periodic solution $u(t)$.
+Since the (minimal) period of the forcing is $2\pi$, we will look for a periodic solution of period $2\pi$.
 """
 
-# ╔═╡ f68f02a2-43cb-492a-a97f-0614c5266e03
-Markdown.MD(Markdown.Admonition("tip", "Lemma",
-[md"""
-If $u(t) = \sum_{n \ge 0} a_n t^n$ and $v(t) = \sum_{n \ge 0} b_n t^n$ then for their product we have $u(t) v(t) = \sum_{n \ge 0} (a*b)_n t^n$.
-"""]))
+# ╔═╡ 1bfcc76a-266a-4784-b76b-3871445e603e
+Foldable("""Why is this a "simple" example?""", md"""
+A more natural problem to look at is to find a periodic orbit in a system of ODEs. In such an *autonomous* system of ODEs the period of a periodic solution is unknown a priori, and determining the period $\tau$ is thus part of the problem, in addition to finding the unknown $\tau$-periodic function $u(t)$. Furthermore, when $u(t)$ is a periodic solution, so is $u(t-t_0)$ for any time shift $t_0$. In particular, periodic solutions are not isolated unless an additional phase condition is imposed. A final complication is that for a *system* of equations the bookkeeping is more involved than for a single equation.
 
-# ╔═╡ 10958af8-a261-42d7-aa32-6f412142d2f0
+Although these difficulties can be overcome, the notation can get in the way of understanding. Since we want to focus here on how to deal with periodic functions, we choose to look at a scalar, non-autonomous problem where the period is given.
+""")
+
+# ╔═╡ 8f3e96dc-0cdc-411e-8f94-e9e47488abf3
 md"""
-An implementation of the Cauchy product is given below.
+#### Fourier series
+
+We substitute the Fourier series
+
+```math
+u(t) = \sum_{k \in \mathbb{Z}} a_k e^{i k t},
+```
+
+in the ODE to find the infinite set of equations
+
+```math
+\lambda_k a_k + (a*a)_k + c_k = 0, \qquad k \in \mathbb{Z},
+```
+
+where
+
+```math
+\lambda_k \overset{\text{def}}{=} k^2 - i \beta_1 k - \beta_2
+```
+
+and $c$ represents the Fourier transform of $\beta_3 \cos(t)$, given by
+
+```math
+c_k
+\overset{\text{def}}{=}
+\begin{cases}
+\frac{\beta_3}{2}, & k = \pm 1, \\
+0, & k \ne \pm 1.
+\end{cases}
+```
+
+
+#### Convolution
+
+The convolution product is given by
+
+```math
+(a*b)_k \overset{\text{def}}{=} \sum_{l \in \mathbb{Z}} a_{k-l} b_l, \qquad k \in \mathbb{Z}.
+```
 """
 
-# ╔═╡ 0e917ec7-6f7b-498a-a544-c84f8e17d93f
+# ╔═╡ 47e39d6a-231e-40d1-906e-eeafe1b1f807
+Markdown.MD(Markdown.Admonition("tip", "Lemma", [md"""If $u(t) = \sum_{k \in \mathbb{Z}} a_k e^{i k t}$ and $v(t) = \sum_{k \in \mathbb{Z}} b_k e^{i k t}$, then for their product we have $u(t) v(t) = \sum_{k \in \mathbb{Z}} (a * b)_k e^{i k t}$."""]))
+
+# ╔═╡ ac3e3cf5-e5c8-4863-8c7b-ccd5f58a3073
+md"""
+In particular, whenever $a_k = 0$ for $|k| > K_a$ and $b_k = 0$ for $|k| > K_b$ the convolution can be computed.
+The RadiiPolynomial library already features the convolution for sequences of Fourier coefficients, see for example:
+"""
+
+# ╔═╡ 98f5889c-2233-4b7a-b195-2380c1450d13
 begin
-	poly = Sequence(Taylor(1), [1.0, 1.0]) # 1 + x
-	poly * poly
+	cost = Sequence(Fourier(1, 1.0), [0.5, 0.0, 0.5]) # cos(x) (order: 1, frequency: 1.0)
+	cost * cost
 end
 
-# ╔═╡ b33d8335-0abd-4018-adfa-63707eac6a22
+# ╔═╡ c4d9c4f0-fd89-4a2a-96a7-17c4ba6dd747
 md"""
 #### Norm
 
@@ -80,155 +126,602 @@ We will work in the sequence space
 X
 \overset{\text{def}}{=}
 \left\{
-a \in \mathbb{R}^\mathbb{N} \, : \, \|a\|_X \overset{\text{def}}{=} \sum_{n \ge 0} |a_n| < \infty
+a \in \mathbb{C}^\mathbb{Z} \, : \, \| a \|_X \overset{\text{def}}{=} \sum_{k \in \mathbb{Z}} |a_k| \nu^{|k|} < \infty
 \right\}.
 ```
+
+We will choose the value of $\nu$ later.
 """
 
-# ╔═╡ 4bd0c9e7-ffb2-4c13-b93d-96cfc530bff7
-Foldable("Is X with this norm a Banach space?", md"""**Exercise**: Yes""")
+# ╔═╡ 766164f3-eef3-4798-bf7c-afdca52d3ba0
+Markdown.MD(Markdown.Admonition("tip", "Lemma",[md"""If $a \in X$ for some $\nu \ge 1$, then the Fourier series $\sum_{k \in \mathbb{Z}} a_k e^{i k t}$ converges uniformly. If $\nu > 1$, then term-by-term differentiation up to any order of the Fourier series is justified."""]))
 
-# ╔═╡ 6bb627ea-0b12-4495-8b39-c79bc5a35890
+# ╔═╡ bbf2e943-8c5c-469f-a2f3-5f8b758f6638
+Foldable("Is X a Banach space?", md"""**Exercise**: Yes""")
+
+# ╔═╡ f91abfa7-8a8f-4204-95d9-637c622dd720
 md"""
-The space $X$ together with $*$ forms a Banach algebra.
+The product and the norm play together nicely: they give the space $X$ the structure of a Banach algebra, as expressed by the following lemma.
 """
 
-# ╔═╡ e5754113-7f92-4946-a684-99d9bd5d830f
-Markdown.MD(Markdown.Admonition("tip", "Lemma (Banach algebra property)", [md"""For any $a, b \in X$ we have $\|a*b\|_X \le \|a\|_X \|b\|_X$."""]))
+# ╔═╡ 8f6431ed-346c-4c51-83c4-ea7ec12a8d60
+Markdown.MD(Markdown.Admonition("tip", "Lemma (Banach algebra property)", [md"""For any $\nu \ge 1$ and $a, b \in X$ we have $\| a * b \|_X \le \| a \|_X \| b \|_X$."""]))
 
-# ╔═╡ 2f541fb5-79a8-4755-a611-a14fdf3f532b
-Foldable("""Proof""", md"""**Exercise** (rearrange the series and use the triangle inequality)""")
-
-# ╔═╡ 9f5cf201-871a-4afb-95ed-4bdba6152d23
+# ╔═╡ c5cfe80e-1728-4393-b837-187e3e7d49a9
+Foldable("""Proof""",
 md"""
-The multiplication operator $M_a (b) := a * b$ can be represented by an infinite dimensional matrix. For our proof we will only need to construct a finite part of it.
+**Exercise** (hint: rearrange the series and use the triangle inequality).
+""")
+
+# ╔═╡ 39d13194-bca9-47c1-a686-2ea5f9d62289
+md"""
+The operator norm (recall: $\|\Gamma\|_{B(X)}$ is the smallest number such that $\|\Gamma a\|_X \le \|\Gamma\|_{B(X)} \|a\|_X$ for all $a \in X$) has a particularly nice representation for weighted $\ell^1$ spaces such as $X$.
 """
 
-# ╔═╡ 27de2c2a-f7b6-46c5-97e7-e15341706cd5
-project(Multiplication(poly), space(poly), space(poly))
+# ╔═╡ 7e78028c-f70b-4474-8bee-783ad7d99d56
+Markdown.MD(Markdown.Admonition("tip", "Lemma (Operator norm)", [
+md"""
+Let $\Gamma$ be a bounded operator on $X$, represented by $(\Gamma a)_k = \sum_{l \in \mathbb{Z}} \Gamma_{k,l} a_l$.
+Then
 
-# ╔═╡ 90fe50ee-89e8-4047-a115-533c90082957
+```math
+\|\Gamma\|_{B(X)} = \sup_{l \in \mathbb{Z}} \frac{1}{\nu^{|l|}} \sum_{k \in \mathbb{Z}} |\Gamma_{k,l}| \nu^{|k|}.
+```
+
+Let $e_k$ denote the basis vector given by $(e_k)_l = \delta_{kl}$ for any $k, l \in \mathbb{Z}$.
+Then
+
+```math
+\|\Gamma\|_{B(X)} = \sup_{k \in \mathbb{Z}} \frac{\|\Gamma e_k\|_X}{\|e_k\|_X}.
+```
+"""]))
+
+# ╔═╡ 6e49233f-1d19-461a-a098-c2c8cb9a84d4
+md"""
+Once again, the RadiiPolynomial library already provides an implementation of the (operator) norm for the case of finitely represented elements/operators in/on $X$. For instance,
+"""
+
+# ╔═╡ bb7a8043-cbe3-4333-ac0a-a9d5faca1b00
+begin
+	# norm of cos(t) with geometric weight ν = 2
+	println(norm(cost, Ell1(GeometricWeight(2.0))))
+	# operator norm of the (truncated) multiplication operator associated with cos(t)
+	println(opnorm(project(Multiplication(cost), space(cost), space(cost)), Ell1(GeometricWeight(2.0))))
+end
+
+# ╔═╡ 8d7fb15d-32d3-4fbb-9d06-c8ec1ed7d00e
 md"""
 ## Zero-finding problem
 
-We define the zero-finding problem $F(a)=0$ on $X$ by
+We define the zero-finding problem $F(a) = 0$ on $X$ by
 
 ```math
-F_n(a) \overset{\text{def}}{=} (a*a)_n - b_n, \qquad n \ge 0.
+F_k(a) \overset{\text{def}}{=} a_k + \lambda_k^{-1} ((a*a)_k +c_k), \qquad k \in \mathbb{Z}.
 ```
+"""
 
+# ╔═╡ b2defc79-da78-47c8-bb78-44cb9000ff58
+Foldable("""Why divide by λ?""",
+md"""
+Dividing by $\lambda_k$ is a choice that simplifies the linear term, which is beneficial for some of the algebra. In terms of estimates it merely shifts the difficulty to the nonlinear term. Working with the alternative zero-finding problem $G_k(a) \overset{\text{def}}{=} \lambda_k a_k + (a*a)_k + c_k$ is also a perfectly valid choice.
+""")
+
+# ╔═╡ 9ab6ce17-0637-4008-be29-e0bf4fda4287
+Markdown.MD(Markdown.Admonition("note", "Conjugate symmetry",
+[md"""
+We denote the *complex conjugate* of $z \in \mathbb{C}$ by $\overline{z}$. For real-valued functions $u(t)$ the Fourier coefficients satisfy $a_{-k} = \overline{a_k}$ for all $k \in \mathbb{Z}$. Conversely, if $a_{-k} = \overline{a_k}$ for all $k \in \mathbb{Z}$, then the Fourier series is real-valued.
+
+For $a \in X$, we denote by $a^\dagger \in X$ the *conjugate* given by $(a^\dagger)_k \overset{\text{def}}{=} \overline{a_{-k}}$. With this notation, $a = a^\dagger$ implies that the Fourier series is real-valued.
+
+We note that $\lambda_{-k} = \overline{\lambda_k}$, $c^\dagger = \overline{c_k}$ and $a^\dagger * b^\dagger = (a * b)^\dagger$. Hence the zero finding problem is *conjugate symmetric*
+
+```math
+F(a^\dagger) = F(a)^\dagger.
+```
+"""]))
+
+# ╔═╡ 9002b709-ec9c-4063-a3a8-7b0c00834095
+Foldable("""Exercise""",
+md"""
+Prove that $a^\dagger * b^\dagger = (a * b)^\dagger$ and $F(a^\dagger) = F(a)^\dagger$.
+""")
+
+# ╔═╡ c2f4618c-dd22-477c-8fe7-324c82d3ff46
+md"""
+We now formalize that the zero-finding problem leads to periodic solutions of our differential equation.
+"""
+
+# ╔═╡ 7d79ed91-7cbb-48b4-966a-d3165f2a3d89
+Markdown.MD(Markdown.Admonition("tip", "Lemma",
+[md"""
+Let $\nu > 1$. If $a \in X$ with $a^\dagger = a$ such that $F(a) = 0$, then the corresponding Fourier series $u(t) = \sum_{k \in \mathbb{Z}} a_k e^{i k t}$ is a real-valued periodic solution of the differential equation $u''(t) + \beta_1 u'(t) + \beta_2 u(t) - u(t)^2 = \beta_3 \cos(t)$.
+"""]))
+
+# ╔═╡ c32d9839-7cb7-4018-bab1-b2211f05b71e
+md"""
 #### Finite dimensional projection
 
-We introduce a projection operator on a finite number of modes ($N+1$ coefficients) and its complement:
+We will need the projection operator on a finite number of modes ($2N+1$ coefficients)
+
+```math
+(\pi^{\leq N} a)_k
+\overset{\text{def}}{=}
+\begin{cases}
+a_k, & |k| \le K, \\
+0, & |k| > K,
+\end{cases}
+```
+
+and its complement $\pi^{> K} \overset{\text{def}}{=} I - \pi^{\le K}$. It follows that $a = \pi^{\le K} a + \pi^{> K} a$ and $\pi^{\le K} \pi^{> K} = \pi^{> K} \pi^{\le K} = 0$.
+"""
+
+# ╔═╡ bd76555d-aa30-4313-b4c4-c3f4b9000194
+Foldable("""Why is this so complicated?""",
+md"""
+The strange looking superscripts $\le K$ and $> K$ are in fact meant to indicate clearly which index values are involved.
+
+The projections provide a sleek way to do the algebra that essentially splits the problem into a finite dimensional part handled by the computer and an infinite dimensional (also referred as *tail*) part handled entirely by pen-and-paper analysis. It avoids writing down *infinite* matrices or formulas with a lot of indices.
+""")
+
+# ╔═╡ 06f3d467-af63-440d-b486-8da7f67c314f
+md"""It is convenient to introduce the diagonal linear operator
 
 $\begin{align}
-(\pi^{\leq N} a)_n := \begin{cases}
-a_n, & n \le N, \\
-0, & n > N,
-\end{cases}
-& \qquad\qquad
-(\pi^{>N} a)_n := \begin{cases}
-0, & n \le N, \\
-a_n, & n > N,
-\end{cases}
+(\Lambda a)_n
+\overset{\text{def}}{=}
+\lambda_n a_n.
 \end{align}$
 
-so that $a=\pi^{\leq N}a+\pi^{>N}a$ and $\pi^{\leq N}\pi^{>N}=0=\pi^{>N} \pi^{\le N}$.
+When $\beta_1 \neq 0$ then the inverse $\Lambda^{-1}$ is well-defined as a bounded operator on $X$.
 """
 
-# ╔═╡ 2c076e0d-5f35-40e3-9612-d5351b019559
-F(a, b, space) = project(a*a - b, space)
+# ╔═╡ df46f5c1-dbc6-4cf1-8e97-36b22c6b4c51
+function Λ⁻¹(β, space)
+	∂ = Derivative(1)
+	∂² = Derivative(2) # ∂^2
+	return -inv(∂² + β[1] * project(∂, space, space) + β[2]*I)
+end
 
-# ╔═╡ d3221c19-2720-43d5-9573-958ff69c5730
+# ╔═╡ 740167dc-5bcd-48c0-b1f0-a7bf5e1b6cb7
 md"""
-The derivative of $F(a)=a*a-b$ can now be written compactly as
+The range $\pi^{\le N}X$ is finite dimensional, and the restriction of $\pi^{\le N} F$ to $\pi^{\le N} X$, which we denote by $F^{\le N}$, is what we will work with in the computer. An implementation is given as follows:
+"""
+
+# ╔═╡ f0e42405-8068-455b-b17c-ede3e259f01d
+F(a, β, space) = a + Λ⁻¹(β, space) * (a*a + β[3] * Sequence(Fourier(1, 1.0), [0.5, 0.0, 0.5]))
+
+# ╔═╡ f5cc03ca-09eb-4419-9d51-78c956ee73d9
+md"""
+The derivative of $F(a) = a + \Lambda^{-1}(a*a + c)$ can now be written compactly as
 
 $\begin{align}
-DF(a)c = 2a*c.
+DF(a)b = b + 2 \Lambda^{-1} (a*b).
 \end{align}$
 """
 
-# ╔═╡ f688e26c-dc4f-4faa-bd69-82c2366bd696
-DF(a, space) = project(Multiplication(2a), space, space)
-
-# ╔═╡ af117c60-f433-4751-92ff-6d5a3744fbb1
+# ╔═╡ c5706263-a08a-4742-b376-b980232d6191
 md"""
-## The Newton-Kantorovich proof
-
-We choose $b_n = 1/3^n$.
+An implementation of the Jacobian $DF^{\leq N}$ of the truncated problem is given below.
 """
 
-# ╔═╡ 4fa97d29-4415-45e0-ac95-34cb1e74e55f
+# ╔═╡ 58ad1864-9446-489c-b175-bb6bed64b385
+DF(a, β, domain, codomain) = I + Λ⁻¹(β, codomain) * project(Multiplication(2a), domain, codomain)
+
+# ╔═╡ 24e1a5af-569e-4ae8-a3d7-19b7962db48b
+md"""
+#### Choosing the approximate inverse of the Jacobian
+
+We also use the projection to split $A$ into a finite part and a tail part:
+
+```math
+A
+\overset{\text{def}}{=}
+A^{\le N}\pi^{\le N} + I^{>N}\pi^{>N},
+```
+
+where $A^{\le N}$ is a linear map (to be chosen below) on $\pi^{\le N}X$ and $I^{>N}$ is the identity on $\pi^{> N}X$. Hence by construction one may also write $A$ in block diagonal form:
+
+```math
+A = \pi^{\le N}A^{\le N}\pi^{\le N} + \pi^{>N}I^{>N}\pi^{>N}.
+```
+"""
+
+# ╔═╡ 77b91c27-ddb0-4115-b0d0-a78f2729dadc
+Foldable("""Is A injective?""",
+md"""
+The operator $A$ is injective on $X$ if and only if $A^{\le N}$ is injective on $\pi^{\le N} X$. The operator $A^{\leq N}$ has a (finite) matrix representation, hence injectivity can be proven by computer.
+
+One may also observe that $A = I + \pi^{\le N} (A^{\le N} - I^{\le N}) \pi^{\le N}$, hence $A$ is of the form "identity plus compact operator" ($A$ is a Fredholm operator of index $0$).
+""")
+
+# ╔═╡ 4a9daa68-86ed-4327-98fc-03d436885d2e
+md"""
+## Numerics
+
+We consider the finite truncation $F^{\le K}$ and use a Newton algorithm to find a point $\bar{a} \in \pi^{\le K} X$ such that $\pi^{\le N} F (\bar{a}) \approx 0$. If the truncation dimensions $K$ is large enough we may hope that also $\pi^{> K} F (\bar{a}) \approx 0$, since we expect the coefficients of $\bar{a}$ to decrease for moderately large $k$.
+"""
+
+# ╔═╡ 3842ad29-ae9c-4743-b487-e76d94fb01cf
+md"""
+We choose parameter values
+"""
+
+# ╔═╡ 1688b3d8-8228-45ee-8729-22265a86484a
+Iβ = [I"0.1", I"4.0", I"1.0"] # in interval form
+
+# ╔═╡ aa150fa3-1729-43b1-bb55-73c741221760
+md"""
+and truncation dimension
+"""
+
+# ╔═╡ e1f6ef9b-5818-415a-8945-97b65288a433
+N = 10
+
+# ╔═╡ d0858eee-5086-4754-966f-de2940183573
+md"""
+To simplify some of the expressions appearing in the bounds, we will for convenience choose $K$ such that $K \ge \sqrt{\beta_3}$.
+"""
+
+# ╔═╡ 192507bd-8285-4581-8a6d-f9ff1b2c4793
+md"""
+We then run Newton iterations.
+"""
+
+# ╔═╡ 301bf3ed-b180-4c44-a92f-0f9f4c2509ed
 begin
-	N = 35
+	initialdata = zeros(ComplexF64, Fourier(N, 1.0)) # Fourier coefficients are complex-valued
 
-	tauBar = interval(1)/interval(3)
+	β = mid.(Iβ) # floats
 
-	bbar = zeros(Interval{Float64}, Taylor(N))
-	for n = 0:N
-		bbar[n] = tauBar^interval(n)
-	end
-
-	b = zeros(Taylor(N))
-	for n = 0:N
-		b[n] = mid(tauBar)^n
-	end
-
-	epsilonN = tauBar^interval(N+1) / (interval(1) - tauBar)
+	a0, success = newton(a -> (F(a, β, space(a)), DF(a, β, space(a), space(a))), initialdata)
+	conjugacy_symmetry!(a0) # symmetry
 end
 
-# ╔═╡ db4c62ae-bef8-4c90-8e54-e38e7ec357b0
-begin
-	a = zeros(Taylor(N))
-	a[0] = sqrt(b[0])
-	a, _ = newton(a -> (F(a, b, space(a)), DF(a, space(a))), a)
+# ╔═╡ a89606ee-b46f-4656-9cb9-d89850646593
+N ≥ sup(sqrt(β[3]))
 
-	abar = interval.(a)
-end
+# ╔═╡ aa320281-42ce-4035-8c55-1f44661737e2
+md"""
+We plot the approximate periodic solution
+"""
 
-# ╔═╡ db76f769-0281-4502-8065-e94f701bfa7a
+# ╔═╡ d5800e45-8809-46d6-9f41-7565e5b1cbfd
 begin
-	plot(LinRange(-1, 1, 101), t -> a(t); legend = false)
+	t = LinRange(0, 2π, 201)
+	plot(t, t -> real(a0(t)); legend = false)
 	xlabel!("t")
 	ylabel!("u")
-	xlims!(-1, 1)
+	xlims!(0, 2π)
 end
 
-# ╔═╡ cde7982c-8cd1-4369-be74-1c543704f933
+# ╔═╡ 5f3d91ee-14c2-4b5e-8e2a-a607d086eb51
+Foldable("""Initializing Newton's method""", md"""Finding a good starting point for Newton's method is not always easy. Here we were a bit lucky that a simple guess sufficed. For other parameter values one may need to study the solutions of the ODE in more detail using numerical integration.""")
+
+# ╔═╡ 936423fd-0d78-41da-8b49-5fca3c125547
 md"""
-We construct a numerical approximation of $\big(\pi^{\le N} DF(\bar{a}) \pi^{\le N}\big)^{-1}$.
+Next we compute a numerical inverse of the Jacobian $DF^{\le N}(\bar{a})$ and we denote this inverse matrix by $A^{\le N}$.
 """
 
-# ╔═╡ f3d4ab9f-24f6-4d65-93fc-e8155fe4f055
+# ╔═╡ e37811fa-cd67-424e-8707-25ad8534d293
+AN = inv(DF(a0, β, space(a0), space(a0)))
+
+# ╔═╡ 0b4e2571-cbec-4a4d-aac6-dd8b32e3f474
+Markdown.MD(Markdown.Admonition("note", "Remark on truncation dimension",
+[md"""
+It is not necessary to choose the finite truncation dimensions for $\bar{a} \in \pi^{\le N} X$ and $A^{\le N}$ equal. For purposes of exposition we do not introduce two different truncation dimension parameters here, but essentially the truncation dimension for $\bar{a}\in \pi^{\le N} X$ controls the size of the residue, while the truncation dimension for the approximate inverse $A^{\le N}$ controls the contractivity of the fixed point operator. These can in principle be controlled rather independently.
+"""]))
+
+# ╔═╡ 0d75d077-53c3-4f03-99d3-af796d973d66
+md"""
+## The Newton-Kantorovich proof
+"""
+
+# ╔═╡ b6cfde9d-357b-43e9-82ec-f88e8cb7ba8e
+md"""
+We choose a value for the weight $\nu$ in the Banach space norm.
+"""
+
+# ╔═╡ 671babb1-4b04-4d6a-8dba-79f807114d63
 begin
-	A = interval.(inv(DF(a, Taylor(N))))
-	normA = opnorm(A, 1) # matrix 1-norm
+	Iν = interval(1.1)
+	X = Ell1(GeometricWeight(Iν))
 end
 
-# ╔═╡ 55580d08-5668-4a98-9082-20792e7a58c8
+# ╔═╡ 83f772ea-aeec-49a3-baa2-d2fd8771c0a7
+md"""
+Since we want to prove something we need to resort to interval arithmetic. Hence we will need to convert $\bar{a}$ and $A$ to interval-valued variables.
+"""
+
+# ╔═╡ 1ace9001-93ae-46f2-98e6-7b371221beb3
 begin
-	YN = sum(abs.(A*F(abar, bbar, Taylor(N))))
-	Yinf = sum(abs.(F(abar, bbar, Taylor(2N))[N+1:end]))
-	Y_bound = YN + Yinf + epsilonN
+	Ia0 = interval.(a0)
+	IAN = interval.(AN)
+	nothing # supress output
 end
 
-# ╔═╡ 8bd6e02f-2b26-4ba4-affc-19038ea60e31
-function Z1Bound(a, A, N)
-	sum = zero(eltype(a))
-	for n = 1:N
-		sum = sum + abs(a[n])
-	end
-	return sum/a[0] + opnorm(I - A * DF(a, Taylor(N)), 1)
+# ╔═╡ eb2ae1fd-5062-436b-ac50-eb3b169bca42
+md"""
+We are now in the Newton-Kantorovich context and thus need to derive the appropriate bounds.
+
+
+
+#### Computable expression for $Y$
+
+This concerns the bound on the residue $A F(\bar{a})$. Determining the residue requires only a finite computation. Indeed, since $(\bar{a}*\bar{a})_n=0$ for $|n|>2N$ (why?) we infer that $\pi^{>2N} F(\bar{a})=0$, and $F(\bar{a})$ can be computed explicitly. In turn this implies that $A F(\bar{a})= \pi^{\leq 2N} A \pi^{\leq 2N} F(\bar{a})$. We conclude that $\|A F(\bar{a})\|_X= \|\pi^{\leq 2N} A \pi^{\leq 2N} F(\bar{a})\|_X $ requires only a finite computation, which we can perform with interval arithmetic to get a rigorous upper bound $Y \geq \|A F(\bar{a})\|_X$.
+"""
+
+# ╔═╡ 6307aecd-b4f7-49ea-b060-4b9236a5ae10
+function boundY(a, β, A, X)
+	N = order(a)
+	Fa = F(a, β, Fourier(2N, frequency(a)))
+	tail_Fa = copy(Fa)
+	tail_Fa[0:N] .= zero(eltype(Fa))
+	return norm(A * Fa, X) + norm(tail_Fa, X)
 end
 
-# ╔═╡ e782bccc-71fe-4170-9ac1-0027bbf1ad8a
-Z1_bound = Z1Bound(abar, A, N)
+# ╔═╡ 9bf0e55e-de5f-4ec9-92e9-5169d3d14302
+Y = boundY(Ia0, Iβ, IAN, X)
 
-# ╔═╡ 310397bd-ff77-44a3-b70c-7954ed944f37
-Z2_bound = interval(2)*normA
+# ╔═╡ 002c7c0a-2b38-4a31-9e08-a424fa5679b8
+md"""
+#### Computable expression for $Z_1$
 
-# ╔═╡ c187aff6-087d-43f5-8042-d3ea1d09ba7a
-r = interval_of_existence(Y_bound, Z1_bound, Z2_bound, Inf)
+This concerns the bound on the operator $I-A DF(\bar{a})$. In the analysis we will split the bound in a part which is computable by "brute force" and an estimate of the tail. The triangle inequality is often helpful for such arguments, but in our case the characterization of the operator norm gives an additional tool. In particular we will use that for any $M \in \mathbb{N}$ we have that
+
+$\begin{align}
+\|\Gamma\|_{B(X)} = \max \Big( \|\Gamma \pi^{\le M}\|_{B(X)}, \|\Gamma \pi^{> M}\|_{B(X)} \Big).
+\end{align}$
+
+We will make a suitable choice for $M$ later.
+"""
+
+# ╔═╡ 907f8fb5-859b-4751-b483-2006ba358d5c
+Markdown.MD(Markdown.Admonition("note", "Finite bandwidth",[md"""
+It follows from the expression for $DF(a)$ that $DF(\bar{a})$ is an finite bandwidth operator of width $N+1$.
+In particular, for any $M \in \mathbb{N}$ we have $\pi^{> M+N} DF(\bar{a}) \pi^{\leq M} = 0$ and for any $M \ge N$ we have that $\pi^{\le M-N} DF(\bar{a}) \pi^{> M} =0$.
+
+It follows from the block-diagonal structure of $A$ that this implies that
+
+$\begin{align}
+A DF(\bar{a}) \pi^{> 2N} =  (A^{\le N}\pi^{\le N} + I^{>N} \pi^{>N}) DF(\bar{a}) \pi^{> 2N} = \pi^{>N} DF(\bar{a}) \pi^{> 2N},
+\end{align}$
+
+and we see that this expression does not involve $A^{\le N}$.
+
+Furthermore, it also follows from the block-diagonal structure of $A$ and the finite bandwidth of $DF(\bar{a})$ that
+
+$\begin{align}
+A DF(\bar{a}) \pi^{\le 2N} = A \pi^{\le 3N} DF(\bar{a}) \pi^{\le 2N} = \pi^{\le 3N} A DF(\bar{a}) \pi^{\le 2N},
+\end{align}$
+
+which can be represented as a matrix and requires only a finite computation to evaluate.
+"""]))
+
+# ╔═╡ 3d28b669-3294-47fb-8221-688ec3ca5491
+Foldable("""Exercise""", md"""Provide the details proving the statements in the box above.""")
+
+# ╔═╡ d35592ba-c0cf-45fe-94c1-c58c3c0bc939
+md"""
+By choosing $M = 2N$ we can thus split the computation of the norm in two parts:
+
+$\begin{align}
+\|I-ADF(\bar{a})\|_{B(X)} = \max \Big( \|\pi^{\le 3N} [I-A DF(\bar{a})] \pi^{\le 2N}\|_{B(X)} , \| [I-ADF(\bar{a})] \pi^{>2N} \|_{B(X)} \Big).
+\end{align}$
+
+The latter term is computable thanks to the following lemma.
+"""
+
+# ╔═╡ d71cba6e-4f62-48d0-aa17-061e1f6bd744
+Markdown.MD(Markdown.Admonition("tip", "Lemma",[md"""
+Assume that $N \ge \sqrt{\beta_3}$.
+Then
+
+$\begin{align}
+\| [I-ADF(\bar{a})]\pi^{>2N} \|_{B(X)} =
+\max \left( \frac{\|[I-ADF(\bar{a})]e_{2N+1}\|_X}{\|e_{2N+1}\|_X} ,
+\frac{\|[I-ADF(\bar{a})]e_{-(2N+1)}\|_X}{\|e_{-(2N+1)}\|_X} \right).
+\end{align}$
+"""]))
+
+# ╔═╡ ac18ecec-5d4e-4d4d-99f1-d5cefcb1355d
+Foldable("""Proof""", md"""**Exercise**. Hint: for $|k| \geq 2N+1$
+we have $[I-ADF(\bar{a})]e_k= -2\Lambda^{-1} (\bar{a} * e_k)$ and it follows from monotonicity of $\lambda_n$ in $|n|$ for $|n|\geq \sqrt{\beta_3}$ that $\frac{\|\Lambda^{-1} (\bar{a} * e_k) \|_X}{\|e_{k}\|_X}$ decreases monotonically in $|k|$ for $|k|\geq 2N+1$. """)
+
+# ╔═╡ b6ae8c03-57aa-4a45-9d6a-9886421ee934
+md"""
+Collecting and summarizing the above results, we conclude that
+
+$\begin{align}
+\|I-ADF(\bar{a})\|_{B(X)} = \|\pi^{\le 3N+1}[I-ADF(\bar{a})]\pi^{\le 2N+1}\|_{B(X)}.
+\end{align}$
+
+The latter operator can be represented by a finite matrix and we can compute the operator norm $\|I-ADF(\bar{a})\|_{B(X)}$ using interval arithmetic to obtain the bound $Z_1$.
+"""
+
+# ╔═╡ a18bb200-3166-4c23-bcb9-dee71ff5035a
+Foldable("""Do we need to determine the norm of I-ADF(a̅) exactly?""", md"""No, we just need an estimate. But we need a pretty good estimate, since we can only succeed with the contraction argument if $Z_1<1$. A naive estimate like $\|I-ADF(\bar{a})\|_{B(X)} \leq \|I\|_{B(X)}+\|A\|_{B(X)}\|DF(\bar{a})\|_{B(X)}$ will certainly not work out. Indeed, we need to take advantage of the cancellations occurring in $I-ADF(\bar{a})$ due to $A$ being an approximate inverse of $DF(\bar{a})$.
+
+We are often willing to spend quite some computer power on getting a rather sharp bound.
+For the current problem we could also get away with a somewhat rougher bound,
+such as (provided $N\geq \sqrt{\beta_3}$)
+
+$\begin{align}
+Z_1=\max\left\{ \|\pi^{\leq 3N}[I- ADF(\bar{a})]\pi^{\leq 2N}\|_{B(X)} , \frac{2  \|\bar{a}\|_X}{|\lambda_{N+1}|} \right\} .
+\end{align}$
+
+We note that sharpness of the $Z_2$-bound is less of an issue, as it plays a considerably less critical role in the radii polynomial inequality.
+""")
+
+# ╔═╡ ac7b5711-b2ef-44dc-a272-c5d3f4e9cb74
+function boundZ₁(a, β, A, X)
+	domain = Fourier(2order(a), frequency(a))
+	codomain = Fourier(3order(a), frequency(a))
+	DFa = DF(a, β, domain, codomain)
+
+	Id = interval(I)
+	ext_A = complex(project(Id, codomain, codomain))
+	ext_A[-N:N,-N:N] = coefficients(A)
+
+	return opnorm(Id - ext_A * DFa, X)
+end
+
+# ╔═╡ 47ef9015-eae8-4b29-807f-d223754701d3
+Z₁ = boundZ₁(Ia0, Iβ, IAN, X)
+
+# ╔═╡ abdca76c-832e-42aa-98fc-8a6c2c03965e
+Foldable("""Injectivity of A revisited""", md"""**Exercise**: Prove that $\|I-A DF(\bar{a})\|_{B(X)}<1$ implies that $A$ is surjective on $X$.
+
+**Corollary**: The block-diagonal structure of $A$ implies that it follows from surjectivity of $A$ onto $X$ that $A^{\leq N}$ is surjective as an operator on $X^{\leq N}$. Since $X^{\leq N}$ is finite dimensional, this implies that $A^{\leq N}$  is injective on $X^{\leq N}$. We conclude that $A$ is also injective on $X$.
+""")
+
+# ╔═╡ 6f346c67-879a-4427-afd4-6acdeb17af21
+md"""
+#### Computable expression for $Z_2$
+
+This concerns the bound on the operator $A[DF(a)-DF(\bar{a})]$. Since this is a Lipschitz bound on the first derivative, one approach is to bound the second derivative. However, here we just do a direct computation to see that
+$A[DF(a)-DF(\bar{a})]b =2A\Lambda^{-1}[(a-\bar{a})*b]$, hence by the Banach algebra property and the definition of the operator norm we arrive at
+
+$\begin{align}
+\|A[DF(a)-DF(\bar{a})]b\|_X \leq 2 \|A\Lambda^{-1}\|_{B(X)} \|a-\bar{a}\|_X \|b\|_X.
+\end{align}$
+
+We thus need to compute (or bound) $2\|A\Lambda^{-1}\|_{B(X)}$.
+"""
+
+# ╔═╡ 1c2cf614-faba-4fd4-8ceb-2a5d1373d93a
+md"""
+Since the operator $\Lambda^{-1}$ is diagonal, it has a natural restriction to $\pi^{\leq N} X$. The next lemma shows that determining the operator norm $\|A\Lambda^{-1}\|_{B(X)}$ requires only a finite computation.
+"""
+
+# ╔═╡ 62cec2b5-e408-46a4-947a-ebc58745c1ec
+Markdown.MD(Markdown.Admonition("tip", "Lemma",[md"""Assume $N\geq\sqrt{\beta_3}$. Then
+$\|A\Lambda^{-1}\|_{B(X)} = \max\{ \|A^{\leq N} \Lambda^{-1}  \|_{B(\pi^{\leq N} X)} , |\lambda_{N+1}|^{-1}  \}$
+"""]))
+
+# ╔═╡ 84478c6d-e157-40dc-987b-80c7f4d11a68
+Foldable("""Proof""", md"""**Exercise**. Hint: consider $\|A\Lambda^{-1}e_n\|_X$ for $|n|\leq N$ and for $|n|>N$ separately.""")
+
+# ╔═╡ 271decf5-68cb-4c8f-9452-6354477f6131
+function boundZ₂(β, A, X)
+	N = order(domain(A))
+	2max(opnorm(Λ⁻¹(β, domain(A)) * A, X), abs((N+1)^2 - im * β[1] * (N+1) - β[2]))
+end
+
+# ╔═╡ 0d7146b3-3015-416b-aae8-697ac0850603
+Z₂ = boundZ₂(Iβ, IAN, X)
+
+# ╔═╡ a9f597fe-4058-47a8-8a39-8d6b36594a96
+md"""
+## Finishing the CAP
+
+We now evaluate the radii polynomial to finish the Newton-Kantorovich proof.
+"""
+
+# ╔═╡ 60b43603-9937-4869-b5fc-f74c1c18e710
+r = interval_of_existence(Y, Z₁, Z₂, Inf)
+
+# ╔═╡ eb1f2c71-60fc-4ee5-9716-f18dd5eb0d2d
+md"""
+#### Symmetry
+
+We made sure that the numerical approximation was conjugate symmetric: $\bar{a}^\dagger=\bar{a}$.
+"""
+
+# ╔═╡ 6df91aa3-ad36-4b9e-ba4a-4dfb46eb1d27
+conj(a0[N:-1:-N]) == a0[:]
+
+# ╔═╡ 49eae38b-786f-45fc-b331-3b01c32363a1
+md"""
+Hence the following lemma provides the final step of our proof.
+"""
+
+# ╔═╡ 35df9eed-5f22-4e26-b119-ea7354d2c762
+Markdown.MD(Markdown.Admonition("tip", "Lemma (symmetry of the solution)",
+[md"""
+Assume that $\bar{a}^\dagger=\bar{a}$ and that the assumptions of the Newton-Kantorovich theorem are satisfied for some $r=r_0>0$. Then the zero $\tilde{a}$ of $F$ such that $\|\tilde{a}-\bar{a}\|_X \leq r_0$ satisfies $\tilde{a}^\dagger = \tilde{a}$.
+"""]))
+
+# ╔═╡ a08b9683-8fe7-4e5f-b829-fde86f3f1894
+Foldable("""Proof""",
+md"""
+First, based on the symmetry $F(a^\dagger) = F(a)^\dagger$ of the zero-finding problem, we see that $F(\tilde{a}) = 0$ implies that $F(\tilde{a}^\dagger) = F(\tilde{a})^\dagger = 0$, hence $\tilde{a}^\dagger$ is a zero of $F$. Second, the norm on $X$ is such that $\|a^\dagger\|_X = \|a\|_X$ for all $a \in X$. We find that
+
+$\begin{align}
+\|\tilde{a}^\dagger-\bar{a}\|_X
+= \|\tilde{a}^\dagger-\bar{a}^\dagger\|_X
+= \|(\tilde{a}-\bar{a})^\dagger\|_X
+= \|\tilde{a}-\bar{a}\|_X \le r_0.
+\end{align}$
+
+Hence $\tilde{a}^\dagger$ is a zero of $F$ inside the ball of radius $r_0$ around $\bar{a}$, and since this zero is unique by the Newton-Kantorovich theorem, we conclude that $\tilde{a}^\dagger = \tilde{a}$.
+""")
+
+# ╔═╡ eef1afcd-4da9-4042-a7c9-0124070740f8
+md"""
+#### Conclusion
+
+We choose
+"""
+
+# ╔═╡ 238c9111-7dda-40e8-8297-9776fe77f7d9
+r₀ = interval(inf(r))
+
+# ╔═╡ 02740c7a-451f-452c-8c02-22a7a3b9fcc1
+md"""
+which satisfies $Y+Z_1 r_0+\frac{1}{2}Z_2 r_0^2 \leq r_0$ and $Z_1+Z_2 r_0 < 1$:
+"""
+
+# ╔═╡ 5ec5453e-2f01-41ed-b227-fa1759071fdc
+precedes(Y + Z₁*r₀ + Z₂*r₀^2 / 2, r₀)
+
+# ╔═╡ 2d2cbe63-1cf6-4e7b-afc8-514a927f8344
+strictprecedes(Z₁ + Z₂*r₀, interval(1))
+
+# ╔═╡ 3cc0fc2c-9512-41d6-9798-4e8cbec94c9e
+md"""The Newton-Kantorovich theorem implies that there is a periodic solution of the differential equation within distance $r_0$ of the approximation depicted in the figure below (with distance measured in the max-norm on $[0,2\pi]$)."""
+
+# ╔═╡ 26d06cfe-24cc-41ec-87d2-8e489865b5b8
+begin
+	plot(t, t -> real(a0(t)); legend = false, width = 2)
+	xlabel!("t")
+	ylabel!("u")
+	xlims!(0, 2π)
+	middle = (maximum(real.(a0.(t))) + minimum(real.(a0.(t)))) / 2
+	annotate!(π, middle, Plots.text("Capified", 50, :magenta; rotation = 30))
+end
+
+# ╔═╡ e40d36d5-93a6-4b76-bccd-c629f621b22b
+Foldable("""Exercise (error bound)""",
+md"""
+Prove that the error between the exact solution $\tilde{u}(t) = \sum_{k \in \mathbb{Z}} \tilde{a}_k e^{i k t}$ (i.e. $F(\tilde{a}) = 0$) and the approximation $\bar{u}(t) = \sum_{|k| \le K} \bar{a}_k e^{i k t}$ is indeed controlled by
+
+```math
+\max_{t \in [0, 2\pi]} | \tilde{u}(t) - \bar{u}(t)| \le r_0.
+```
+""")
+
+# ╔═╡ 9dc65809-74c2-4341-baa8-63900de08df4
+md"""
+# Next steps and further reading
+
+In this worksheet we discussed the setup of a CAP for a periodic solution in a simplified problem, including explicit estimates and code. These arguments can be generalized to the more general problem of finding a periodic orbit in a system of ODEs. As mentioned before, the main additional difficulties are the unknown period of the orbit, the phase condition, and the bookkeeping of the different components of the system.
+
+The Julia package [RadiiPolynomial.jl](https://olivierhnt.github.io/RadiiPolynomial.jl/stable/) provides convenient high-level support for such problems. In particular, the example of a periodic orbit in the Lorenz system is implemented and documented
+[here](https://olivierhnt.github.io/RadiiPolynomial.jl/stable/examples/infinite_dimensional_proofs/ode/lorenz_po/).
+
+
+
+#### A final note on interval arithmetic
+
+In the code provided in this notebook we used the Julia interval arithmetic library [IntervalArithmetic.jl](https://juliaintervals.github.io/IntervalArithmetic.jl/stable/). We took a bit of liberty by taking advantage of automatic conversion of floats and integers to intervals, when variables of these types are combined in elementary operations. The interval arithmetic library is not entirely happy about this:
+"""
+
+# ╔═╡ f3636af3-42bd-4a2d-a604-eae51db48996
+begin
+	[isguaranteed(Y)
+	 isguaranteed(Z₁)
+	 isguaranteed(Z₂)]
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -1456,34 +1949,99 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╠═d0e623ee-b096-4a27-977d-dc32567d6020
-# ╠═018ecc45-8638-4a59-b561-efb086bdc751
-# ╟─d5a510a3-c518-47ed-96bc-7bb22e3b08b5
-# ╟─f68f02a2-43cb-492a-a97f-0614c5266e03
-# ╟─10958af8-a261-42d7-aa32-6f412142d2f0
-# ╠═0e917ec7-6f7b-498a-a544-c84f8e17d93f
-# ╟─b33d8335-0abd-4018-adfa-63707eac6a22
-# ╟─4bd0c9e7-ffb2-4c13-b93d-96cfc530bff7
-# ╟─6bb627ea-0b12-4495-8b39-c79bc5a35890
-# ╟─e5754113-7f92-4946-a684-99d9bd5d830f
-# ╟─2f541fb5-79a8-4755-a611-a14fdf3f532b
-# ╟─9f5cf201-871a-4afb-95ed-4bdba6152d23
-# ╠═27de2c2a-f7b6-46c5-97e7-e15341706cd5
-# ╟─90fe50ee-89e8-4047-a115-533c90082957
-# ╠═2c076e0d-5f35-40e3-9612-d5351b019559
-# ╟─d3221c19-2720-43d5-9573-958ff69c5730
-# ╠═f688e26c-dc4f-4faa-bd69-82c2366bd696
-# ╟─af117c60-f433-4751-92ff-6d5a3744fbb1
-# ╠═4fa97d29-4415-45e0-ac95-34cb1e74e55f
-# ╠═db4c62ae-bef8-4c90-8e54-e38e7ec357b0
-# ╟─db76f769-0281-4502-8065-e94f701bfa7a
-# ╟─cde7982c-8cd1-4369-be74-1c543704f933
-# ╠═f3d4ab9f-24f6-4d65-93fc-e8155fe4f055
-# ╠═55580d08-5668-4a98-9082-20792e7a58c8
-# ╠═8bd6e02f-2b26-4ba4-affc-19038ea60e31
-# ╠═e782bccc-71fe-4170-9ac1-0027bbf1ad8a
-# ╠═310397bd-ff77-44a3-b70c-7954ed944f37
-# ╠═c187aff6-087d-43f5-8042-d3ea1d09ba7a
+# ╟─044aabf3-b817-4266-93a9-a4cabce1ec4e
+# ╠═4b949c9b-4669-4d5a-b74c-0840bf375ddd
+# ╠═db7c8b55-56bf-493c-a4ff-1ba9610a41ed
+# ╟─2ae8d07b-a05e-4136-a121-6317641916fe
+# ╟─c33dc650-3f94-11ef-398a-8bbc4a2b69b8
+# ╟─1bfcc76a-266a-4784-b76b-3871445e603e
+# ╟─8f3e96dc-0cdc-411e-8f94-e9e47488abf3
+# ╟─47e39d6a-231e-40d1-906e-eeafe1b1f807
+# ╟─ac3e3cf5-e5c8-4863-8c7b-ccd5f58a3073
+# ╠═98f5889c-2233-4b7a-b195-2380c1450d13
+# ╟─c4d9c4f0-fd89-4a2a-96a7-17c4ba6dd747
+# ╟─766164f3-eef3-4798-bf7c-afdca52d3ba0
+# ╟─bbf2e943-8c5c-469f-a2f3-5f8b758f6638
+# ╟─f91abfa7-8a8f-4204-95d9-637c622dd720
+# ╟─8f6431ed-346c-4c51-83c4-ea7ec12a8d60
+# ╟─c5cfe80e-1728-4393-b837-187e3e7d49a9
+# ╟─39d13194-bca9-47c1-a686-2ea5f9d62289
+# ╟─7e78028c-f70b-4474-8bee-783ad7d99d56
+# ╟─6e49233f-1d19-461a-a098-c2c8cb9a84d4
+# ╠═bb7a8043-cbe3-4333-ac0a-a9d5faca1b00
+# ╟─8d7fb15d-32d3-4fbb-9d06-c8ec1ed7d00e
+# ╟─b2defc79-da78-47c8-bb78-44cb9000ff58
+# ╟─9ab6ce17-0637-4008-be29-e0bf4fda4287
+# ╟─9002b709-ec9c-4063-a3a8-7b0c00834095
+# ╟─c2f4618c-dd22-477c-8fe7-324c82d3ff46
+# ╟─7d79ed91-7cbb-48b4-966a-d3165f2a3d89
+# ╟─c32d9839-7cb7-4018-bab1-b2211f05b71e
+# ╟─bd76555d-aa30-4313-b4c4-c3f4b9000194
+# ╟─06f3d467-af63-440d-b486-8da7f67c314f
+# ╠═df46f5c1-dbc6-4cf1-8e97-36b22c6b4c51
+# ╟─740167dc-5bcd-48c0-b1f0-a7bf5e1b6cb7
+# ╠═f0e42405-8068-455b-b17c-ede3e259f01d
+# ╟─f5cc03ca-09eb-4419-9d51-78c956ee73d9
+# ╟─c5706263-a08a-4742-b376-b980232d6191
+# ╠═58ad1864-9446-489c-b175-bb6bed64b385
+# ╟─24e1a5af-569e-4ae8-a3d7-19b7962db48b
+# ╟─77b91c27-ddb0-4115-b0d0-a78f2729dadc
+# ╟─4a9daa68-86ed-4327-98fc-03d436885d2e
+# ╟─3842ad29-ae9c-4743-b487-e76d94fb01cf
+# ╠═1688b3d8-8228-45ee-8729-22265a86484a
+# ╟─aa150fa3-1729-43b1-bb55-73c741221760
+# ╠═e1f6ef9b-5818-415a-8945-97b65288a433
+# ╟─d0858eee-5086-4754-966f-de2940183573
+# ╠═a89606ee-b46f-4656-9cb9-d89850646593
+# ╟─192507bd-8285-4581-8a6d-f9ff1b2c4793
+# ╠═301bf3ed-b180-4c44-a92f-0f9f4c2509ed
+# ╟─aa320281-42ce-4035-8c55-1f44661737e2
+# ╟─d5800e45-8809-46d6-9f41-7565e5b1cbfd
+# ╟─5f3d91ee-14c2-4b5e-8e2a-a607d086eb51
+# ╟─936423fd-0d78-41da-8b49-5fca3c125547
+# ╠═e37811fa-cd67-424e-8707-25ad8534d293
+# ╟─0b4e2571-cbec-4a4d-aac6-dd8b32e3f474
+# ╟─0d75d077-53c3-4f03-99d3-af796d973d66
+# ╟─b6cfde9d-357b-43e9-82ec-f88e8cb7ba8e
+# ╠═671babb1-4b04-4d6a-8dba-79f807114d63
+# ╟─83f772ea-aeec-49a3-baa2-d2fd8771c0a7
+# ╠═1ace9001-93ae-46f2-98e6-7b371221beb3
+# ╟─eb2ae1fd-5062-436b-ac50-eb3b169bca42
+# ╠═6307aecd-b4f7-49ea-b060-4b9236a5ae10
+# ╠═9bf0e55e-de5f-4ec9-92e9-5169d3d14302
+# ╟─002c7c0a-2b38-4a31-9e08-a424fa5679b8
+# ╟─907f8fb5-859b-4751-b483-2006ba358d5c
+# ╟─3d28b669-3294-47fb-8221-688ec3ca5491
+# ╟─d35592ba-c0cf-45fe-94c1-c58c3c0bc939
+# ╟─d71cba6e-4f62-48d0-aa17-061e1f6bd744
+# ╟─ac18ecec-5d4e-4d4d-99f1-d5cefcb1355d
+# ╟─b6ae8c03-57aa-4a45-9d6a-9886421ee934
+# ╟─a18bb200-3166-4c23-bcb9-dee71ff5035a
+# ╠═ac7b5711-b2ef-44dc-a272-c5d3f4e9cb74
+# ╠═47ef9015-eae8-4b29-807f-d223754701d3
+# ╟─abdca76c-832e-42aa-98fc-8a6c2c03965e
+# ╟─6f346c67-879a-4427-afd4-6acdeb17af21
+# ╟─1c2cf614-faba-4fd4-8ceb-2a5d1373d93a
+# ╟─62cec2b5-e408-46a4-947a-ebc58745c1ec
+# ╟─84478c6d-e157-40dc-987b-80c7f4d11a68
+# ╠═271decf5-68cb-4c8f-9452-6354477f6131
+# ╠═0d7146b3-3015-416b-aae8-697ac0850603
+# ╟─a9f597fe-4058-47a8-8a39-8d6b36594a96
+# ╠═60b43603-9937-4869-b5fc-f74c1c18e710
+# ╟─eb1f2c71-60fc-4ee5-9716-f18dd5eb0d2d
+# ╠═6df91aa3-ad36-4b9e-ba4a-4dfb46eb1d27
+# ╟─49eae38b-786f-45fc-b331-3b01c32363a1
+# ╟─35df9eed-5f22-4e26-b119-ea7354d2c762
+# ╟─a08b9683-8fe7-4e5f-b829-fde86f3f1894
+# ╟─eef1afcd-4da9-4042-a7c9-0124070740f8
+# ╠═238c9111-7dda-40e8-8297-9776fe77f7d9
+# ╟─02740c7a-451f-452c-8c02-22a7a3b9fcc1
+# ╠═5ec5453e-2f01-41ed-b227-fa1759071fdc
+# ╠═2d2cbe63-1cf6-4e7b-afc8-514a927f8344
+# ╟─3cc0fc2c-9512-41d6-9798-4e8cbec94c9e
+# ╟─26d06cfe-24cc-41ec-87d2-8e489865b5b8
+# ╟─e40d36d5-93a6-4b76-bccd-c629f621b22b
+# ╟─9dc65809-74c2-4341-baa8-63900de08df4
+# ╠═f3636af3-42bd-4a2d-a604-eae51db48996
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

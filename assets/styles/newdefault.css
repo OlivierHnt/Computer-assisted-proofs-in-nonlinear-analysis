@@ -20,21 +20,15 @@ html {
 
 body {
     /* background: #f1e7e7; */
-    font-family: "Roboto", sans-serif;
+    font-family: "Open Sans", sans-serif;
     overflow-wrap: break-word;
 }
-
 main h1 {
-    font-family: "Roboto", serif;
+    font-family: "Vollkorn", serif;
     font-weight: 800;
     font-style: italic;
     margin-block-end: 0.5em;
     font-size: 2.5rem;
     margin-block-start: 0;
-    /* letter-spacing: -0.2px; */
-}
-
-main h2 {
-    margin-top: 64px;
-    margin-bottom: 32px;
+    letter-spacing: -0.2px;
 }

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.46
 
 #> [frontmatter]
 #> chapter = 5
@@ -11,21 +11,23 @@
 using Markdown
 using InteractiveUtils
 
+# ╔═╡ d0e623ee-b096-4a27-977d-dc32567d6020
+using PlutoTeachingTools, PlutoUI # packages for the notebook
+
+# ╔═╡ 018ecc45-8638-4a59-b561-efb086bdc751
+using RadiiPolynomial, LinearAlgebra
+
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""<style>
 main {
-    max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
 """
 
-# ╔═╡ d0e623ee-b096-4a27-977d-dc32567d6020
-using PlutoTeachingTools, PlutoUI
-
-# ╔═╡ 018ecc45-8638-4a59-b561-efb086bdc751
-using RadiiPolynomial, LinearAlgebra
+# ╔═╡ 4412bd33-8b3f-41de-9e1a-a8f1187c793f
+TableOfContents(title="Table of Contents"; indent=true, depth=4, aside=true)
 
 # ╔═╡ 584fad48-cadf-4c57-a4c8-4de54f53ebbe
 md"""
@@ -1516,6 +1518,7 @@ version = "17.4.0+2"
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
 # ╠═d0e623ee-b096-4a27-977d-dc32567d6020
 # ╠═018ecc45-8638-4a59-b561-efb086bdc751
+# ╟─4412bd33-8b3f-41de-9e1a-a8f1187c793f
 # ╟─584fad48-cadf-4c57-a4c8-4de54f53ebbe
 # ╟─d5a510a3-c518-47ed-96bc-7bb22e3b08b5
 # ╟─f73b88cb-19e2-4d50-a45e-fbe90fb691cd
