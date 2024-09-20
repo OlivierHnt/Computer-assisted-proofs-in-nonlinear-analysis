@@ -2,32 +2,22 @@
 # v0.19.46
 
 #> [frontmatter]
-#> chapter = 1
-#> order = 0.5
-#> title = "Lecture notes: Finite-dimensional problems"
-#> tags = ["module1"]
+#> chapter = 2
+#> order = 2
+#> title = "Square root"
+#> tags = ["module2"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
-end
-
 # ╔═╡ d0e623ee-b096-4a27-977d-dc32567d6020
 using PlutoTeachingTools, PlutoUI # packages for the notebook
 
-# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
+# ╔═╡ 018ecc45-8638-4a59-b561-efb086bdc751
 using RadiiPolynomial, Plots
 
-# ╔═╡ a5169b4b-f0d4-4f66-8198-0aec5f8e135a
+# ╔═╡ 564092a6-546d-4772-a3a4-9f78a1801667
 html"""<style>
 main {
     margin-left: auto;
@@ -36,202 +26,229 @@ main {
 }
 """
 
-# ╔═╡ b3845641-1537-4a27-8550-1eff30900a6b
+# ╔═╡ 91bb507e-5871-46f4-9042-0ce4cc97617c
 TableOfContents(title="Table of Contents"; indent=true, depth=4, aside=true)
 
-# ╔═╡ c33dc650-3f94-11ef-398a-8bbc4a2b69b8
+# ╔═╡ 5e8827db-6a95-4726-89cf-0dc34f821c31
+md"## Introduction and setup"
+
+# ╔═╡ d5a510a3-c518-47ed-96bc-7bb22e3b08b5
 md"""
-## Motivating example: a chaotic dynamical system
+In this lecture we will discuss how to solve the following square root problem.
 
-Consider the sequence defined by
+Given $v(t) = 1 + \cos(t)$, find the function $u$ such that
 
-$\begin{align}
-x_{n+1} = \mu x_n (1-x_n),
-\end{align}$
+```math
+u(t) ^ 2 = v(t), \qquad t \in \mathbb{R}.
+```
 
-where $\mu$ is a parameter in $[0,4]$ and the initial condition $x_0$ is in $[0,1]$.
+We will search for $u$ in the following form $u(t) = \sum_{k \in \mathbb{Z}} a_k e^{i k t}$.
+
+The first step is to discretize this function space.
+We consider
+
+```math
+\ell^1 \overset{\text{def}}{=} \left\{ a \in \mathbb{C}^\mathbb{Z} \, : \, \| a \|_1 \overset{\text{def}}{=} \sum_{k \in \mathbb{Z}} |a_k| < \infty \right\}.
+```
 """
 
-# ╔═╡ 2fe25b56-0fcc-41a0-b74a-2bd650c387d5
+# ╔═╡ d087eda1-d093-448e-bbbd-2a52534140d3
+md"#### Operator norm"
+
+# ╔═╡ 4f63ab38-1f21-4879-a91f-553d4979bfd2
 md"""
-The slider below can be used to vary the value of $\mu$.
+Prove that if $A \in B(\ell^1)$, then $\| A \|_{B(\ell^1)} \le \max_{l \in \mathbb{Z}} \sum_{k \in \mathbb{Z}} |A_{k,l}|$ (in fact the inequality is an equality).
 """
 
-# ╔═╡ 05df1902-b4b8-4fd7-ab91-ad01f4fa413e
-@bind mu Slider(0:0.1:4; default = 3.9)
+# ╔═╡ 5ae5251a-b873-4aaa-9d0b-2ac7bb8c2237
+md"#### Convolution"
 
-# ╔═╡ 2653b081-ac49-4ccc-afa6-3d6253d93ed7
-mu
+# ╔═╡ e50cd72a-eecd-46e5-8f98-37f135658011
+md"""
+The second step is to observe that the product of two functions yields a product in $\ell^1$.
+This is the discrete convolution.
+"""
 
-# ╔═╡ 730eeed9-a736-48df-a853-94f45dedd836
+# ╔═╡ c9228651-9c4f-42f2-ad7f-34065aa2e529
+md"""
+!!! tip "Lemma"
+	If $u(t) = \sum_{k \in \mathbb{Z}} a_k t^k$ and $v(t) = \sum_{k \in \mathbb{Z}} b_k t^k$, then for their product we have $u(t) v(t) = \sum_{k \in \mathbb{Z}} (a*b)_k t^k$ where
+
+	```math
+	(a*b)_k \overset{\text{def}}{=} \sum_{l \in \mathbb{Z}} a_{k-l} b_l, \qquad k \in \mathbb{Z}.
+	```
+"""
+
+# ╔═╡ afa31d93-85e1-46d5-8bd9-177666ba2098
+md"""
+Then, the problem of finding the square root of $v$ corresponds to finding a sequence of coefficients $a \in (\ell^1, *)$ such that
+
+```math
+a * a = b,
+```
+
+where $b_0 = 1$ and $b_1 = b_{-1} = 1/2$.
+Moreover, to ease the notation, we simply write $\ell^1 = (\ell^1, *)$.
+"""
+
+# ╔═╡ 6bb627ea-0b12-4495-8b39-c79bc5a35890
+md"""
+The space $X$ together with $*$ forms a Banach algebra.
+"""
+
+# ╔═╡ e5754113-7f92-4946-a684-99d9bd5d830f
+Markdown.MD(Markdown.Admonition("tip", "Lemma (Banach algebra property)", [md"""For any $a, b \in X$ we have $\|a*b\|_X \le \|a\|_X \|b\|_X$."""]))
+
+# ╔═╡ 2f541fb5-79a8-4755-a611-a14fdf3f532b
+Foldable("""Proof""", md"""**Exercise** (rearrange the series and use the triangle inequality)""")
+
+# ╔═╡ 9f5cf201-871a-4afb-95ed-4bdba6152d23
+md"""
+The multiplication operator $M_a (b) \overset{\text{def}}{=} a * b$ can be represented by an infinite dimensional matrix. For our proof we will only need to construct a finite part of it.
+"""
+
+# ╔═╡ 597941ec-81f4-4887-abd2-2f303166c2d4
+b = Sequence(Fourier(1, 1.0), [0.5, 2.0, 0.5])
+
+# ╔═╡ 27de2c2a-f7b6-46c5-97e7-e15341706cd5
+project(Multiplication(b), space(b), space(b))
+
+# ╔═╡ 37739d69-090f-4d0e-b2ad-1322da629dd2
+md"## Zero-finding problem"
+
+# ╔═╡ 90fe50ee-89e8-4047-a115-533c90082957
+md"""
+Let us now go back to our task of finding the square root of $b$ with respect to $*$.
+To this end, we consider the zero-finding problem $F : \ell^1 \to \ell^1$ given by
+
+F(a) \overset{\text{def}}{=} a*a - b.
+
+We aim to prove that, for some injective $A \approx DF(\bar{a})^{-1} \in B(\ell^1)$ yet to be constructed, the fixed-point operator
+
+```math
+T(a) \overset{\text{def}}{=} a - A F(a) = a - A (a * a - b),
+```
+
+is contracting around $\bar{a}$ with $F(\bar{a}) \approx 0$.
+
+Observe that
+
+```math
+DF(a) h = 2a * h,
+```
+
+that is $DF(a)$ is the mutliplication operator $M_c$ associated with $c = 2a$.
+
+As a bounded linear operator acting on infinite sequences in $\ell^1$, $M_c$ can be visualized as a matrix with an infinite number of rows and columns.
+Specifically, one can check that $M_c$ is a [Topepliz matrix](https://en.wikipedia.org/wiki/Toeplitz_matrix) so that
+
+```math
+M_b =
+\begin{pmatrix}
+\ddots & \ddots & \ddots \\
+\ddots & c_0    & c_{-1} & c_{-2} \\
+\ddots & c_1    & c_0    & c_{-1} & \ddots \\
+       & c_2    & c_1    & c_0    & \ddots \\
+       &        & \ddots & \ddots & \ddots
+\end{pmatrix}.
+```
+"""
+
+# ╔═╡ 2787dcd4-9e81-43e6-a74a-0574499e3687
+md"### Finite dimensional projection"
+
+# ╔═╡ 26a18a45-7106-4956-a5a0-1ac46349e020
+md"""
+We introduce a projection operator on a finite number of modes ($2K+1$ coefficients) and its complement:
+
+```math
+(\pi^{\le K} a)_k
+\overset{\text{def}}{=}
+\begin{cases}
+a_k, & |k| \le K, \\
+0, & |k| > K,
+\end{cases}
+```
+
+as well as $\pi^{>K} \overset{\text{def}}{=} I - \pi^{\le K}$.
+"""
+
+# ╔═╡ 2c076e0d-5f35-40e3-9612-d5351b019559
+F(a, b, space) = project(a*a - b, space)
+
+# ╔═╡ f688e26c-dc4f-4faa-bd69-82c2366bd696
+DF(a, space) = project(Multiplication(2a), space, space)
+
+# ╔═╡ db4c62ae-bef8-4c90-8e54-e38e7ec357b0
 begin
-	x0 = 0.4
-	maxiter = 50
-	x = zeros(maxiter+1)
-	x[1] = x0
-	for n = 1:maxiter
-		x[n+1] = mu*x[n]*(1-x[n])
-	end
-	plot(0:maxiter, x; marker = (:circle, 5), legend = false)
-	xlabel!("n")
-	ylims!(-0.1, 1.1)
+	K = 2
+	initial_guess = zeros(Fourier(K, 1.0))
+	initial_guess[0] = sqrt(b[0])
+	a0, _ = newton(a -> (F(a, b, space(a)), DF(a, space(a))), initial_guess)
 end
 
-# ╔═╡ e3be34b1-bc05-49f5-884d-78886f7a9509
-Markdown.MD(Markdown.Admonition("tip", "Theorem", [md"Let $f:[0,1]\to[0,1]$ be continuous, and consider the dynamical system defined by $x_{n+1} = f(x_n)$. If there exists an orbit of period 3, i.e. $x_0$ in $[0,1]$ such that $x_0 \ne x_1 \ne x_2$ and $x_3=x_0$, then the system is *chaotic*. In particular, there exist orbits of any period.[^Sha64][^LY75]"]))
+# ╔═╡ fafde27b-9714-484f-a882-2f13b7ce22be
+md"### Approximate inverse"
 
-# ╔═╡ 6a625351-cadf-4d51-b30a-ef070ca23552
+# ╔═╡ 062005af-9af6-47af-a534-a64581ecb0bf
+md"#### Computing the approximate inverse"
+
+# ╔═╡ dc403fed-22ac-43a5-aabd-b5bb198a3a4b
+M = project(Multiplication(2a0), Fourier(K, 1.0), Fourier(K, 1.0))
+
+# ╔═╡ a82b583b-9a63-44d3-8e62-378a1d8212c1
+c = interval.( M \ Sequence(Fourier(K, 1.0), I[1:(2K+1),K+1]) )
+
+# ╔═╡ af117c60-f433-4751-92ff-6d5a3744fbb1
+md"### Newton-Kantorovich"
+
+# ╔═╡ 4a4b7fff-17c3-4339-9ca5-d8dac1012d9e
 md"""
-Let us fix a value of $\mu$ for which the dynamics seems complicated, say $\mu = 3.9$. Our goal will be to prove the existence of a period 3 orbit, by first finding numerically an approximate period 3 orbit, and then proving a posteriori the existence of a true period 3 orbit nearby.
+Observe that $\| M_a \|_{B(\ell^1)} = \| a \|_1$ for all $a \in \ell^1$ (the proof is left as an exercise).
 
-There are several ways to prove the existence of a period 3 orbit for this example (with and without computer assistance), but the ideas we are going to present and use will generalize to more complicated infinite dimensional problems.
+Let us now apply our contraction argument and compute the required bounds:
+
+```math
+\begin{align}
+Y &\ge \| A F(\bar{a}) \|_1 = \| c * (\bar{a} * \bar{a} - b) \|_1, \\
+Z_1 &\ge \| A DF(\bar{a}) - I \|_{B(\ell^1)} = \| 2c * \bar{a} - 1 \|_1, \\
+Z_2 &= 2\| c \|_1.
+\end{align}
+```
+
+To conclude the proof, note that $Z_1 < 1$ implies that $A DF(\bar{a})$ is invertible, since $A DF(\bar{a}) = 2c * M_{\bar{a}} = 2M_{\bar{a}} * c = DF(\bar{a}) A$, this guarantees that $A$ is in fact injective.
+
+Note that all the above quantities are computable since $A F(\bar{a}) \in \pi^{3K \le} \ell^1$.
 """
 
-# ╔═╡ 8b779da9-46e2-442d-af54-5ad0284e7b84
+# ╔═╡ 4230279b-fe77-4c9a-b144-1e2f9538e046
+Y = norm(c * F(a0, b, Fourier(2K, 1.0)), 1)
+
+# ╔═╡ e6871d6c-0890-4472-8c75-070393939da6
+Z₁ = norm(2c * a0 - 1, 1)
+
+# ╔═╡ 63093c7b-66a8-457d-bbdd-75eddc5f74a5
+Z₂ = 2norm(c, 1)
+
+# ╔═╡ 507d49af-d127-41d6-9c34-6d357b6d4a7c
+interval_of_existence(Y, Z₁, Z₂, 1e-1)
+
+# ╔═╡ db76f769-0281-4502-8065-e94f701bfa7a
+begin
+	plot(LinRange(-π, π, 101), t -> real(a0(t)); label = "approx")
+	plot!(LinRange(-π, π, 101), t -> sqrt(2+cos(t)); label = "theoretical")
+end
+
+# ╔═╡ 05507eeb-df0a-4980-9d2c-083743e3fcd8
+md"## Next steps"
+
+# ╔═╡ ea41caa2-69c8-4b97-8643-90d85bfc3756
 md"""
-## Contraction mapping and Newton-Kantorovich theorem
-"""
+What if $v$ is an infinite power series...
 
-# ╔═╡ c352e6d8-fd3d-4070-8bdf-4c98ae555b69
-md"""
-Given a problem and an approximate solution $\bar{x}$, our goal is to define a fixed-point operator $T$ such that
-- the solutions to our problem are in one-to-one correspondence with fixed-points of $T$,
--  $T$ is a contraction on a small neighborhood of $\bar{x}$.
+Analyticity (weighted $\ell^1$ space)...
 
-The specific form of $T$ may vary depending on the nature of the problem, but we can outline a general strategy for constructing such an operator. We provide sufficient conditions that can be verified in practice to demonstrate that an operator $T$ is contracting on a small neighborhood of $\bar{x}$. Even though we only deal with finite dimentional problems in this first module, we already state these conditions in a general Banach space, as they will also be heavily used in the next modules.
-"""
-
-# ╔═╡ 6eeb3554-a50c-4f3d-b676-95368021204c
-Markdown.MD(Markdown.Admonition("tip", "Theorem",
-[md"""
-Let $\mathcal{X}$ be a Banach space, $\bar{x} \in \mathcal{X}$, and $T : \mathcal{X} \to \mathcal{X}$ a continuously differentiable map. Assume there exists a constant $Y$ and a non-decreasing map $Z : [0, \infty) \to [0, \infty)$ such that
-
-$\begin{align}
-\Vert T(\bar{x}) - \bar{x} \Vert &\leq Y, \\
-\Vert DT(x) \Vert &\leq Z(\Vert x-\bar{x}\Vert), \quad \forall x \in \mathcal{X}.
-\end{align}$
-
-If there exists $r>0$ such that
-
-$\begin{align}
-Y + \int_0^r Z(s) \mathrm{d}s &\leq r, \\
-Z(r) &< 1,
-\end{align}$
-
-then $T$ has a unique fixed point $x^*$ such that $\Vert x^* - \bar{x} \Vert \le r$.
-"""]))
-
-# ╔═╡ 94e323ed-5e13-413b-8bcb-1909dd6e14a5
-Markdown.MD(Markdown.Admonition("note", "Remarks",
-[md"""
-- The bound $Z$ is actually only needed locally, i.e. we only need $Z(s)$ for $s \le r$. Therefore, one can fix a priori some $r_* > 0$, and weaken then assumption by only asking for $Z$ to be defined on $[0,r_*]$ and to satisfy $\Vert DT(x) \Vert \le Z(\Vert x-\bar{x} \Vert)$ for all $x$ in $X$ such that $\Vert x-\bar{x} \Vert \le r_*$. Of course, we are then only allowed to consider $r \in (0,r_*]$.
-- In practice, studying carefully how $\Vert DT(x) \Vert$ depends on $\Vert x-\bar{x} \Vert$ allows us to get better bounds. However, we can sometimes get away with crude estimates. That is, we derive a constant $Z_*$ such that $\Vert DT(x) \Vert \le Z_*$ for all $x \in \mathcal{X}$ such that $\Vert x-\bar{x} \Vert \le r_*$, and then use $Z(s) = Z_*$ for all $s \le r_*$. The conditions on $r$ then simplify, and, if $Z_* < 1$, we can take any $r \ge \frac{Y}{1-Z_*}$.
-"""]))
-
-# ╔═╡ accd6469-25c3-40d7-959b-5663d560437c
-md"""
-Going back to a dynamical system $x_{n+1} = f(x_n)$, a natural fixed-point operator for period 3 orbits is given by $T(x) = f^3(x)$, i.e. $f$ composed with itself three times. However, such a $T$ has no reason to be contracting.
-
-To develop a more general procedure for constructing a fixed-point problem, one can start by finding a map $F$ whose isolated zeros are solutions to our problem. Given an approximate solution $\bar{x}$, one can consider the Newton-like operator $T(x) = x - DF(\bar{x})^{-1} F(x)$. This operator should be contracting in a neighborhood of $\bar{x}$, as $DT(\bar{x}) = 0$.
-
-For finite dimensional problems of moderate size, computing the inverse of $DF(\bar{x})$ is feasible. However, in infinite dimensional problems, $DF(\bar{x})^{-1}$ may become challenging to work with. To address this, one often considers an approximate inverse $A \approx DF(\bar{x})^{-1}$ and the fixed-point operator $T(x) = x - AF(x)$. We state all following results in this context, for an $A$ which is not specified and could actually (but does not have to) be $DF(\bar{x})^{-1}$.
-"""
-
-# ╔═╡ 542de1ab-1b8b-49c8-8960-704c2351407a
-Markdown.MD(Markdown.Admonition("tip", "Corollary",
-[md"""
-Let $\mathcal{X}$ and $\mathcal{Y}$ be two Banach spaces, $\bar{x}\in \mathcal{X}$, $F : \mathcal{X} \to \mathcal{Y}$ a continuously differentiable map, $A : \mathcal{Y} \to \mathcal{X}$ an injective linear map, and $r_* > 0$. Assume there exist constants $Y$, $Z_1$ and  $Z_2$ such that
-
-$\begin{align}
-\Vert AF(\bar{x}) \Vert &\le Y, \\
-\Vert I-ADF(\bar{x}) \Vert &\le Z_1, \\
-\Vert A(DF(x)-DF(\bar{x})) \Vert &\leq Z_2\Vert x-\bar{x}\Vert, \quad \forall x \in \mathcal{X} \text{ such that } \Vert x-\bar{x}\Vert \le r_*.
-\end{align}$
-
-If there exists $r\in(0,r_*]$ such that
-
-$\begin{align}
-Y + Z_1 r + \frac{1}{2} Z_2 r^2 &\le r, \\
-Z_1 + Z_2 r &< 1,
-\end{align}$
-
-then $F$ has a unique zero $x^*$ such that $\Vert x^* - \bar{x} \Vert \le r$.
-"""]))
-
-# ╔═╡ 23923d27-9905-4f26-8ef5-53f183d290da
-md"""
-This corollary is a simplified version of the Newton-Kantorovich Theorem [^Ort68]. Many slight variations can be found in the literature, and are used in many CAPs (see for instance [^BL15] [^NPW19] and the references therein).
-"""
-
-# ╔═╡ 66ca51ad-0f2e-4f3c-8dd0-e66649b224d9
-md"""
-## Interval arithmetic
-"""
-
-# ╔═╡ f7d40916-2d5b-47f2-9fe9-6635363978ae
-md"""
-When we want to use the Newton-Kantorovich theorem with $\bar{x}$ being an approximate solution obtained using the computer, we also need to use the computer to evaluate quantities like $\Vert F(\bar{x}) \Vert$ to obtain the bounds $Y$ and $Z$. However, by default these computations are performed using floating-point arithmetic, which introduces rounding errors. In particular, if we set $Y = \Vert F(\bar{x}) \Vert$ on the computer, we cannot be certain that $Y$ actually satifies the assumption of the Newton-Kantorovich theorem.
-
-[Interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic) provides a way to control rounding errors and obtain guaranteed results from computer calculations. Here, we only give a brief description of interval arithmetic; refer to [^Moo79] [^Tuc11] for more detailed discussions.
-"""
-
-# ╔═╡ 7b174512-9ed1-4b99-ae17-a366323f0a46
-md"""
-When a command like `a = 0.1` is executed in Julia, the computer associates to the variable `a` a single floating-point number: the floating-point number which is the closest to $1/10$. Since $1/10$ does not have a finite representation in base $2$, the value stored in `a` is already not equal to the typed-in number `0.1`. It turns out to be slightly larger than $1/10$, but it could very well have been the other way around (e.g. `0.3`).
-"""
-
-# ╔═╡ 2d68d26d-6e10-407f-8227-515ddadd9599
-a = 0.1
-
-# ╔═╡ 78f17262-7ffc-4d74-835c-f17863817b9a
-a > 1//10
-
-# ╔═╡ c359bec8-4a1a-4e34-9f56-1f70f4fa5cbe
-md"""
-When using interval arithmetic, we represent any real number by an interval, whose end-points are floating-point numbers. More precisely, for $a \in \mathbb{R}$, we consider the interval $[\underline{a}, \overline{a}]$ where $\underline{a}, \overline{a}$ are floating-point numbers satisfying $\underline{a} \le a \le \overline{a}$. We give up the hope of representing numbers exactly, but we recover guaranteed information: the real number $a$ is contained in the interval representing it on the computer.
-
-We use the Julia package [IntervalArithmetic.jl](https://github.com/JuliaIntervals/IntervalArithmetic.jl) in this course, but there are many other interval arithmetic librairies in different languages (e.g. [Arb](https://arblib.org/) or [Intlab](https://www.tuhh.de/ti3/rump/intlab/)).
-Note that IntervalArithmetic is automatically available when using [RadiiPolynomial.jl](https://github.com/OlivierHnt/RadiiPolynomial.jl).
-"""
-
-# ╔═╡ c44fd902-7655-43b5-82cc-53c2ecc4f77b
-ia = I"0.1" #interval(1)/interval(10)
-
-# ╔═╡ 4c15bb79-2591-4f2a-9243-ff811de70df7
-in_interval(1//10, ia)
-
-# ╔═╡ 97fcd17c-9710-4753-89f5-9d592a33d0b1
-md"""
-The rules of interval arithmetic then ensure that this property is preserved when doing arithmetic operations. For instance, consider two intervals `a` and `b` of the form $[\underline{a}, \overline{a}]$ and $[\underline{b}, \overline{b}]$, containing the reals numbers $a$ and $b$. When we do `c = a + b`, the resulting interval $[\underline{c},\overline{c}]$ for `c` is computed as follows. For $\underline{c}$, we take $\underline{a}+\underline{b}$ **rounded downward**, and for $\overline{c}$ we take $\overline{a}+\overline{b}$ **rounded upward**. In particular, the real number $c = a + b$ is contained in the interval `c`.
-"""
-
-# ╔═╡ c41f292d-b61a-4386-90ca-358d2c3faaea
-md"""
-Similarly, if the variable `c` is an interval $[\underline{c}, \overline{c}]$, and we compute `d = exp(c)`, we would like that `d` contains $\exp(c)$. Usual arithmetic operations, as well as implementations of elementary functions (e.g. `exp`, `log`, `cos`, etc.) complying with these rules are provided in IntervalArithmetic.
-"""
-
-# ╔═╡ f8eab26f-c893-4d2e-b4e8-6b59f33cbc9c
-c = interval(2, 4)
-
-# ╔═╡ 556163e0-80d2-4f4e-b198-b8e0922438db
-d = cos(exp(sqrt(c)))
-
-# ╔═╡ 97fadca1-fcf9-46b8-aa07-c615ca0deb7f
-Markdown.MD(Markdown.Admonition("note", "Remarks",
-[md"""
-Even when doing computer-assisted proofs, one should not use interval arithmetics for all computations. When trying to find an approximate solution $\bar{x}$, floating-point calculations are perfectly fine, and it is only when evaluating the bounds in the Newton-Kantorovich theorem that interval arithmetic must be used.
-"""]))
-
-# ╔═╡ b8d56ba6-01da-4604-8dad-3e63ec203fd4
-md"""
-## References
-[^BL15]: J. B. van den Berg and J.-P. Lessard. Rigorous numerics in dynamics. *Notices Amer. Math. Soc.*, 62(9), 2015.
-[^LY75]: T.-Y. Li and J. A. Yorke. Period three implies chaos. *The American Mathematical Monthly*, 82(10):985--992, 1975.
-[^Moo79]: R. E. Moore. *Methods and applications of interval analysis*. SIAM, 1979
-[^Ort68]: J. M. Ortega. The Newton-Kantorovich theorem. *The American Mathematical Monthly*, 75(6):658--660, 1968.
-[^NPW19]: M. T. Nakao, M. Plum, and Y. Watanabe. *Numerical Verification Methods and Computer-Assisted Proofs for Partial Differential Equations*. Springer Singapore, 2019.
-[^Sha64]: A. N. Sharkowskii. Co-existence of the cycles of a continuous mapping of the line into itself. *Ukrainian Math. J.*, 16(1), 1964.
-[^Tuc11]: W. Tucker. *Validated numerics: a short introduction to rigorous computations*. Princeton University Press, 2011.
+Implement the cubic root as an exercise...
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1460,37 +1477,43 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╟─a5169b4b-f0d4-4f66-8198-0aec5f8e135a
+# ╟─564092a6-546d-4772-a3a4-9f78a1801667
 # ╠═d0e623ee-b096-4a27-977d-dc32567d6020
-# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
-# ╟─b3845641-1537-4a27-8550-1eff30900a6b
-# ╟─c33dc650-3f94-11ef-398a-8bbc4a2b69b8
-# ╟─2fe25b56-0fcc-41a0-b74a-2bd650c387d5
-# ╟─05df1902-b4b8-4fd7-ab91-ad01f4fa413e
-# ╟─2653b081-ac49-4ccc-afa6-3d6253d93ed7
-# ╟─730eeed9-a736-48df-a853-94f45dedd836
-# ╟─e3be34b1-bc05-49f5-884d-78886f7a9509
-# ╟─6a625351-cadf-4d51-b30a-ef070ca23552
-# ╟─8b779da9-46e2-442d-af54-5ad0284e7b84
-# ╟─c352e6d8-fd3d-4070-8bdf-4c98ae555b69
-# ╟─6eeb3554-a50c-4f3d-b676-95368021204c
-# ╟─94e323ed-5e13-413b-8bcb-1909dd6e14a5
-# ╟─accd6469-25c3-40d7-959b-5663d560437c
-# ╟─542de1ab-1b8b-49c8-8960-704c2351407a
-# ╟─23923d27-9905-4f26-8ef5-53f183d290da
-# ╟─66ca51ad-0f2e-4f3c-8dd0-e66649b224d9
-# ╟─f7d40916-2d5b-47f2-9fe9-6635363978ae
-# ╟─7b174512-9ed1-4b99-ae17-a366323f0a46
-# ╠═2d68d26d-6e10-407f-8227-515ddadd9599
-# ╠═78f17262-7ffc-4d74-835c-f17863817b9a
-# ╟─c359bec8-4a1a-4e34-9f56-1f70f4fa5cbe
-# ╠═c44fd902-7655-43b5-82cc-53c2ecc4f77b
-# ╠═4c15bb79-2591-4f2a-9243-ff811de70df7
-# ╟─97fcd17c-9710-4753-89f5-9d592a33d0b1
-# ╟─c41f292d-b61a-4386-90ca-358d2c3faaea
-# ╠═f8eab26f-c893-4d2e-b4e8-6b59f33cbc9c
-# ╠═556163e0-80d2-4f4e-b198-b8e0922438db
-# ╟─97fadca1-fcf9-46b8-aa07-c615ca0deb7f
-# ╟─b8d56ba6-01da-4604-8dad-3e63ec203fd4
+# ╠═018ecc45-8638-4a59-b561-efb086bdc751
+# ╟─91bb507e-5871-46f4-9042-0ce4cc97617c
+# ╟─5e8827db-6a95-4726-89cf-0dc34f821c31
+# ╟─d5a510a3-c518-47ed-96bc-7bb22e3b08b5
+# ╟─d087eda1-d093-448e-bbbd-2a52534140d3
+# ╟─4f63ab38-1f21-4879-a91f-553d4979bfd2
+# ╟─5ae5251a-b873-4aaa-9d0b-2ac7bb8c2237
+# ╟─e50cd72a-eecd-46e5-8f98-37f135658011
+# ╟─c9228651-9c4f-42f2-ad7f-34065aa2e529
+# ╟─afa31d93-85e1-46d5-8bd9-177666ba2098
+# ╟─6bb627ea-0b12-4495-8b39-c79bc5a35890
+# ╟─e5754113-7f92-4946-a684-99d9bd5d830f
+# ╟─2f541fb5-79a8-4755-a611-a14fdf3f532b
+# ╟─9f5cf201-871a-4afb-95ed-4bdba6152d23
+# ╠═597941ec-81f4-4887-abd2-2f303166c2d4
+# ╠═27de2c2a-f7b6-46c5-97e7-e15341706cd5
+# ╟─37739d69-090f-4d0e-b2ad-1322da629dd2
+# ╟─90fe50ee-89e8-4047-a115-533c90082957
+# ╟─2787dcd4-9e81-43e6-a74a-0574499e3687
+# ╟─26a18a45-7106-4956-a5a0-1ac46349e020
+# ╠═2c076e0d-5f35-40e3-9612-d5351b019559
+# ╠═f688e26c-dc4f-4faa-bd69-82c2366bd696
+# ╠═db4c62ae-bef8-4c90-8e54-e38e7ec357b0
+# ╟─fafde27b-9714-484f-a882-2f13b7ce22be
+# ╟─062005af-9af6-47af-a534-a64581ecb0bf
+# ╠═dc403fed-22ac-43a5-aabd-b5bb198a3a4b
+# ╠═a82b583b-9a63-44d3-8e62-378a1d8212c1
+# ╟─af117c60-f433-4751-92ff-6d5a3744fbb1
+# ╟─4a4b7fff-17c3-4339-9ca5-d8dac1012d9e
+# ╠═4230279b-fe77-4c9a-b144-1e2f9538e046
+# ╠═e6871d6c-0890-4472-8c75-070393939da6
+# ╟─63093c7b-66a8-457d-bbdd-75eddc5f74a5
+# ╠═507d49af-d127-41d6-9c34-6d357b6d4a7c
+# ╟─db76f769-0281-4502-8065-e94f701bfa7a
+# ╟─05507eeb-df0a-4980-9d2c-083743e3fcd8
+# ╟─ea41caa2-69c8-4b97-8643-90d85bfc3756
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

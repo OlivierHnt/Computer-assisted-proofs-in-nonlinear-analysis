@@ -5,7 +5,7 @@
 #> chapter = 4
 #> order = 1
 #> title = "Lecture notes: periodic orbit problems"
-#> tags = ["module4"]
+#> tags = ["lecture", "module4"]
 #> layout = "layout.jlhtml"
 
 using Markdown

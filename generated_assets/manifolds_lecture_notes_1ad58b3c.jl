@@ -5,7 +5,7 @@
 #> chapter = 5
 #> order = 1
 #> title = "Lecture notes: invariant manifolds of equilibria"
-#> tags = ["module5"]
+#> tags = ["lecture", "module5"]
 #> layout = "layout.jlhtml"
 
 using Markdown
