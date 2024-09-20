@@ -5,7 +5,7 @@
 #> chapter = 1
 #> order = 0.5
 #> title = "Lecture notes: Finite-dimensional problems"
-#> tags = ["module1"]
+#> tags = ["lecture", "module1"]
 #> layout = "layout.jlhtml"
 
 using Markdown
@@ -37,12 +37,13 @@ main {
 """
 
 # ╔═╡ b3845641-1537-4a27-8550-1eff30900a6b
-TableOfContents(title="Table of Contents"; indent=true, depth=4, aside=true)
+TableOfContents(title = "Table of Contents"; indent = true, depth = 4, aside = true)
+
+# ╔═╡ ed6f44f4-3696-494a-b8e3-b30184f5bb06
+md"## Motivating example: a chaotic dynamical system"
 
 # ╔═╡ c33dc650-3f94-11ef-398a-8bbc4a2b69b8
 md"""
-## Motivating example: a chaotic dynamical system
-
 Consider the sequence defined by
 
 $\begin{align}
@@ -50,187 +51,231 @@ x_{n+1} = \mu x_n (1-x_n),
 \end{align}$
 
 where $\mu$ is a parameter in $[0,4]$ and the initial condition $x_0$ is in $[0,1]$.
-"""
 
-# ╔═╡ 2fe25b56-0fcc-41a0-b74a-2bd650c387d5
-md"""
 The slider below can be used to vary the value of $\mu$.
 """
 
 # ╔═╡ 05df1902-b4b8-4fd7-ab91-ad01f4fa413e
-@bind mu Slider(0:0.1:4; default = 3.9)
+@bind μ Slider(0:0.1:4; default = 3.9)
 
 # ╔═╡ 2653b081-ac49-4ccc-afa6-3d6253d93ed7
-mu
+μ
 
 # ╔═╡ 730eeed9-a736-48df-a853-94f45dedd836
 begin
 	x0 = 0.4
 	maxiter = 50
-	x = zeros(maxiter+1)
-	x[1] = x0
+	xs = zeros(maxiter+1)
+	xs[1] = x0
 	for n = 1:maxiter
-		x[n+1] = mu*x[n]*(1-x[n])
+		xs[n+1] = μ*xs[n]*(1-xs[n])
 	end
-	plot(0:maxiter, x; marker = (:circle, 5), legend = false)
+	plot(0:maxiter, xs; marker = (:circle, 5), legend = false)
 	xlabel!("n")
 	ylims!(-0.1, 1.1)
 end
 
-# ╔═╡ e3be34b1-bc05-49f5-884d-78886f7a9509
-Markdown.MD(Markdown.Admonition("tip", "Theorem", [md"Let $f:[0,1]\to[0,1]$ be continuous, and consider the dynamical system defined by $x_{n+1} = f(x_n)$. If there exists an orbit of period 3, i.e. $x_0$ in $[0,1]$ such that $x_0 \ne x_1 \ne x_2$ and $x_3=x_0$, then the system is *chaotic*. In particular, there exist orbits of any period.[^Sha64][^LY75]"]))
-
-# ╔═╡ 6a625351-cadf-4d51-b30a-ef070ca23552
+# ╔═╡ 1d9286fa-647a-4743-806f-9cea5aab6be1
 md"""
-Let us fix a value of $\mu$ for which the dynamics seems complicated, say $\mu = 3.9$. Our goal will be to prove the existence of a period 3 orbit, by first finding numerically an approximate period 3 orbit, and then proving a posteriori the existence of a true period 3 orbit nearby.
+As values of $\mu$ increase, the dynamics seem increasingly more complex.
+Such behaviour result from a cascade of [period doubling bifurcations](https://en.wikipedia.org/wiki/Period-doubling_bifurcation) eventually leading to chaotic dynamics.
+A celebrated result for discrete dynamical systems is that a period 3 orbits implies chaos.
+"""
+
+# ╔═╡ 1e56532e-9886-4a41-9ba0-1a619a85e014
+md"""
+!!! theorem "Theorem"
+	Let $f : [0,1] \to [0,1]$ be continuous, and consider the dynamical system defined by $x_{n+1} = f(x_n)$.
+	If there exists an orbit of period 3, i.e. $x_0$ in $[0,1]$ such that $x_0 \ne x_1 \ne x_2$ and $x_3 = x_0$, then the system is chaotic.
+	In particular, there exist orbits of any period.[^Sha64][^LY75]
+"""
+
+# ╔═╡ 8d6c631f-832a-48a9-891f-650f53a0ac6c
+md"""
+Let us fix a value of $\mu$ for which the dynamics seems complicated, say $\mu = 3.9$.
+Our goal will be to prove the existence of a period 3 orbit, by first finding numerically an approximate period 3 orbit, and then proving a posteriori the existence of a true period 3 orbit nearby.
 
 There are several ways to prove the existence of a period 3 orbit for this example (with and without computer assistance), but the ideas we are going to present and use will generalize to more complicated infinite dimensional problems.
 """
 
-# ╔═╡ 8b779da9-46e2-442d-af54-5ad0284e7b84
-md"""
-## Contraction mapping and Newton-Kantorovich theorem
-"""
+# ╔═╡ 429e5261-d7d0-47a3-94b5-8e7905a5bd53
+md"## Contraction mapping and the Newton-Kantorovich theorem"
 
-# ╔═╡ c352e6d8-fd3d-4070-8bdf-4c98ae555b69
+# ╔═╡ a27b45ca-77d1-408e-98e9-6b5248aca85e
 md"""
 Given a problem and an approximate solution $\bar{x}$, our goal is to define a fixed-point operator $T$ such that
 - the solutions to our problem are in one-to-one correspondence with fixed-points of $T$,
 -  $T$ is a contraction on a small neighborhood of $\bar{x}$.
 
-The specific form of $T$ may vary depending on the nature of the problem, but we can outline a general strategy for constructing such an operator. We provide sufficient conditions that can be verified in practice to demonstrate that an operator $T$ is contracting on a small neighborhood of $\bar{x}$. Even though we only deal with finite dimentional problems in this first module, we already state these conditions in a general Banach space, as they will also be heavily used in the next modules.
+The specific form of $T$ may vary depending on the nature of the problem, but we can outline a general strategy for constructing such an operator.
+We provide sufficient conditions that can be verified in practice to demonstrate that an operator $T$ is contracting on a small neighborhood of $\bar{x}$.
+Even though we only deal with finite dimentional problems in this first module, we already state these conditions in a general [Banach space](https://en.wikipedia.org/wiki/Banach_space), as they will also be heavily used in the next modules.
 """
 
-# ╔═╡ 6eeb3554-a50c-4f3d-b676-95368021204c
-Markdown.MD(Markdown.Admonition("tip", "Theorem",
-[md"""
-Let $\mathcal{X}$ be a Banach space, $\bar{x} \in \mathcal{X}$, and $T : \mathcal{X} \to \mathcal{X}$ a continuously differentiable map. Assume there exists a constant $Y$ and a non-decreasing map $Z : [0, \infty) \to [0, \infty)$ such that
-
-$\begin{align}
-\Vert T(\bar{x}) - \bar{x} \Vert &\leq Y, \\
-\Vert DT(x) \Vert &\leq Z(\Vert x-\bar{x}\Vert), \quad \forall x \in \mathcal{X}.
-\end{align}$
-
-If there exists $r>0$ such that
-
-$\begin{align}
-Y + \int_0^r Z(s) \mathrm{d}s &\leq r, \\
-Z(r) &< 1,
-\end{align}$
-
-then $T$ has a unique fixed point $x^*$ such that $\Vert x^* - \bar{x} \Vert \le r$.
-"""]))
-
-# ╔═╡ 94e323ed-5e13-413b-8bcb-1909dd6e14a5
-Markdown.MD(Markdown.Admonition("note", "Remarks",
-[md"""
-- The bound $Z$ is actually only needed locally, i.e. we only need $Z(s)$ for $s \le r$. Therefore, one can fix a priori some $r_* > 0$, and weaken then assumption by only asking for $Z$ to be defined on $[0,r_*]$ and to satisfy $\Vert DT(x) \Vert \le Z(\Vert x-\bar{x} \Vert)$ for all $x$ in $X$ such that $\Vert x-\bar{x} \Vert \le r_*$. Of course, we are then only allowed to consider $r \in (0,r_*]$.
-- In practice, studying carefully how $\Vert DT(x) \Vert$ depends on $\Vert x-\bar{x} \Vert$ allows us to get better bounds. However, we can sometimes get away with crude estimates. That is, we derive a constant $Z_*$ such that $\Vert DT(x) \Vert \le Z_*$ for all $x \in \mathcal{X}$ such that $\Vert x-\bar{x} \Vert \le r_*$, and then use $Z(s) = Z_*$ for all $s \le r_*$. The conditions on $r$ then simplify, and, if $Z_* < 1$, we can take any $r \ge \frac{Y}{1-Z_*}$.
-"""]))
-
-# ╔═╡ accd6469-25c3-40d7-959b-5663d560437c
+# ╔═╡ a801e2c7-c907-40d2-9976-bba19c590b2b
 md"""
-Going back to a dynamical system $x_{n+1} = f(x_n)$, a natural fixed-point operator for period 3 orbits is given by $T(x) = f^3(x)$, i.e. $f$ composed with itself three times. However, such a $T$ has no reason to be contracting.
+!!! theorem "Theorem (Contraction mapping)"
+	Let $\mathcal{X}$ be a Banach space, $\bar{x} \in \mathcal{X}$, and $T : \mathcal{X} \to \mathcal{X}$ a continuously differentiable map.
+	Assume that there exist a constant $Y$ and a non-decreasing map $Z : [0, \infty) \to [0, \infty)$ such that
 
-To develop a more general procedure for constructing a fixed-point problem, one can start by finding a map $F$ whose isolated zeros are solutions to our problem. Given an approximate solution $\bar{x}$, one can consider the Newton-like operator $T(x) = x - DF(\bar{x})^{-1} F(x)$. This operator should be contracting in a neighborhood of $\bar{x}$, as $DT(\bar{x}) = 0$.
-
-For finite dimensional problems of moderate size, computing the inverse of $DF(\bar{x})$ is feasible. However, in infinite dimensional problems, $DF(\bar{x})^{-1}$ may become challenging to work with. To address this, one often considers an approximate inverse $A \approx DF(\bar{x})^{-1}$ and the fixed-point operator $T(x) = x - AF(x)$. We state all following results in this context, for an $A$ which is not specified and could actually (but does not have to) be $DF(\bar{x})^{-1}$.
+	```math
+	\begin{align}
+	\| T(\bar{x}) - \bar{x} \| &\le Y, \\
+	\| DT(x) \| &\le Z(\| x-\bar{x} \|), \qquad \forall x \in \mathcal{X}.
+	\end{align}
+	```
+	
+	If there exists $r_0 > 0$ such that
+	
+	$\begin{align}
+	Y + \int_0^{r_0} Z(s) \, ds &\le r_0, \\
+	Z(r_0) &< 1,
+	\end{align}$
+	
+	then $T$ has a unique fixed point $x_0$ such that $\| x_0 - \bar{x} \| \le r_0$.
 """
 
-# ╔═╡ 542de1ab-1b8b-49c8-8960-704c2351407a
-Markdown.MD(Markdown.Admonition("tip", "Corollary",
-[md"""
-Let $\mathcal{X}$ and $\mathcal{Y}$ be two Banach spaces, $\bar{x}\in \mathcal{X}$, $F : \mathcal{X} \to \mathcal{Y}$ a continuously differentiable map, $A : \mathcal{Y} \to \mathcal{X}$ an injective linear map, and $r_* > 0$. Assume there exist constants $Y$, $Z_1$ and  $Z_2$ such that
-
-$\begin{align}
-\Vert AF(\bar{x}) \Vert &\le Y, \\
-\Vert I-ADF(\bar{x}) \Vert &\le Z_1, \\
-\Vert A(DF(x)-DF(\bar{x})) \Vert &\leq Z_2\Vert x-\bar{x}\Vert, \quad \forall x \in \mathcal{X} \text{ such that } \Vert x-\bar{x}\Vert \le r_*.
-\end{align}$
-
-If there exists $r\in(0,r_*]$ such that
-
-$\begin{align}
-Y + Z_1 r + \frac{1}{2} Z_2 r^2 &\le r, \\
-Z_1 + Z_2 r &< 1,
-\end{align}$
-
-then $F$ has a unique zero $x^*$ such that $\Vert x^* - \bar{x} \Vert \le r$.
-"""]))
-
-# ╔═╡ 23923d27-9905-4f26-8ef5-53f183d290da
+# ╔═╡ 6caaf267-3015-4a66-975f-ec1c3a6f86f8
 md"""
-This corollary is a simplified version of the Newton-Kantorovich Theorem [^Ort68]. Many slight variations can be found in the literature, and are used in many CAPs (see for instance [^BL15] [^NPW19] and the references therein).
+!!! note "Remarks"
+	- The bound $Z$ is actually only needed locally, i.e. we only need $Z(s)$ for $s \le r_0$.
+	  Therefore, one can fix a priori some $r_* > 0$, and weaken the assumption by only asking for $Z$ to be defined on $[0, r_*]$ and to satisfy $\| DT(x) \| \le Z(\| x-\bar{x} \|)$ for all $x$ in $\mathcal{X}$ such that $\| x-\bar{x} \| \le r_*$.
+	  Of course, we are then only allowed to consider $r \in (0, r_*]$.
+	- In practice, studying carefully how $\| DT(x) \|$ depends on $\| x-\bar{x} \|$ allows us to get better bounds.
+	  However, we can sometimes get away with cruder estimates.
+	  That is, we derive a constant $Z_*$ such that $\| DT(x) \| \le Z_*$ for all $x \in \mathcal{X}$ such that $\| x-\bar{x} \| \le r_*$, and then use $Z(s) = Z_*$ for all $s \le r_*$.
+	  The conditions on $r_0$ then simplify, and, if $Z_* < 1$, we can take any $r_0 \ge \frac{Y}{1-Z_*}$.
 """
+
+# ╔═╡ 77380230-67f2-4794-bb51-39ceeac7bef1
+md"""
+For a dynamical system $x_{n+1} = f(x_n)$, a natural fixed-point operator for period 3 orbits is given by $T(x) = f^3(x)$, i.e. $f$ composed with itself three times.
+However, such a $T$ has no reason to be contracting.
+
+To develop a more general procedure for constructing a fixed-point problem, one can start by finding a map $F$ whose isolated zeros are solutions to our problem.
+Given an approximate solution $\bar{x}$, one can consider the Newton-like operator $T(x) = x - DF(\bar{x})^{-1} F(x)$.
+This operator should be contracting in a neighborhood of $\bar{x}$, as $DT(\bar{x}) = 0$.
+
+For finite dimensional problems of moderate size, computing the inverse of $DF(\bar{x})$ is feasible.
+However, in infinite dimensional problems, $DF(\bar{x})^{-1}$ may become challenging to work with.
+To address this, one often considers an approximate inverse $A \approx DF(\bar{x})^{-1}$ and the fixed-point operator $T(x) = x - AF(x)$.
+We state all following results in this context, for an $A$ which is not specified and could actually (but does not have to) be $DF(\bar{x})^{-1}$.
+"""
+
+# ╔═╡ 08dab1b4-c78d-4e85-89b6-cf9b485030e0
+md"""
+!!! corollary "Corollary (Newton-Kantorovich)"
+	Let $\mathcal{X}$ and $\mathcal{Y}$ be two Banach spaces, $\bar{x} \in \mathcal{X}$, $F : \mathcal{X} \to \mathcal{Y}$ a continuously differentiable map, $A : \mathcal{Y} \to \mathcal{X}$ an injective linear map, and $r_* > 0$.
+	Assume that there exist constants $Y$, $Z_1$ and $Z_2$ such that
+	
+	```math
+	\begin{align}
+	\| AF(\bar{x}) \| &\le Y, \\
+	\| I-ADF(\bar{x}) \| &\le Z_1, \\
+	\| A(DF(x)-DF(\bar{x})) \| &\le Z_2 \| x-\bar{x} \|, \qquad \forall x \in \mathcal{X} \text{ such that } \| x-\bar{x} \| \le r_*.
+	\end{align}
+	```
+	
+	If there exists $r_0 \in (0,r_*]$ such that
+	
+	```math	
+	\begin{align}
+	Y + Z_1 r_0 + \frac{1}{2} Z_2 r_0^2 &\le r_0, \\
+	Z_1 + Z_2 r_0 &< 1,
+	\end{align}
+	```
+	
+	then $F$ has a unique zero $x_0$ such that $\| x_0 - \bar{x} \| \le r_0$.
+"""
+
+# ╔═╡ 3dc209e6-d7c0-464b-a477-0c46ede9483e
+md"""
+This corollary is a simplified version of the [Newton-Kantorovich Theorem](https://en.wikipedia.org/wiki/Kantorovich_theorem) [^Ort68].
+Many (slight) variations of this result appear throughout the literature and are frequently applied in CAPs (see for instance [^BL15] [^NPW19] and the references therein).
+"""
+
+# ╔═╡ f0d6ab5b-13cf-4408-aaae-93f959ce29c4
+md"## Interval arithmetic"
+
+# ╔═╡ 24ddc2c5-7976-4c67-8525-f6bb5d2e04a5
+md"""
+When we want to use the contraction mapping theorem with $\bar{x}$ being an approximate solution obtained using the computer, we also need to use the computer to evaluate quantities to obtain the bounds $Y$ and $Z$.
+However, these computations typically rely on floating-point arithmetic, which introduces rounding errors.
+In particular, if we set $Y = \| T(\bar{x}) -\bar{x} \|$ on the computer, we cannot be certain that $Y$ actually satifies the assumption of the Newton-Kantorovich theorem.
+
+[Interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic) provides a way to control rounding errors and obtain guaranteed results from computer calculations.
+Here, we only give a brief description of interval arithmetic; refer to [^Moo79] [^Tuc11] for more detailed discussions.
+"""
+
+# ╔═╡ 3b123092-1241-4a2a-bb61-36c7f68a0b35
+md"### Overview"
 
 # ╔═╡ 66ca51ad-0f2e-4f3c-8dd0-e66649b224d9
 md"""
-## Interval arithmetic
-"""
+When using interval arithmetic, we represent any real number by an interval, whose end-points are floating-point numbers.
+More precisely, for $a \in \mathbb{R}$, we consider the interval $[\underline{a}, \overline{a}]$ where $\underline{a}, \overline{a}$ are floating-point numbers satisfying $\underline{a} \le a \le \overline{a}$.
+We give up the hope of representing numbers exactly, but we recover guaranteed information: the real number $a$ is contained in the interval stored in the computer.
 
-# ╔═╡ f7d40916-2d5b-47f2-9fe9-6635363978ae
-md"""
-When we want to use the Newton-Kantorovich theorem with $\bar{x}$ being an approximate solution obtained using the computer, we also need to use the computer to evaluate quantities like $\Vert F(\bar{x}) \Vert$ to obtain the bounds $Y$ and $Z$. However, by default these computations are performed using floating-point arithmetic, which introduces rounding errors. In particular, if we set $Y = \Vert F(\bar{x}) \Vert$ on the computer, we cannot be certain that $Y$ actually satifies the assumption of the Newton-Kantorovich theorem.
+The rules of interval arithmetic then ensure that this property is preserved when doing arithmetic operations.
+For instance, consider two intervals `a` and `b` of the form $[\underline{a}, \overline{a}]$ and $[\underline{b}, \overline{b}]$, containing the reals numbers $a$ and $b$, respectively.
+When we perform $c = a + b`, the resulting interval $[\underline{c},\overline{c}]$ for `c` is computed as follows.
+For $\underline{c}$, we take $\underline{a}+\underline{b}$ **rounded downward**, and for $\overline{c}$ we take $\overline{a}+\overline{b}$ **rounded upward**.
+In particular, the real number $c = a + b$ is contained in the interval `c`.
 
-[Interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic) provides a way to control rounding errors and obtain guaranteed results from computer calculations. Here, we only give a brief description of interval arithmetic; refer to [^Moo79] [^Tuc11] for more detailed discussions.
-"""
+Similarly, if the variable `c` is an interval $[\underline{c}, \overline{c}]$, and we compute `d = exp(c)`, we have that `d` contains $\exp(c)$.
 
-# ╔═╡ 7b174512-9ed1-4b99-ae17-a366323f0a46
-md"""
-When a command like `a = 0.1` is executed in Julia, the computer associates to the variable `a` a single floating-point number: the floating-point number which is the closest to $1/10$. Since $1/10$ does not have a finite representation in base $2$, the value stored in `a` is already not equal to the typed-in number `0.1`. It turns out to be slightly larger than $1/10$, but it could very well have been the other way around (e.g. `0.3`).
-"""
-
-# ╔═╡ 2d68d26d-6e10-407f-8227-515ddadd9599
-a = 0.1
-
-# ╔═╡ 78f17262-7ffc-4d74-835c-f17863817b9a
-a > 1//10
-
-# ╔═╡ c359bec8-4a1a-4e34-9f56-1f70f4fa5cbe
-md"""
-When using interval arithmetic, we represent any real number by an interval, whose end-points are floating-point numbers. More precisely, for $a \in \mathbb{R}$, we consider the interval $[\underline{a}, \overline{a}]$ where $\underline{a}, \overline{a}$ are floating-point numbers satisfying $\underline{a} \le a \le \overline{a}$. We give up the hope of representing numbers exactly, but we recover guaranteed information: the real number $a$ is contained in the interval representing it on the computer.
-
-We use the Julia package [IntervalArithmetic.jl](https://github.com/JuliaIntervals/IntervalArithmetic.jl) in this course, but there are many other interval arithmetic librairies in different languages (e.g. [Arb](https://arblib.org/) or [Intlab](https://www.tuhh.de/ti3/rump/intlab/)).
-Note that IntervalArithmetic is automatically available when using [RadiiPolynomial.jl](https://github.com/OlivierHnt/RadiiPolynomial.jl).
-"""
-
-# ╔═╡ c44fd902-7655-43b5-82cc-53c2ecc4f77b
-ia = I"0.1" #interval(1)/interval(10)
-
-# ╔═╡ 4c15bb79-2591-4f2a-9243-ff811de70df7
-in_interval(1//10, ia)
-
-# ╔═╡ 97fcd17c-9710-4753-89f5-9d592a33d0b1
-md"""
-The rules of interval arithmetic then ensure that this property is preserved when doing arithmetic operations. For instance, consider two intervals `a` and `b` of the form $[\underline{a}, \overline{a}]$ and $[\underline{b}, \overline{b}]$, containing the reals numbers $a$ and $b$. When we do `c = a + b`, the resulting interval $[\underline{c},\overline{c}]$ for `c` is computed as follows. For $\underline{c}$, we take $\underline{a}+\underline{b}$ **rounded downward**, and for $\overline{c}$ we take $\overline{a}+\overline{b}$ **rounded upward**. In particular, the real number $c = a + b$ is contained in the interval `c`.
-"""
-
-# ╔═╡ c41f292d-b61a-4386-90ca-358d2c3faaea
-md"""
-Similarly, if the variable `c` is an interval $[\underline{c}, \overline{c}]$, and we compute `d = exp(c)`, we would like that `d` contains $\exp(c)$. Usual arithmetic operations, as well as implementations of elementary functions (e.g. `exp`, `log`, `cos`, etc.) complying with these rules are provided in IntervalArithmetic.
+We use the Julia library [IntervalArithmetic](https://github.com/JuliaIntervals/IntervalArithmetic.jl) in this course, but there are many other interval arithmetic librairies in different languages (e.g. [Intlab](https://www.tuhh.de/ti3/rump/intlab/) for Matlab).
+Note that IntervalArithmetic is automatically available when using [RadiiPolynomial](https://github.com/OlivierHnt/RadiiPolynomial.jl).
+Usual arithmetic operations, as well as implementations of elementary functions (e.g. `exp`, `log`, `cos`, etc.) complying with these rules are provided in IntervalArithmetic.
 """
 
 # ╔═╡ f8eab26f-c893-4d2e-b4e8-6b59f33cbc9c
-c = interval(2, 4)
+a = interval(2, 4)
 
 # ╔═╡ 556163e0-80d2-4f4e-b198-b8e0922438db
-d = cos(exp(sqrt(c)))
+cos(exp(sqrt(a)))
 
 # ╔═╡ 97fadca1-fcf9-46b8-aa07-c615ca0deb7f
-Markdown.MD(Markdown.Admonition("note", "Remarks",
-[md"""
-Even when doing computer-assisted proofs, one should not use interval arithmetics for all computations. When trying to find an approximate solution $\bar{x}$, floating-point calculations are perfectly fine, and it is only when evaluating the bounds in the Newton-Kantorovich theorem that interval arithmetic must be used.
-"""]))
+md"""
+!!! note "Remarks"
+	Even when doing computer-assisted proofs, one should not use interval arithmetics for every computations.
+	Typically, when trying to find an approximate solution $\bar{x}$, floating-point calculations are perfectly fine, and it is only when evaluating the bounds in the Newton-Kantorovich theorem that interval arithmetic must be used.
+"""
+
+# ╔═╡ 0bf1cce8-6caf-40d5-93a6-b495b764d943
+md"### Beware of typed-in floating-point numbers"
+
+# ╔═╡ c09b05d4-0325-486a-a433-6b32fbb7dfc7
+md"""
+When a command like `x = 0.1` is executed in Julia, the computer associates to the variable `x` a floating-point number: the floating-point number which is the closest to $1/10$.
+Since $1/10$ does not have a finite representation in base $2$, the value stored in `x` is already not equal to the typed-in number `0.1`.
+It turns out to be slightly larger than $1/10$, but it could very well have been the other way around (see what happens for `x = 0.3`).
+See also this [webpage](https://0.30000000000000004.com) on the topic.
+"""
+
+# ╔═╡ 2d68d26d-6e10-407f-8227-515ddadd9599
+x = 0.1
+
+# ╔═╡ 78f17262-7ffc-4d74-835c-f17863817b9a
+x > 1//10
+
+# ╔═╡ c44fd902-7655-43b5-82cc-53c2ecc4f77b
+ix = I"0.1" #interval(1)/interval(10)
+
+# ╔═╡ 4c15bb79-2591-4f2a-9243-ff811de70df7
+in_interval(1//10, ix)
+
+# ╔═╡ 0a2208b6-f90c-4587-978f-33643fd4bdba
+md"## References"
 
 # ╔═╡ b8d56ba6-01da-4604-8dad-3e63ec203fd4
 md"""
-## References
-[^BL15]: J. B. van den Berg and J.-P. Lessard. Rigorous numerics in dynamics. *Notices Amer. Math. Soc.*, 62(9), 2015.
+[^BL15]: J. B. van den Berg and J.-P. Lessard. Rigorous numerics in dynamics. *Notices Of The American Mathematical Society*, 62(9), 2015.
 [^LY75]: T.-Y. Li and J. A. Yorke. Period three implies chaos. *The American Mathematical Monthly*, 82(10):985--992, 1975.
 [^Moo79]: R. E. Moore. *Methods and applications of interval analysis*. SIAM, 1979
 [^Ort68]: J. M. Ortega. The Newton-Kantorovich theorem. *The American Mathematical Monthly*, 75(6):658--660, 1968.
 [^NPW19]: M. T. Nakao, M. Plum, and Y. Watanabe. *Numerical Verification Methods and Computer-Assisted Proofs for Partial Differential Equations*. Springer Singapore, 2019.
-[^Sha64]: A. N. Sharkowskii. Co-existence of the cycles of a continuous mapping of the line into itself. *Ukrainian Math. J.*, 16(1), 1964.
+[^Sha64]: A. N. Sharkowskii. Co-existence of the cycles of a continuous mapping of the line into itself. *Ukrainian Mathematical Journal*, 16(1), 1964.
 [^Tuc11]: W. Tucker. *Validated numerics: a short introduction to rigorous computations*. Princeton University Press, 2011.
 """
 
@@ -1464,33 +1509,35 @@ version = "1.4.1+1"
 # ╠═d0e623ee-b096-4a27-977d-dc32567d6020
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╟─b3845641-1537-4a27-8550-1eff30900a6b
-# ╟─c33dc650-3f94-11ef-398a-8bbc4a2b69b8
-# ╟─2fe25b56-0fcc-41a0-b74a-2bd650c387d5
+# ╟─ed6f44f4-3696-494a-b8e3-b30184f5bb06
+# ╠═c33dc650-3f94-11ef-398a-8bbc4a2b69b8
 # ╟─05df1902-b4b8-4fd7-ab91-ad01f4fa413e
 # ╟─2653b081-ac49-4ccc-afa6-3d6253d93ed7
 # ╟─730eeed9-a736-48df-a853-94f45dedd836
-# ╟─e3be34b1-bc05-49f5-884d-78886f7a9509
-# ╟─6a625351-cadf-4d51-b30a-ef070ca23552
-# ╟─8b779da9-46e2-442d-af54-5ad0284e7b84
-# ╟─c352e6d8-fd3d-4070-8bdf-4c98ae555b69
-# ╟─6eeb3554-a50c-4f3d-b676-95368021204c
-# ╟─94e323ed-5e13-413b-8bcb-1909dd6e14a5
-# ╟─accd6469-25c3-40d7-959b-5663d560437c
-# ╟─542de1ab-1b8b-49c8-8960-704c2351407a
-# ╟─23923d27-9905-4f26-8ef5-53f183d290da
+# ╟─1d9286fa-647a-4743-806f-9cea5aab6be1
+# ╟─1e56532e-9886-4a41-9ba0-1a619a85e014
+# ╟─8d6c631f-832a-48a9-891f-650f53a0ac6c
+# ╟─429e5261-d7d0-47a3-94b5-8e7905a5bd53
+# ╟─a27b45ca-77d1-408e-98e9-6b5248aca85e
+# ╟─a801e2c7-c907-40d2-9976-bba19c590b2b
+# ╟─6caaf267-3015-4a66-975f-ec1c3a6f86f8
+# ╟─77380230-67f2-4794-bb51-39ceeac7bef1
+# ╟─08dab1b4-c78d-4e85-89b6-cf9b485030e0
+# ╟─3dc209e6-d7c0-464b-a477-0c46ede9483e
+# ╟─f0d6ab5b-13cf-4408-aaae-93f959ce29c4
+# ╟─24ddc2c5-7976-4c67-8525-f6bb5d2e04a5
+# ╟─3b123092-1241-4a2a-bb61-36c7f68a0b35
 # ╟─66ca51ad-0f2e-4f3c-8dd0-e66649b224d9
-# ╟─f7d40916-2d5b-47f2-9fe9-6635363978ae
-# ╟─7b174512-9ed1-4b99-ae17-a366323f0a46
-# ╠═2d68d26d-6e10-407f-8227-515ddadd9599
-# ╠═78f17262-7ffc-4d74-835c-f17863817b9a
-# ╟─c359bec8-4a1a-4e34-9f56-1f70f4fa5cbe
-# ╠═c44fd902-7655-43b5-82cc-53c2ecc4f77b
-# ╠═4c15bb79-2591-4f2a-9243-ff811de70df7
-# ╟─97fcd17c-9710-4753-89f5-9d592a33d0b1
-# ╟─c41f292d-b61a-4386-90ca-358d2c3faaea
 # ╠═f8eab26f-c893-4d2e-b4e8-6b59f33cbc9c
 # ╠═556163e0-80d2-4f4e-b198-b8e0922438db
 # ╟─97fadca1-fcf9-46b8-aa07-c615ca0deb7f
+# ╟─0bf1cce8-6caf-40d5-93a6-b495b764d943
+# ╟─c09b05d4-0325-486a-a433-6b32fbb7dfc7
+# ╠═2d68d26d-6e10-407f-8227-515ddadd9599
+# ╠═78f17262-7ffc-4d74-835c-f17863817b9a
+# ╠═c44fd902-7655-43b5-82cc-53c2ecc4f77b
+# ╠═4c15bb79-2591-4f2a-9243-ff811de70df7
+# ╟─0a2208b6-f90c-4587-978f-33643fd4bdba
 # ╟─b8d56ba6-01da-4604-8dad-3e63ec203fd4
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

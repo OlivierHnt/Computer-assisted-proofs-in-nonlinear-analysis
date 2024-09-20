@@ -5,7 +5,7 @@
 #> chapter = 3
 #> order = 1
 #> title = "Lecture notes: Taylor integration"
-#> tags = ["module3"]
+#> tags = ["lecture", "module3"]
 #> layout = "layout.jlhtml"
 
 using Markdown

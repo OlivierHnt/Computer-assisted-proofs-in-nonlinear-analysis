@@ -45,7 +45,6 @@ end)
 <link rel="stylesheet" href="$(root_url)/assets/styles/layout.css" type="text/css" />
 <script src="$(root_url)/assets/scripts/sidebar.js" type="module"></script>
 
-<link rel="pp-search-data" href="$(root_url)/pp_search_data.json" />
 <script src="https://cdn.jsdelivr.net/npm/lunr@2.3.9/lunr.min.js" integrity="sha256-DFDZACuFeAqEKv/7Vnu1Tt5ALa58bcWZegGGFNgET8g=" crossorigin="anonymous" defer></script>
 
 <script src="https://cdn.jsdelivr.net/npm/lite-youtube-embed@0.3.0/src/lite-yt-embed.js" integrity="sha256-sDRYYtDc+jNi2rrJPUS5kGxXXMlmnOSCq5ek5tYAk/M=" crossorigin="anonymous" defer></script>
@@ -124,18 +123,9 @@ $(pluto_head)
         <div id="pages-content">
            $(any(contains("lecture"), f("tags", String[])) ? @htl("""
            <div class="lecture-header" >
-                <p class="number">Section $(f("chapter", "-")).$(f("section", "-"))</p>
                 <h1>$(
                     f("title", basename(page.input.relative_path))
                 )</h1>
-
-                <div class="video">
-
-                    <h4>Lecture Video</h4>
-                    <div>
-                        <lite-youtube videoid=$(f("youtube_id", "notfound")) params="modestbranding=1&rel=0"></lite-youtube>
-                    </div>
-                </div>
             </div>
             """) : nothing)
         $(content)

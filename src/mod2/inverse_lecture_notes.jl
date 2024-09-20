@@ -4,20 +4,20 @@
 #> [frontmatter]
 #> chapter = 2
 #> order = 1
-#> title = "Lecture notes: Taylor sequence"
+#> title = "Inverse"
 #> tags = ["module2"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ d0e623ee-b096-4a27-977d-dc32567d6020
+# ╔═╡ de230094-748d-11ef-25e3-ef811ae3bf31
 using PlutoTeachingTools, PlutoUI # packages for the notebook
 
-# ╔═╡ 018ecc45-8638-4a59-b561-efb086bdc751
+# ╔═╡ 0b90f400-faef-4a80-9e6d-e16b149151d9
 using RadiiPolynomial, Plots
 
-# ╔═╡ 564092a6-546d-4772-a3a4-9f78a1801667
+# ╔═╡ 2af9b21a-2dcf-497f-bd7c-9ebbf80b9428
 html"""<style>
 main {
     margin-left: auto;
@@ -26,211 +26,416 @@ main {
 }
 """
 
-# ╔═╡ 91bb507e-5871-46f4-9042-0ce4cc97617c
-TableOfContents(title="Table of Contents"; indent=true, depth=4, aside=true)
+# ╔═╡ 11810156-e8c9-4145-af2a-93e0757a8cc9
+TableOfContents(title = "Table of Contents"; indent = true, depth = 4, aside = true)
 
-# ╔═╡ d5a510a3-c518-47ed-96bc-7bb22e3b08b5
+# ╔═╡ 44fc05a5-a0c1-4428-adee-edb5b8b869e3
+md"## Introduction and setup"
+
+# ╔═╡ 9162d799-c8a8-44cd-8921-b6fa4c6f291f
 md"""
-In this lecture we will learn how to perform a rigorous square root operation for Taylor series.
+In this lecture we will discuss how to solve an *inverse* problem.
+Namely, given $v(t) = 2 + t$, find the function $u$ such that
+
+```math
+u(t) v(t) = 1, \qquad t \in [-1, 1].
+```
+
 This constitutes the first example of infinite dimensional problems.
+Indeed, we will search for a function $u$ in the following form $u(t) = \sum_{n \ge 0} a_n t^n$.
 
-# Simple example: square root in $\ell^1$
-
-## Introduction and setup
-
-We consider the simple quadratic equation
+The first step is to discretize this function space.
+We consider
 
 ```math
-a*a = b,
-```
-
-where $a, b \in \ell^1$. That is, given $b \in \ell^1$ compute the square root $a \in \ell^1$ relative to the Cauchy product operation.
-
-#### Cauchy product
-
-The Cauchy product is given by
-
-```math
-(a*b)_n \overset{\text{def}}{=} \sum_{k=0}^n a_k b_{n-k}, \qquad n \ge 0.
+\ell^1 \overset{\text{def}}{=} \left\{ a \in \mathbb{R}^\mathbb{N} \, : \, \| a \|_1 \overset{\text{def}}{=} \sum_{n \ge 0} |a_n| < \infty \right\}.
 ```
 """
 
-# ╔═╡ f68f02a2-43cb-492a-a97f-0614c5266e03
-Markdown.MD(Markdown.Admonition("tip", "Lemma",
-[md"""
-If $u(t) = \sum_{n \ge 0} a_n t^n$ and $v(t) = \sum_{n \ge 0} b_n t^n$ then for their product we have $u(t) v(t) = \sum_{n \ge 0} (a*b)_n t^n$.
-"""]))
+# ╔═╡ 4cc2d0b2-53d5-436e-a2e2-a9a4c4f0e5b8
+md"### Operator norm"
 
-# ╔═╡ 10958af8-a261-42d7-aa32-6f412142d2f0
+# ╔═╡ 5654a167-0b32-4768-98c1-00dd1ad473c3
 md"""
-An implementation of the Cauchy product is given below.
+Prove that if $A \in B(\ell^1)$, then $\| A \|_{B(\ell^1)} \le \max_{l \ge 0} \sum_{n \ge 0} |A_{n,l}|$ (in fact the inequality is an equality).
 """
 
-# ╔═╡ 0e917ec7-6f7b-498a-a544-c84f8e17d93f
+# ╔═╡ 526f434e-075f-4207-a481-43b144d7c2f1
+md"#### Computing operator norms"
+
+# ╔═╡ fc023e96-7664-41e6-81f1-06fac19d12eb
+md"""
+Implementing the 1-norm is straightfoward:
+"""
+
+# ╔═╡ 8f61deaf-4c92-4b59-a487-28d4aba2de5d
+sum(abs, [1, 2, 3])
+
+# ╔═╡ d487e3cc-1d16-467b-ba52-cc4c6cdafacb
+md"""
+Similarly, the operator norm is also easily computed via:
+"""
+
+# ╔═╡ 1e00bda3-b2aa-43d1-bad5-1a30f1dfdb89
+maximum(sum(abs, [1 2 ; 3 4]; dims = 1))
+
+# ╔═╡ 19497a0a-5e66-452d-a4a5-39f95b211f22
+md"""
+Yet, it is practical to consider using the RadiiPolynomial library for norms, especially when dealing with more complex norms.
+"""
+
+# ╔═╡ 5894d57b-5d28-4d13-9ff9-965726d84479
+norm(Sequence(Taylor(2), [1, 2, 3]), 1)
+
+# ╔═╡ 85d433ab-3e1d-443c-9256-d386c4c9bf83
+opnorm(LinearOperator(Taylor(1), Taylor(1), [1 2 ; 3 4]), 1)
+
+# ╔═╡ 694758f6-f199-4e82-932f-b99465b72ee8
+md"### Cauchy product"
+
+# ╔═╡ 3cb18cba-18e5-4e6f-8b16-eccd1dcef9fd
+md"""
+Observe that the product of two functions yields a product in $\ell^1$.
+
+!!! tip "Lemma"
+	If $u(t) = \sum_{n \ge 0} a_n t^n$ and $v(t) = \sum_{n \ge 0} b_n t^n$, then for their product we have $u(t) v(t) = \sum_{n \ge 0} (a*b)_n t^n$ where
+
+	```math
+	(a*b)_n \overset{\text{def}}{=} \sum_{l=0}^n a_{n-l} b_l, \qquad n \ge 0.
+	```
+"""
+
+# ╔═╡ f737a8eb-0fa4-49e6-ad07-502099edc3e1
+md"""
+Then, the problem of finding the inverse of $v$ corresponds to finding a sequence of coefficients $a \in (\ell^1, *)$ such that
+
+```math
+a * b = 1,
+```
+
+where $b \overset{\text{def}}{=} (2, 1, 0, \dots)$.
+Here we slightly abuse notation by identifying the constant $1$ with its sequence of Taylor coefficients $(1, 0, \dots)$.
+To simplify the notation, we also denote $(\ell^1, *)$ just by $\ell^1$.
+"""
+
+# ╔═╡ 6badcd71-0e20-482e-8858-631b6357add2
+md"#### Computing the Cauchy product"
+
+# ╔═╡ e3f2f668-88b1-461d-886c-1011c9e018bf
+md"""
+We can store the non-trivial components of $b$ in a vector as follows:
+"""
+
+# ╔═╡ dc3e35fb-f266-4d6b-be07-4ea2b151cfb5
+my_b = [2.0, 1.0]
+
+# ╔═╡ 37827087-01ad-4fe7-bcb6-df2239ea0bca
 begin
-	poly = Sequence(Taylor(1), [1.0, 1.0]) # 1 + x
-	poly * poly
+	plot(LinRange(-1, 1, 51), t -> my_b[1] + my_b[2] * t; label = "v")
+	plot!(LinRange(-1, 1, 51), t -> inv(my_b[1] + my_b[2] * t); label = "1/v")
+	xlims!(-1, 1)
+	xlabel!("t")
 end
 
-# ╔═╡ b33d8335-0abd-4018-adfa-63707eac6a22
+# ╔═╡ 5c1bf65b-6130-41d6-98a5-36c6deac1e27
 md"""
-#### Norm
+A code implementing the Cauchy product can be done as follows:
+"""
 
-We will work in the sequence space
+# ╔═╡ 7392a928-1b28-401e-9160-9ba30eefd674
+function cauchy_product(a, b, Nc)
+	Na = length(a)-1
+	Nb = length(b)-1
+	CoefType = promote_type(eltype(a), eltype(b))
+	c = zeros(CoefType, Nc+1)
+	for n = 0:Nc
+		for l = max(0, n-Na):min(n, Nb) # since 1 ≤ n-l+1 ≤ Na+1 and 1 ≤ l+1 ≤ Nb+1
+			c[n+1] += a[n-l+1] * b[l+1]
+		end
+	end
+    return c
+end
+
+# ╔═╡ c826d3ee-438c-4106-b79b-78ba0b4d50fd
+cauchy_product(my_b, my_b, 2) # (2 + x)^2 = 4 + 4x + x^2
+
+# ╔═╡ bb25cf18-b064-431b-9407-dfa061d78048
+md"""
+In fact, this product is already implemented in the RadiiPolynomial library.
+First we define the sequence of Taylor coefficients:
+"""
+
+# ╔═╡ 82c9f85d-f74f-4106-a5b8-35043e2d6119
+b = Sequence(Taylor(1), [2.0, 1.0])
+
+# ╔═╡ 3044f4e8-6975-4169-a1e8-5ae044adb122
+md"""
+At this point, the only difference between `my_b` and `b` is that `my_b` is simply a standard `Vector` (a one-dimensional array of length 2), while `b` is a [composite type](https://docs.julialang.org/en/v1/manual/types/#Composite-Types) which has registered the vector of coefficients but also the space `Taylor(1)` where $1$ corresponds to the order.
+Simply put, `b` is a vector with a special tag attached to it.
+
+The advantage is that the standard function `*` of Julia can pick up on this and perform the Cauchy product:
+"""
+
+# ╔═╡ 4f900df0-7616-4f17-aec3-c447a58a2a74
+b * b # while `my_b * my_b` errors
+
+# ╔═╡ 00c0ca34-5596-4750-8665-e589ac382cf8
+md"""
+One should think of `b` as being an infinite sequence of coefficients whose only non-trivial coefficients are the first 2 coefficients.
+In this regards, adding two `Sequence` of different orders is well defined:
+"""
+
+# ╔═╡ 52926eea-8175-43d8-8446-f3750dfc2794
+b + Sequence(Taylor(2), [1, 1, 1]) # while `my_b + [1, 1, 1]` errors
+
+# ╔═╡ 51f0b06b-e7ec-4f0b-a9b2-eccbd95fcba0
+md"""
+Moreover, since numbers have a canonical representation as a sequence one can add scalars to sequences:
+"""
+
+# ╔═╡ 62a5750a-cf1f-41e9-8eba-aa4dd80b7d6f
+b + 1 # while `my_b + 1` errors
+
+# ╔═╡ e8b57ef7-6ee3-4982-809f-00890492c396
+md"## Zero-finding problem"
+
+# ╔═╡ 151f9f5f-65ab-4ccb-94a6-c530d924962f
+md"""
+Let us now go back to our task of finding the inverse of $b$ with respect to $*$.
+To this end, we consider the zero-finding problem $F : \ell^1 \to \ell^1$ given by
 
 ```math
-X
+F(a) \overset{\text{def}}{=} a*b - 1.
+```
+
+We aim to prove that, for some injective $A \approx DF(\bar{a})^{-1} \in B(\ell^1)$ yet to be constructed, the fixed-point operator
+
+```math
+T(a) \overset{\text{def}}{=} a - A F(a) = a - A (a * b - 1),
+```
+
+is contracting around $\bar{a}$ with $F(\bar{a}) \approx 0$.
+
+Observe that
+
+```math
+DF(a) h = b * h,
+```
+
+that is $DF(a)$ is the mutliplication operator $M_b$ associated with $b$.
+
+As a bounded linear operator acting on infinite sequences in $\ell^1$, $M_b$ can be visualized as a matrix with an infinite number of rows and columns.
+Specifically, one can check that $M_b$ is a lower triangular operator so that
+
+```math
+M_b =
+\begin{pmatrix}
+b_0 & 0   & 0 & \cdots \\
+b_1 & b_0 & 0 & \cdots \\
+b_2 & b_1 & b_0 & \ddots \\
+\vdots & \vdots & \vdots & \ddots
+\end{pmatrix}.
+```
+"""
+
+# ╔═╡ ee748d75-7e6e-4e4b-95d1-46f2f8dbe538
+md"""
+Given a finite number $N$ of rows and columns, one can implement such multiplication operator as follows:
+"""
+
+# ╔═╡ 8568a1e1-6140-4ef3-90c7-a502b7a2af2e
+function mult_operator(my_b, N)
+	n = length(my_b)
+	M = zeros(N+1, N+1)
+	for i = 1:N+1
+		for j = max(1,i+1-n):min(i) # since 1 ≤ i-j+1 ≤ n
+			M[i,j] = my_b[i-j+1]
+		end
+	end
+    return M
+end
+
+# ╔═╡ 7392d156-4a30-471c-b54d-98bf235c8555
+my_M = mult_operator(my_b, 5)
+
+# ╔═╡ 75b99408-9fed-4c20-8f6f-0513185b0c0f
+md"""
+Again, this is already implemented in the library.
+We can *wrap* the sequence in a `Multiplication` data structure:
+"""
+
+# ╔═╡ d19281af-752c-414f-9a81-5b79caacf1e5
+infinite_M = Multiplication(b)
+
+# ╔═╡ d4735adb-b9b7-40d5-8d3e-e2609abe8088
+md"""
+Of course since (even if $b$ has a finite number of non-zero elements) $M_b$ remains an infinite matrix with non-zero elements on each row and column.
+So for the moment, `infinite_M` is not "materialized" so to say, but it can act on a `Sequence`:
+"""
+
+# ╔═╡ bda1b945-f554-40ff-8085-714202abec88
+infinite_M(b) # infinite_M * b
+
+# ╔═╡ 299c15a2-253a-428f-9a23-cd48bd8238c2
+md"""
+Our custom function `mult_operator` returned $\pi^{\le N} M_b \pi^{\le N}$.
+In RadiiPolynomial, the projection operator $\pi^{\le N}$ is performed through the `project` function:
+"""
+
+# ╔═╡ 82143c8d-7009-4537-975f-c832330caa9e
+M = project(Multiplication(b), Taylor(5), Taylor(5))
+
+# ╔═╡ faec7172-c732-470c-88a0-8de5d92075b0
+md"### Finite dimensional projection"
+
+# ╔═╡ 4290872b-923b-45dc-81b0-3e280a5a77c1
+md"""
+We introduce a projection operator on a finite number of modes ($N+1$ coefficients)
+
+```math
+(\pi^{\le N} a)_n
 \overset{\text{def}}{=}
-\left\{
-a \in \mathbb{R}^\mathbb{N} \, : \, \|a\|_X \overset{\text{def}}{=} \sum_{n \ge 0} |a_n| < \infty
-\right\}.
-```
-"""
-
-# ╔═╡ 4bd0c9e7-ffb2-4c13-b93d-96cfc530bff7
-Foldable("Is X with this norm a Banach space?", md"""**Exercise**: Yes""")
-
-# ╔═╡ 6bb627ea-0b12-4495-8b39-c79bc5a35890
-md"""
-The space $X$ together with $*$ forms a Banach algebra.
-"""
-
-# ╔═╡ e5754113-7f92-4946-a684-99d9bd5d830f
-Markdown.MD(Markdown.Admonition("tip", "Lemma (Banach algebra property)", [md"""For any $a, b \in X$ we have $\|a*b\|_X \le \|a\|_X \|b\|_X$."""]))
-
-# ╔═╡ 2f541fb5-79a8-4755-a611-a14fdf3f532b
-Foldable("""Proof""", md"""**Exercise** (rearrange the series and use the triangle inequality)""")
-
-# ╔═╡ 9f5cf201-871a-4afb-95ed-4bdba6152d23
-md"""
-The multiplication operator $M_a (b) := a * b$ can be represented by an infinite dimensional matrix. For our proof we will only need to construct a finite part of it.
-"""
-
-# ╔═╡ 27de2c2a-f7b6-46c5-97e7-e15341706cd5
-project(Multiplication(poly), space(poly), space(poly))
-
-# ╔═╡ 90fe50ee-89e8-4047-a115-533c90082957
-md"""
-## Zero-finding problem
-
-We define the zero-finding problem $F(a)=0$ on $X$ by
-
-```math
-F_n(a) \overset{\text{def}}{=} (a*a)_n - b_n, \qquad n \ge 0.
-```
-
-#### Finite dimensional projection
-
-We introduce a projection operator on a finite number of modes ($N+1$ coefficients) and its complement:
-
-$\begin{align}
-(\pi^{\leq N} a)_n := \begin{cases}
+\begin{cases}
 a_n, & n \le N, \\
 0, & n > N,
 \end{cases}
-& \qquad\qquad
-(\pi^{>N} a)_n := \begin{cases}
-0, & n \le N, \\
-a_n, & n > N,
-\end{cases}
-\end{align}$
+```
 
-so that $a=\pi^{\leq N}a+\pi^{>N}a$ and $\pi^{\leq N}\pi^{>N}=0=\pi^{>N} \pi^{\le N}$.
+together with its complement $\pi^{> N} \overset{\text{def}}{=} I - \pi^{\le N}$.
 """
 
-# ╔═╡ 2c076e0d-5f35-40e3-9612-d5351b019559
-F(a, b, space) = project(a*a - b, space)
+# ╔═╡ 1d1277bf-2aa3-4c89-b34d-b2a2e5fc6fc5
+md"### Approximate inverse"
 
-# ╔═╡ d3221c19-2720-43d5-9573-958ff69c5730
+# ╔═╡ 8a4513a5-9049-48df-ae9b-ea8c5d5f1076
 md"""
-The derivative of $F(a)=a*a-b$ can now be written compactly as
+For $T$ to be a contraction, we want $A$ to be a "good" approximate inverse of $M_b$. We seek
 
-$\begin{align}
-DF(a)c = 2a*c.
-\end{align}$
+```math
+A \overset{\text{def}}{=} M_{\bar{a}}
+```
+
+where
+
+```math
+M_b \bar{a} \approx (1, 0, \dots).
+```
+
+We can numerically solve this linear system for a finite number of modes
+
+```math
+\pi^{\le N} M_b \pi^{\le N} \bar{a} = \pi^{\le N} (1, 0, \dots)
+```
+
+Consequently,
+
+```math
+F(\bar{a}) = \bar{a} * b - 1 \approx 0
+\qquad \text{and} \qquad
+A DF(\bar{a}) = \bar{a} * b \approx 1,
+```
 """
 
-# ╔═╡ f688e26c-dc4f-4faa-bd69-82c2366bd696
-DF(a, space) = project(Multiplication(2a), space, space)
+# ╔═╡ 1af05657-7b03-4715-9652-77aa5b2f222c
+md"#### Computing the approximate inverse"
 
-# ╔═╡ af117c60-f433-4751-92ff-6d5a3744fbb1
+# ╔═╡ a3124717-6741-4769-8fb0-2b489f13dc94
+a0 = interval.( M \ Sequence(Taylor(5), I[1:6,1]) )
+
+# ╔═╡ 7edef822-8f17-4a17-8dc7-f476fd610a29
+md"### Newton-Kantorovich"
+
+# ╔═╡ 63b48726-18f5-4bab-8675-f90ec50166ac
 md"""
-## The Newton-Kantorovich proof
+Observe that $\| M_a \|_{B(\ell^1)} = \| a \|_1$ for all $a \in \ell^1$ (the proof is left as an exercise).
 
-We choose $b_n = 1/3^n$.
+Let us now apply our contraction argument and compute the required bounds:
+
+```math
+\begin{align}
+Y &\ge \| A F(\bar{a}) \|_1 = \| \bar{a} * (\bar{a} * b - 1) \|_1, \\
+Z_1 &\ge \| A DF(\bar{a}) - I \|_{B(\ell^1)} = \| \bar{a} * b - 1 \|_1 = \| F(\bar{a}) \|_1, \\
+Z_2 &= 0.
+\end{align}
+```
+
+To conclude the proof, note that $Z_1 < 1$ implies that $A DF(\bar{a})$ is invertible, since $A DF(\bar{a}) = M_\bar{a} * M_b = M_b * M_\bar{a} = DF(\bar{a}) A$, this guarantees that $A$ is in fact injective.
+
+Note that all the above quantities are computable since $A F(\bar{a}) \in \pi^{2N + 1 \le} \ell^1$ (recall that $b \in \pi^{\le 1} \ell^1, \bar{a} \in \pi^{\le N} \ell^1$).
 """
 
-# ╔═╡ 4fa97d29-4415-45e0-ac95-34cb1e74e55f
+# ╔═╡ 4f37b759-371e-4042-82d0-720523718021
+F(a, b) = a * b - 1
+
+# ╔═╡ d27d66a6-4717-4d6d-895f-cdebd649cebd
+Y = norm(a0 * F(a0, b), 1)
+
+# ╔═╡ 9d468890-c155-442d-bcbf-6a33bc991f72
+Z₁ = norm(F(a0, b), 1)
+
+# ╔═╡ d02c07ee-77f2-4317-9692-558323e37b54
+Z₂ = interval(0)
+
+# ╔═╡ e87f4cbe-e511-4c78-882b-f86961007932
+interval_of_existence(Y, Z₁, Z₂, Inf)
+
+# ╔═╡ 04417cef-c3d9-4adb-a449-7b26bbe20056
 begin
-	N = 35
-
-	tauBar = interval(1)/interval(3)
-
-	bbar = zeros(Interval{Float64}, Taylor(N))
-	for n = 0:N
-		bbar[n] = tauBar^interval(n)
-	end
-
-	b = zeros(Taylor(N))
-	for n = 0:N
-		b[n] = mid(tauBar)^n
-	end
-
-	epsilonN = tauBar^interval(N+1) / (interval(1) - tauBar)
+	plot(LinRange(-1, 1, 51), t -> mid(a0(t)); label = "approx")
+	plot!(LinRange(-1, 1, 51), t -> inv(2+t); label = "theoretical")
 end
 
-# ╔═╡ db4c62ae-bef8-4c90-8e54-e38e7ec357b0
-begin
-	a = zeros(Taylor(N))
-	a[0] = sqrt(b[0])
-	a, _ = newton(a -> (F(a, b, space(a)), DF(a, space(a))), a)
-
-	abar = interval.(a)
-end
-
-# ╔═╡ db76f769-0281-4502-8065-e94f701bfa7a
-begin
-	plot(LinRange(-1, 1, 101), t -> a(t); legend = false)
-	xlabel!("t")
-	ylabel!("u")
-	xlims!(-1, 1)
-end
-
-# ╔═╡ cde7982c-8cd1-4369-be74-1c543704f933
+# ╔═╡ d61da3a0-ac88-41a4-ae50-86a02ea43cbf
 md"""
-We construct a numerical approximation of $\big(\pi^{\le N} DF(\bar{a}) \pi^{\le N}\big)^{-1}$.
+```math
+\sup_{t \in [-1,1]} | v(t)^{-1} - \sum_{n=0}^N \bar{a}_n t^n | \le \| b^{-1} - \bar{a} \|_1 \le r
+```
 """
 
-# ╔═╡ f3d4ab9f-24f6-4d65-93fc-e8155fe4f055
-begin
-	A = interval.(inv(DF(a, Taylor(N))))
-	normA = opnorm(A, 1) # matrix 1-norm
-end
+# ╔═╡ de0fb5e0-ad64-4cb6-a2db-0b30021adf5a
+md"""
+For the sake of completeness, let us compare what the code of the proof would have looked like with our manual implementation:
+"""
 
-# ╔═╡ 55580d08-5668-4a98-9082-20792e7a58c8
-begin
-	YN = sum(abs.(A*F(abar, bbar, Taylor(N))))
-	Yinf = sum(abs.(F(abar, bbar, Taylor(2N))[N+1:end]))
-	Y_bound = YN + Yinf + epsilonN
-end
+# ╔═╡ 28be86e3-a1b2-4562-8d6a-6ebff88a3bb4
+my_F(a0, b, N) = cauchy_product(a0, b, N) - [1 ; zeros(N)]
 
-# ╔═╡ 8bd6e02f-2b26-4ba4-affc-19038ea60e31
-function Z1Bound(a, A, N)
-	sum = zero(eltype(a))
-	for n = 1:N
-		sum = sum + abs(a[n])
-	end
-	return sum/a[0] + opnorm(I - A * DF(a, Taylor(N)), 1)
-end
+# ╔═╡ a31c1107-aa7e-43e5-b4c3-4c3f2b3fbfad
+my_a0 = interval.( my_M \ I[1:6,1] )
 
-# ╔═╡ e782bccc-71fe-4170-9ac1-0027bbf1ad8a
-Z1_bound = Z1Bound(abar, A, N)
+# ╔═╡ 9a4f9f19-2fe8-44ee-aa8f-bdbe811b86dd
+my_Y = sum(abs.(cauchy_product(
+	my_a0,
+	my_F(my_a0, [my_b ; zeros(max(5-length(my_b), 0))], 6),
+	11)))
 
-# ╔═╡ 310397bd-ff77-44a3-b70c-7954ed944f37
-Z2_bound = interval(2)*normA
+# ╔═╡ a980db33-ab3a-4b19-8ccd-7c9922bf6928
+md"""
+One can see that the padding by zeros, explicitly keeping track of the sizes are already making the code less readible for this simple example.
+The RadiiPolynomial library does the bookkeeping for you!
+"""
 
-# ╔═╡ c187aff6-087d-43f5-8042-d3ea1d09ba7a
-r = interval_of_existence(Y_bound, Z1_bound, Z2_bound, Inf)
+# ╔═╡ 2d99c89c-c23d-4b6e-a0e2-58d209ffd96b
+md"""
+Lastly, the problem is simple enough that we can compute by hand both the first 5 terms of $(2+t)^{-1}$ and compare with our CAP.
+
+```math
+\frac{1}{2+t} = \frac{1}{2} - \frac{t}{4} + \frac{t^2}{8} - \frac{t^3}{16} + \frac{t^4}{32} - \frac{t^5}{64} + O(t^6).
+```
+"""
+
+# ╔═╡ e40b7fc3-1ce6-4583-9bbe-51525c4c1cb0
+bounds.(coefficients(a0))
+
+# ╔═╡ 46b2d787-095a-4f15-873c-8d0bae1b6750
+md"## Next steps"
+
+# ╔═╡ 5d28a250-9c3d-4105-8d75-1c8f2c585a0f
+md"""
+Larger domain, introduce $\nu$...
+
+What if $v$ is an infinite power series...
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -242,7 +447,7 @@ RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
 Plots = "~1.40.8"
-PlutoTeachingTools = "~0.2.15"
+PlutoTeachingTools = "~0.3.0"
 PlutoUI = "~0.7.60"
 RadiiPolynomial = "~0.8.13"
 """
@@ -253,7 +458,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.5"
 manifest_format = "2.0"
-project_hash = "a064359e34f654ceb201746cdb4cbc9e20b50f00"
+project_hash = "2a778c5d86a1bdd14fe9b7b4da3a6bda20a31af0"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -922,10 +1127,10 @@ uuid = "0ff47ea0-7a50-410d-8455-4348d5de0420"
 version = "0.1.6"
 
 [[deps.PlutoTeachingTools]]
-deps = ["Downloads", "HypertextLiteral", "LaTeXStrings", "Latexify", "Markdown", "PlutoLinks", "PlutoUI", "Random"]
-git-tree-sha1 = "5d9ab1a4faf25a62bb9d07ef0003396ac258ef1c"
+deps = ["Downloads", "HypertextLiteral", "Latexify", "Markdown", "PlutoLinks", "PlutoUI"]
+git-tree-sha1 = "e2593782a6b53dc5176058d27e20387a0576a59e"
 uuid = "661c6b06-c737-4d37-b85c-46df65de6f69"
-version = "0.2.15"
+version = "0.3.0"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
@@ -1047,9 +1252,9 @@ uuid = "992d4aef-0814-514b-bc4d-f2e9a6c4116f"
 version = "1.0.3"
 
 [[deps.SimpleBufferStream]]
-git-tree-sha1 = "874e8867b33a00e784c8a7e4b60afe9e037b74e1"
+git-tree-sha1 = "f305871d2f381d21527c770d4788c06c097c9bc1"
 uuid = "777ac1f9-54b0-4bf8-805c-2214025038e7"
-version = "1.1.0"
+version = "1.2.0"
 
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
@@ -1458,35 +1663,74 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╟─564092a6-546d-4772-a3a4-9f78a1801667
-# ╠═d0e623ee-b096-4a27-977d-dc32567d6020
-# ╠═018ecc45-8638-4a59-b561-efb086bdc751
-# ╟─91bb507e-5871-46f4-9042-0ce4cc97617c
-# ╟─d5a510a3-c518-47ed-96bc-7bb22e3b08b5
-# ╟─f68f02a2-43cb-492a-a97f-0614c5266e03
-# ╟─10958af8-a261-42d7-aa32-6f412142d2f0
-# ╠═0e917ec7-6f7b-498a-a544-c84f8e17d93f
-# ╟─b33d8335-0abd-4018-adfa-63707eac6a22
-# ╟─4bd0c9e7-ffb2-4c13-b93d-96cfc530bff7
-# ╟─6bb627ea-0b12-4495-8b39-c79bc5a35890
-# ╟─e5754113-7f92-4946-a684-99d9bd5d830f
-# ╟─2f541fb5-79a8-4755-a611-a14fdf3f532b
-# ╟─9f5cf201-871a-4afb-95ed-4bdba6152d23
-# ╠═27de2c2a-f7b6-46c5-97e7-e15341706cd5
-# ╟─90fe50ee-89e8-4047-a115-533c90082957
-# ╠═2c076e0d-5f35-40e3-9612-d5351b019559
-# ╟─d3221c19-2720-43d5-9573-958ff69c5730
-# ╠═f688e26c-dc4f-4faa-bd69-82c2366bd696
-# ╟─af117c60-f433-4751-92ff-6d5a3744fbb1
-# ╠═4fa97d29-4415-45e0-ac95-34cb1e74e55f
-# ╠═db4c62ae-bef8-4c90-8e54-e38e7ec357b0
-# ╟─db76f769-0281-4502-8065-e94f701bfa7a
-# ╟─cde7982c-8cd1-4369-be74-1c543704f933
-# ╠═f3d4ab9f-24f6-4d65-93fc-e8155fe4f055
-# ╠═55580d08-5668-4a98-9082-20792e7a58c8
-# ╠═8bd6e02f-2b26-4ba4-affc-19038ea60e31
-# ╠═e782bccc-71fe-4170-9ac1-0027bbf1ad8a
-# ╠═310397bd-ff77-44a3-b70c-7954ed944f37
-# ╠═c187aff6-087d-43f5-8042-d3ea1d09ba7a
+# ╟─2af9b21a-2dcf-497f-bd7c-9ebbf80b9428
+# ╠═de230094-748d-11ef-25e3-ef811ae3bf31
+# ╠═0b90f400-faef-4a80-9e6d-e16b149151d9
+# ╟─11810156-e8c9-4145-af2a-93e0757a8cc9
+# ╟─44fc05a5-a0c1-4428-adee-edb5b8b869e3
+# ╟─9162d799-c8a8-44cd-8921-b6fa4c6f291f
+# ╟─4cc2d0b2-53d5-436e-a2e2-a9a4c4f0e5b8
+# ╟─5654a167-0b32-4768-98c1-00dd1ad473c3
+# ╟─526f434e-075f-4207-a481-43b144d7c2f1
+# ╟─fc023e96-7664-41e6-81f1-06fac19d12eb
+# ╠═8f61deaf-4c92-4b59-a487-28d4aba2de5d
+# ╟─d487e3cc-1d16-467b-ba52-cc4c6cdafacb
+# ╠═1e00bda3-b2aa-43d1-bad5-1a30f1dfdb89
+# ╟─19497a0a-5e66-452d-a4a5-39f95b211f22
+# ╠═5894d57b-5d28-4d13-9ff9-965726d84479
+# ╠═85d433ab-3e1d-443c-9256-d386c4c9bf83
+# ╟─694758f6-f199-4e82-932f-b99465b72ee8
+# ╟─3cb18cba-18e5-4e6f-8b16-eccd1dcef9fd
+# ╟─f737a8eb-0fa4-49e6-ad07-502099edc3e1
+# ╟─6badcd71-0e20-482e-8858-631b6357add2
+# ╟─e3f2f668-88b1-461d-886c-1011c9e018bf
+# ╠═dc3e35fb-f266-4d6b-be07-4ea2b151cfb5
+# ╟─37827087-01ad-4fe7-bcb6-df2239ea0bca
+# ╟─5c1bf65b-6130-41d6-98a5-36c6deac1e27
+# ╠═7392a928-1b28-401e-9160-9ba30eefd674
+# ╠═c826d3ee-438c-4106-b79b-78ba0b4d50fd
+# ╟─bb25cf18-b064-431b-9407-dfa061d78048
+# ╠═82c9f85d-f74f-4106-a5b8-35043e2d6119
+# ╟─3044f4e8-6975-4169-a1e8-5ae044adb122
+# ╠═4f900df0-7616-4f17-aec3-c447a58a2a74
+# ╟─00c0ca34-5596-4750-8665-e589ac382cf8
+# ╠═52926eea-8175-43d8-8446-f3750dfc2794
+# ╟─51f0b06b-e7ec-4f0b-a9b2-eccbd95fcba0
+# ╠═62a5750a-cf1f-41e9-8eba-aa4dd80b7d6f
+# ╟─e8b57ef7-6ee3-4982-809f-00890492c396
+# ╟─151f9f5f-65ab-4ccb-94a6-c530d924962f
+# ╟─ee748d75-7e6e-4e4b-95d1-46f2f8dbe538
+# ╠═8568a1e1-6140-4ef3-90c7-a502b7a2af2e
+# ╠═7392d156-4a30-471c-b54d-98bf235c8555
+# ╟─75b99408-9fed-4c20-8f6f-0513185b0c0f
+# ╠═d19281af-752c-414f-9a81-5b79caacf1e5
+# ╟─d4735adb-b9b7-40d5-8d3e-e2609abe8088
+# ╠═bda1b945-f554-40ff-8085-714202abec88
+# ╟─299c15a2-253a-428f-9a23-cd48bd8238c2
+# ╠═82143c8d-7009-4537-975f-c832330caa9e
+# ╟─faec7172-c732-470c-88a0-8de5d92075b0
+# ╟─4290872b-923b-45dc-81b0-3e280a5a77c1
+# ╟─1d1277bf-2aa3-4c89-b34d-b2a2e5fc6fc5
+# ╟─8a4513a5-9049-48df-ae9b-ea8c5d5f1076
+# ╟─1af05657-7b03-4715-9652-77aa5b2f222c
+# ╠═a3124717-6741-4769-8fb0-2b489f13dc94
+# ╟─7edef822-8f17-4a17-8dc7-f476fd610a29
+# ╟─63b48726-18f5-4bab-8675-f90ec50166ac
+# ╠═4f37b759-371e-4042-82d0-720523718021
+# ╠═d27d66a6-4717-4d6d-895f-cdebd649cebd
+# ╠═9d468890-c155-442d-bcbf-6a33bc991f72
+# ╠═d02c07ee-77f2-4317-9692-558323e37b54
+# ╠═e87f4cbe-e511-4c78-882b-f86961007932
+# ╟─04417cef-c3d9-4adb-a449-7b26bbe20056
+# ╟─d61da3a0-ac88-41a4-ae50-86a02ea43cbf
+# ╟─de0fb5e0-ad64-4cb6-a2db-0b30021adf5a
+# ╠═28be86e3-a1b2-4562-8d6a-6ebff88a3bb4
+# ╠═a31c1107-aa7e-43e5-b4c3-4c3f2b3fbfad
+# ╠═9a4f9f19-2fe8-44ee-aa8f-bdbe811b86dd
+# ╟─a980db33-ab3a-4b19-8ccd-7c9922bf6928
+# ╟─2d99c89c-c23d-4b6e-a0e2-58d209ffd96b
+# ╠═e40b7fc3-1ce6-4583-9bbe-51525c4c1cb0
+# ╟─46b2d787-095a-4f15-873c-8d0bae1b6750
+# ╟─5d28a250-9c3d-4105-8d75-1c8f2c585a0f
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
