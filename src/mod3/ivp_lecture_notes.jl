@@ -4,7 +4,7 @@
 #> [frontmatter]
 #> chapter = 3
 #> order = 1
-#> title = "Lecture notes: Taylor integration"
+#> title = "Taylor integration"
 #> tags = ["lecture", "module3"]
 #> layout = "layout.jlhtml"
 
@@ -18,12 +18,13 @@ using PlutoTeachingTools, PlutoUI # packages for the notebook
 using RadiiPolynomial, Plots
 
 # ╔═╡ 551ab699-e4c5-4748-b567-9a29b8783b33
-html"""<style>
+html"""
+<style>
 main {
-    margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
+</style>
 """
 
 # ╔═╡ 5ed309bf-dc26-4008-b199-f1de5078130e

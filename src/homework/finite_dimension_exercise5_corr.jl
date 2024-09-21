@@ -1,31 +1,26 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
-
-#> [frontmatter]
-#> homework_number = 5
-#> order = 5.5
-#> title = "Rigorous control of the entire spectrum - correction"
-#> tags = ["module1", "homeworks"]
-#> layout = "layout.jlhtml"
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
 
+# ╔═╡ 9099f41e-6239-4f7f-a3ec-82e7d4787f8f
+using PlutoTeachingTools # package for the notebook
+
+# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
+using LinearAlgebra, IntervalArithmetic
+
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
-html"""<style>
+html"""
+<style>
 main {
     max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
+</style>
 """
-
-# ╔═╡ 9099f41e-6239-4f7f-a3ec-82e7d4787f8f
-using PlutoTeachingTools
-
-# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial, LinearAlgebra
 
 # ╔═╡ 45e10c91-f161-43a5-9c9e-5b4dca6a8e53
 md"""
@@ -51,10 +46,23 @@ Foldable("Hint",
 md"You may first compute numerically a matrix $P$ of approximate eigenvectors of $W_3$, then rigorously compute $\tilde W_{3} = P^{-1}W_3 P$, and finally apply the Gershgoring circle theorem to $\tilde W_{3}$."
 )
 
+# ╔═╡ 257d92b2-ccc4-4351-b3ac-ff53f6f2d54d
+function my_rigorous_inv(A)
+	B = inv(A)
+	δ = opnorm(I - interval(A)*interval(B), 1)
+	if sup(δ) < 1
+		r = δ/(1-δ) * opnorm(interval(B), 1)
+	else
+		println("Unable to rigorously invert")
+		r = NaN
+	end
+	return interval(B, sup(r)*ones(size(B)); format = :midpoint)
+end
+
 # ╔═╡ 773d5d67-2819-4225-add4-f7913fd6d296
 function gershgorin(M)
 	eigenvalues, P = eigen(M)
-	iP = interval.(P)
+	iP = interval(P)
 	iPinv = my_rigorous_inv(P)
 	M̃ = iPinv * M * iP
 	centers = mid.(diag(M̃))
@@ -64,19 +72,6 @@ function gershgorin(M)
 	end
 	radii = sum(abs.(temp); dims=2) + radius.(diag(M̃))
 	return interval(centers, sup.(radii); format = :midpoint)
-end
-
-# ╔═╡ 257d92b2-ccc4-4351-b3ac-ff53f6f2d54d
-function my_rigorous_inv(A)
-	B = inv(A)
-	δ = opnorm(I - LinearOperator(interval.(A))*LinearOperator(interval.(B)), 1)
-	if sup(δ) < 1
-		r = δ/(1-δ) * opnorm(LinearOperator(interval.(B)), 1)
-	else
-		println("Unable to rigorously invert")
-		r = NaN
-	end
-	return interval(B, sup(r)*ones(size(B)); format = :midpoint)
 end
 
 # ╔═╡ 0db57db5-c43a-451a-9ebb-eccd799514ef
@@ -150,13 +145,13 @@ count_nb_neg_eig(spectrum_approx)
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+IntervalArithmetic = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
-RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
+IntervalArithmetic = "~0.22.16"
 PlutoTeachingTools = "~0.2.15"
-RadiiPolynomial = "~0.8.13"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -165,7 +160,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.5"
 manifest_format = "2.0"
-project_hash = "5cbcd9c3886f5990007357c5249b3600ed2e62a4"
+project_hash = "ea4aa617acb64ed7a84cf805eb3c88beae5cdeae"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -450,12 +445,6 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
-[[deps.RadiiPolynomial]]
-deps = ["IntervalArithmetic", "LinearAlgebra", "Printf", "Reexport", "SparseArrays"]
-git-tree-sha1 = "8442e84088a316034b2b9d8128d6af0ac4ab4fad"
-uuid = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
-version = "0.8.13"
-
 [[deps.Random]]
 deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
@@ -561,7 +550,7 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╟─9099f41e-6239-4f7f-a3ec-82e7d4787f8f
+# ╠═9099f41e-6239-4f7f-a3ec-82e7d4787f8f
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╟─45e10c91-f161-43a5-9c9e-5b4dca6a8e53
 # ╟─a6e349ff-ba01-48c4-91a8-5400faa05346

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.46
 
 #> [frontmatter]
 #> homework_number = 2
@@ -11,21 +11,33 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+end
+
+# ╔═╡ 1658541d-29b1-417e-9895-88fbbd37d312
+using PlutoTeachingTools # package for the notebook
+
+# ╔═╡ 7337c633-a51b-4642-875c-9b623df2657f
+using RadiiPolynomial
+
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
-html"""<style>
+html"""
+<style>
 main {
     max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
+</style>
 """
-
-# ╔═╡ 755f440a-f42d-4de2-9cd2-826ea2114ab7
-using PlutoTeachingTools
-
-# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial
 
 # ╔═╡ aff38e1d-416c-472b-81ea-820d7430dded
 md"""
@@ -49,29 +61,27 @@ md"""
 # ╔═╡ 3b098d28-5fc8-4463-a59b-08bca638d5be
 function F(x, μ)
 	x₀, x₁, x₂ = x
-	return Sequence(
-		[μ * x₀ * (1 - x₀) - x₁,
-		 μ * x₁ * (1 - x₁) - x₂,
-		 μ * x₂ * (1 - x₂) - x₀])
+	return [μ * x₀ * (1 - x₀) - x₁,
+		    μ * x₁ * (1 - x₁) - x₂,
+		    μ * x₂ * (1 - x₂) - x₀]
 end
 
 # ╔═╡ dda38796-c299-4d38-b479-fde4c1496941
 function DF(x, μ)
 	x₀, x₁, x₂ = x
-	return LinearOperator(
-		[ μ * (1 - 2x₀) -1              0
-		  0              μ * (1 - 2x₁) -1
-		 -1              0              μ * (1 - 2x₂)])
+	return [ μ * (1 - 2x₀) -1              0
+		     0              μ * (1 - 2x₁) -1
+		    -1              0              μ * (1 - 2x₂)]
 end
 
 # ╔═╡ 2b4ebcc2-e58c-49d3-a298-cecfd666b6ea
 μ = 3.9
 
 # ╔═╡ 698891fa-5637-40de-8756-f507551c25d4
-# initial_data = Sequence(rand(Float64, (3)))
+# initial_data = ...
 
 # ╔═╡ 5ee47406-c6cc-40d8-adb9-c37146f9db01
-# x̄, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
+# x0, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
 
 # ╔═╡ 7b944744-628c-4ac9-8528-6dc19789ddb0
 md"""
@@ -79,20 +89,30 @@ md"""
 """
 
 # ╔═╡ fdd9fd8b-a3df-455d-bfe8-321723f5c566
-# A = ... (you can call the inv function to invert a linear operator)
+# A = ... (you can call the `inv` function to invert a linear operator)
 
 # ╔═╡ 8b9a0f39-21f0-4288-bb2b-a594d6712292
 md"""
-**3.** Using the $1$-norm on $\mathbb{R}^3$, show that the constant $Z_2 = 2\mu \left\Vert A \right\Vert_1$ satisfies the assumption of the Newton-Kantorovich theorem.
+**3.** Using the $1$-norm on $\mathbb{R}^3$, show that the constant $Z_2 = 2 \mu \| A \|_1$ satisfies the assumption of the Newton-Kantorovich theorem.
 """
 
 # ╔═╡ 3d27e2d3-e5e8-4e95-9294-23e416608b6a
-Foldable("Hint",	md"For this example, one can easily compute $\Vert DF(x) - DF(\bar{x}) \Vert_1$.")
+Foldable("Hint",
+md"""
+For this example, one can easily compute $\| DF(x) - DF(\bar{x}) \|_1$.
+""")
 
 # ╔═╡ 03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
 md"""
-**4.** Implement and evaluate suitable bounds $Y$, $Z_1$ and $Z_2$, and use the function `interval_of_existence` from RadiiPolynomial in order to prove the existence of a period 3 orbit for $\mu = 3.9$.
+**4.** Implement and compute the bounds $Y$, $Z_1$ and $Z_2$.
+Use the function `interval_of_existence` from the RadiiPolynomial library in order to prove the existence of a period 3 orbit for $\mu = 3.9$.
 """
+
+# ╔═╡ 311ca566-451d-41e0-8420-7ed57b0cc08f
+Foldable("Hint",
+md"""
+ $3.9$ is not exactly representable as a floating-point number.
+""")
 
 # ╔═╡ 4c78f87b-7191-47f4-8bd7-cd9d13c5b4c6
 # Y = ...
@@ -101,13 +121,106 @@ md"""
 # Z₁ = ...
 
 # ╔═╡ a4b2181e-d7dd-4c49-8c45-d6864cf878c6
-r_star = Inf # since DF is linear
+# r_star = ...
 
 # ╔═╡ 2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
 # Z₂ = ...
 
 # ╔═╡ 5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
 # interval_of_existence(Y, Z₁, Z₂, r_star)
+
+# ╔═╡ ec53a5b5-5699-4a35-92d2-d9f43aab19ad
+hide_everything_below =
+	html"""
+	<style>
+	pluto-cell.hide_everything_below ~ pluto-cell {
+		display: none;
+	}
+	</style>
+	
+	<script>
+	const cell = currentScript.closest("pluto-cell")
+	
+	const setclass = () => {
+		console.log("change!")
+		cell.classList.toggle("hide_everything_below", true)
+	}
+	setclass()
+	const observer = new MutationObserver(setclass)
+	
+	observer.observe(cell, {
+		subtree: false,
+		attributeFilter: ["class"],
+	})
+	
+	invalidation.then(() => {
+		observer.disconnect()
+		cell.classList.toggle("hide_everything_below", false)
+	})
+	
+	</script>
+	""";
+
+# ╔═╡ ba9376cd-e5fb-48ef-a2c0-2687c60d0eb9
+begin
+    b = @bind reveal html"<input type=checkbox>"
+	md"""
+	#### Show the solution $b
+	"""
+end
+
+# ╔═╡ 08769acf-8651-4c66-941e-ba9f53729a47
+if !(reveal === true)
+	hide_everything_below
+end
+
+# ╔═╡ 0d1d131e-c236-4dae-8709-bc91ecb83f25
+md"""
+**1.**
+"""
+
+# ╔═╡ 2a4fe035-f7b3-49e1-b319-95a925248652
+initial_data = ones(3)
+
+# ╔═╡ aa7606f1-6088-48c1-99e7-74a947d0bf2c
+x0, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
+
+# ╔═╡ b3b5888f-23ba-4f8a-be79-00108a3fb012
+md"""
+**2.**
+"""
+
+# ╔═╡ 80b9c2e3-b196-46b4-b7e6-652bf8d4c7a1
+A = inv(DF(x0, μ))
+
+# ╔═╡ 0e20f8d9-ab43-4498-aec2-22e9e2bb87c2
+md"""
+**4.**
+"""
+
+# ╔═╡ c15c4c77-b377-401d-a5fb-8ff15d7c63e1
+ix0 = interval(x0)
+
+# ╔═╡ 8e640b5b-5573-4f4d-81e1-4237ba4e44fc
+iA = interval(A)
+
+# ╔═╡ 75130895-d903-4d0e-9dbb-64371a0d2557
+iμ = I"3.9"
+
+# ╔═╡ 20eafc06-01f0-4d75-8f24-27bb720afd8d
+Y = norm(iA * F(ix0, iμ), 1)
+
+# ╔═╡ e21fb93a-6524-45cd-9813-82cc721384a4
+Z₁ = opnorm(I - iA * DF(ix0, iμ), 1)
+
+# ╔═╡ 09d582d5-c52a-4e93-8582-424b4ee5a081
+r_star = Inf # since DF is linear
+
+# ╔═╡ 2f5bbbaa-1f9c-4025-a0cc-9b2f6349c382
+Z₂ = 2 * iμ * opnorm(iA, 1)
+
+# ╔═╡ c6e837a2-9d56-4fda-aa64-782aaac51e69
+interval_of_existence(Y, Z₁, Z₂, r_star)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -116,7 +229,7 @@ PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
 RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
-PlutoTeachingTools = "~0.2.15"
+PlutoTeachingTools = "~0.3.0"
 RadiiPolynomial = "~0.8.13"
 """
 
@@ -126,7 +239,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.5"
 manifest_format = "2.0"
-project_hash = "c3b90feecc2a59f02712df6921ac7b9538719543"
+project_hash = "8e8963d49545789be8a52e4eef48940789b63020"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -380,10 +493,10 @@ uuid = "0ff47ea0-7a50-410d-8455-4348d5de0420"
 version = "0.1.6"
 
 [[deps.PlutoTeachingTools]]
-deps = ["Downloads", "HypertextLiteral", "LaTeXStrings", "Latexify", "Markdown", "PlutoLinks", "PlutoUI", "Random"]
-git-tree-sha1 = "5d9ab1a4faf25a62bb9d07ef0003396ac258ef1c"
+deps = ["Downloads", "HypertextLiteral", "Latexify", "Markdown", "PlutoLinks", "PlutoUI"]
+git-tree-sha1 = "e2593782a6b53dc5176058d27e20387a0576a59e"
 uuid = "661c6b06-c737-4d37-b85c-46df65de6f69"
-version = "0.2.15"
+version = "0.3.0"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
@@ -522,8 +635,7 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╠═755f440a-f42d-4de2-9cd2-826ea2114ab7
-# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
+# ╠═1658541d-29b1-417e-9895-88fbbd37d312
 # ╟─aff38e1d-416c-472b-81ea-820d7430dded
 # ╟─f283c615-fcde-4752-8d02-fafaa0e73b7d
 # ╠═3b098d28-5fc8-4463-a59b-08bca638d5be
@@ -536,10 +648,29 @@ version = "17.4.0+2"
 # ╟─8b9a0f39-21f0-4288-bb2b-a594d6712292
 # ╟─3d27e2d3-e5e8-4e95-9294-23e416608b6a
 # ╟─03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
+# ╟─311ca566-451d-41e0-8420-7ed57b0cc08f
 # ╠═4c78f87b-7191-47f4-8bd7-cd9d13c5b4c6
 # ╠═4ac782db-4d32-4bf8-bddf-cc8f8b5e6217
 # ╠═a4b2181e-d7dd-4c49-8c45-d6864cf878c6
 # ╠═2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
 # ╠═5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
+# ╟─ec53a5b5-5699-4a35-92d2-d9f43aab19ad
+# ╟─ba9376cd-e5fb-48ef-a2c0-2687c60d0eb9
+# ╟─08769acf-8651-4c66-941e-ba9f53729a47
+# ╟─0d1d131e-c236-4dae-8709-bc91ecb83f25
+# ╠═7337c633-a51b-4642-875c-9b623df2657f
+# ╠═2a4fe035-f7b3-49e1-b319-95a925248652
+# ╠═aa7606f1-6088-48c1-99e7-74a947d0bf2c
+# ╟─b3b5888f-23ba-4f8a-be79-00108a3fb012
+# ╠═80b9c2e3-b196-46b4-b7e6-652bf8d4c7a1
+# ╟─0e20f8d9-ab43-4498-aec2-22e9e2bb87c2
+# ╠═c15c4c77-b377-401d-a5fb-8ff15d7c63e1
+# ╠═8e640b5b-5573-4f4d-81e1-4237ba4e44fc
+# ╠═75130895-d903-4d0e-9dbb-64371a0d2557
+# ╠═20eafc06-01f0-4d75-8f24-27bb720afd8d
+# ╠═e21fb93a-6524-45cd-9813-82cc721384a4
+# ╠═09d582d5-c52a-4e93-8582-424b4ee5a081
+# ╠═2f5bbbaa-1f9c-4025-a0cc-9b2f6349c382
+# ╠═c6e837a2-9d56-4fda-aa64-782aaac51e69
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

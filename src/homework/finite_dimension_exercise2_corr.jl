@@ -1,31 +1,26 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
-
-#> [frontmatter]
-#> homework_number = 2
-#> order = 2.5
-#> title = "Back to period 3 implies chaos - correction"
-#> tags = ["module1", "homeworks"]
-#> layout = "layout.jlhtml"
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
 
+# ╔═╡ ce10dbf5-5eab-4e98-bae0-abffc5ee25ba
+using PlutoTeachingTools # package for the notebook
+
+# ╔═╡ 566da30c-ba51-47e2-89d5-231ae5cdaf31
+using RadiiPolynomial
+
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
-html"""<style>
+html"""
+<style>
 main {
     max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
+</style>
 """
-
-# ╔═╡ 755f440a-f42d-4de2-9cd2-826ea2114ab7
-using PlutoTeachingTools
-
-# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial
 
 # ╔═╡ aff38e1d-416c-472b-81ea-820d7430dded
 md"""
@@ -49,29 +44,27 @@ md"""
 # ╔═╡ 3b098d28-5fc8-4463-a59b-08bca638d5be
 function F(x, μ)
 	x₀, x₁, x₂ = x
-	return Sequence(
-		[μ * x₀ * (1 - x₀) - x₁,
-		 μ * x₁ * (1 - x₁) - x₂,
-		 μ * x₂ * (1 - x₂) - x₀])
+	return [μ * x₀ * (1 - x₀) - x₁,
+		    μ * x₁ * (1 - x₁) - x₂,
+		    μ * x₂ * (1 - x₂) - x₀]
 end
 
 # ╔═╡ dda38796-c299-4d38-b479-fde4c1496941
 function DF(x, μ)
 	x₀, x₁, x₂ = x
-	return LinearOperator(
-		[ μ * (1 - 2x₀) -1              0
-		  0              μ * (1 - 2x₁) -1
-		 -1              0              μ * (1 - 2x₂)])
+	return [ μ * (1 - 2x₀) -1              0
+		     0              μ * (1 - 2x₁) -1
+		    -1              0              μ * (1 - 2x₂)]
 end
 
 # ╔═╡ 8d22a89b-5531-4e0c-9c02-e351578df93e
 μ = 3.9
 
 # ╔═╡ 698891fa-5637-40de-8756-f507551c25d4
-initial_data = Sequence(rand(Float64, (3)))
+initial_data = ones(3)
 
 # ╔═╡ 5ee47406-c6cc-40d8-adb9-c37146f9db01
-x̄, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
+x0, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
 
 # ╔═╡ 7b944744-628c-4ac9-8528-6dc19789ddb0
 md"""
@@ -79,7 +72,7 @@ md"""
 """
 
 # ╔═╡ fdd9fd8b-a3df-455d-bfe8-321723f5c566
-A = inv(DF(x̄,μ))
+A = inv(DF(x0, μ))
 
 # ╔═╡ 8b9a0f39-21f0-4288-bb2b-a594d6712292
 md"""
@@ -95,28 +88,28 @@ md"""
 """
 
 # ╔═╡ 5b609b75-ae5f-4c79-a405-d0aa568f304a
-ix̄ = interval.(x̄)
+ix0 = interval(x0)
 
 # ╔═╡ 6ce92509-0d57-402f-b2d9-57b54df7f313
-iA = interval.(A)
+iA = interval(A)
 
 # ╔═╡ 4b0624d1-f410-45a9-807c-06ca5a198480
 iμ = I"3.9"
 
 # ╔═╡ 4c78f87b-7191-47f4-8bd7-cd9d13c5b4c6
-Y = norm(iA * F(ix̄, iμ), 1)
+Y = norm(iA * F(ix0, iμ), 1)
 
 # ╔═╡ 4ac782db-4d32-4bf8-bddf-cc8f8b5e6217
-Z₁ = opnorm(I - iA * DF(ix̄, iμ), 1)
+Z₁ = opnorm(I - iA * DF(ix0, iμ), 1)
 
 # ╔═╡ a4b2181e-d7dd-4c49-8c45-d6864cf878c6
-rstar = Inf # since DF is linear
+r_star = Inf # since DF is linear
 
 # ╔═╡ 2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
 Z₂ = 2 * iμ * opnorm(iA, 1)
 
 # ╔═╡ 5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
-interval_of_existence(Y, Z₁, Z₂, rstar)
+interval_of_existence(Y, Z₁, Z₂, r_star)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -125,7 +118,7 @@ PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
 RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
-PlutoTeachingTools = "~0.2.15"
+PlutoTeachingTools = "~0.3.0"
 RadiiPolynomial = "~0.8.13"
 """
 
@@ -135,7 +128,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.5"
 manifest_format = "2.0"
-project_hash = "c3b90feecc2a59f02712df6921ac7b9538719543"
+project_hash = "8e8963d49545789be8a52e4eef48940789b63020"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -389,10 +382,10 @@ uuid = "0ff47ea0-7a50-410d-8455-4348d5de0420"
 version = "0.1.6"
 
 [[deps.PlutoTeachingTools]]
-deps = ["Downloads", "HypertextLiteral", "LaTeXStrings", "Latexify", "Markdown", "PlutoLinks", "PlutoUI", "Random"]
-git-tree-sha1 = "5d9ab1a4faf25a62bb9d07ef0003396ac258ef1c"
+deps = ["Downloads", "HypertextLiteral", "Latexify", "Markdown", "PlutoLinks", "PlutoUI"]
+git-tree-sha1 = "e2593782a6b53dc5176058d27e20387a0576a59e"
 uuid = "661c6b06-c737-4d37-b85c-46df65de6f69"
-version = "0.2.15"
+version = "0.3.0"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
@@ -531,8 +524,8 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╟─755f440a-f42d-4de2-9cd2-826ea2114ab7
-# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
+# ╠═ce10dbf5-5eab-4e98-bae0-abffc5ee25ba
+# ╠═566da30c-ba51-47e2-89d5-231ae5cdaf31
 # ╟─aff38e1d-416c-472b-81ea-820d7430dded
 # ╟─f283c615-fcde-4752-8d02-fafaa0e73b7d
 # ╠═3b098d28-5fc8-4463-a59b-08bca638d5be

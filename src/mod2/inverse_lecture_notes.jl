@@ -5,7 +5,7 @@
 #> chapter = 2
 #> order = 1
 #> title = "Inverse"
-#> tags = ["module2"]
+#> tags = ["lecture", "module2"]
 #> layout = "layout.jlhtml"
 
 using Markdown
@@ -18,12 +18,13 @@ using PlutoTeachingTools, PlutoUI # packages for the notebook
 using RadiiPolynomial, Plots
 
 # ╔═╡ 2af9b21a-2dcf-497f-bd7c-9ebbf80b9428
-html"""<style>
+html"""
+<style>
 main {
-    margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
+</style>
 """
 
 # ╔═╡ 11810156-e8c9-4145-af2a-93e0757a8cc9

@@ -1,31 +1,26 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
-
-#> [frontmatter]
-#> homework_number = 3
-#> order = 3.5
-#> title = "Rigorous computation of an eigenpair - correction"
-#> tags = ["module1", "homeworks"]
-#> layout = "layout.jlhtml"
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
 
+# ╔═╡ 70740a99-ec98-45c8-ba8f-06d63dd396b0
+using PlutoTeachingTools # package for the notebook
+
+# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
+using LinearAlgebra, RadiiPolynomial
+
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
-html"""<style>
+html"""
+<style>
 main {
     max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
+</style>
 """
-
-# ╔═╡ 70740a99-ec98-45c8-ba8f-06d63dd396b0
-using PlutoTeachingTools
-
-# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial, LinearAlgebra
 
 # ╔═╡ c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
 md"""
@@ -47,34 +42,33 @@ F(\lambda,u) =
 )
 
 # ╔═╡ 8e04cef7-d8ae-4284-98cc-61318e13e326
-function F(X, M, ū)
+function F(X, M, u0)
 	λ = X[1]
 	u = X[2:end]
-	return Sequence(
-		[sum(u.*conj(ū)) - 1;
-		 M*u-λ*u])
+	return [sum(u .* conj(u0)) - 1;
+		    M*u - λ*u]
 end
 
 # ╔═╡ c26c7bf0-38d6-4990-879d-c6ca8bb29e20
-function DF(X, M, ū)
+function DF(X, M, u0)
 	λ = X[1]
 	u = X[2:end]
 	n = length(X) - 1
-	temp = zeros(eltype(X), n+1, n+1)
-	temp[2:end,1] = -u
-	temp[1,2:end] = ū'
-	temp[2:end,2:end] = M - λ*I
-	return LinearOperator(temp)
+	mat = zeros(eltype(X), n+1, n+1)
+	mat[2:end,1] = -u
+	mat[1,2:end] = u0'
+	mat[2:end,2:end] = M - λ*I
+	return mat
 end
 
 # ╔═╡ 6052a4ee-333e-45f6-a7f4-9756f4357377
 function validate_eigenpair(λ, u, M)
 	X = [λ ; u]
-	ū = u
-	iA = interval.(inv(DF(X, M, ū)))
-	iX = interval.(X)
-	Y = norm(iA * F(iX, M, ū), 1)
-	Z₁ = opnorm(I - iA * DF(iX, M, ū), 1)
+	u0 = u
+	iA = interval(inv(DF(X, M, u0)))
+	iX = interval(X)
+	Y = norm(iA * F(iX, M, u0), 1)
+	Z₁ = opnorm(I - iA * DF(iX, M, u0), 1)
 	Z₂ = opnorm(iA, 1)
 	return interval_of_existence(Y, Z₁, Z₂, Inf)
 end
@@ -128,10 +122,10 @@ begin
 	M = W(N)
 	radii = zeros(Interval{Float64}, 2*N+1)
 	for n = 1:2*N+1
-		λ = eigenvalues[n]
-		u = eigenvectors[:,n]
-		radii[n] = validate_eigenpair(λ, u, M)
-		println("λ̄ = ", λ, ", validation radius: ", inf(radii[n]))
+		λ0 = eigenvalues[n]
+		u0 = eigenvectors[:,n]
+		radii[n] = validate_eigenpair(λ0, u0, M)
+		println("λ̄ = ", λ0, ", validation radii: ", bounds(radii[n]))
 	end
 end
 
@@ -549,7 +543,7 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╟─70740a99-ec98-45c8-ba8f-06d63dd396b0
+# ╠═70740a99-ec98-45c8-ba8f-06d63dd396b0
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╟─c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
 # ╟─7748e568-afc9-43cc-b2bd-5a231d86f455

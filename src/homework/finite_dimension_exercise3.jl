@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.46
 
 #> [frontmatter]
 #> homework_number = 3
@@ -11,46 +11,66 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+end
+
+# ╔═╡ 70740a99-ec98-45c8-ba8f-06d63dd396b0
+using PlutoTeachingTools # package for the notebook
+
+# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
+using LinearAlgebra
+
+# ╔═╡ f0c2d1b7-8dd4-44d0-b962-bb8fe166b496
+using RadiiPolynomial
+
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
-html"""<style>
+html"""
+<style>
 main {
     max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
+</style>
 """
-
-# ╔═╡ 70740a99-ec98-45c8-ba8f-06d63dd396b0
-using PlutoTeachingTools
-
-# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial, LinearAlgebra
 
 # ╔═╡ c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
 md"""
-**1.** Consider a matrix $M$, and an approximate eigenpair $(\bar{\lambda},\bar{u})$ of $M$. The goal of this exercise is to *capify* $(\bar{\lambda},\bar{u})$, i.e., to prove that there exists an exact eigenpair $(\lambda,u)$ nearby. Assuming the corresponding exact eigenvalue $\lambda$ is simple, define a suitable $F=0$ problem, and derive the bounds needed to apply the Newton-Kantorovich theorem in that context.
+**1.** Consider a matrix $M$, and an approximate eigenpair $(\bar{\lambda}, \bar{u})$ of $M$.
+The goal of this exercise is to validate $(\bar{\lambda}, \bar{u})$, i.e. to prove that there exists an exact eigenpair $(\lambda, u)$ nearby.
+Assuming the corresponding exact eigenvalue $\lambda$ is simple, define a suitable $F = 0$ problem, and derive the bounds needed to apply the Newton-Kantorovich theorem in that context.
 """
 
 # ╔═╡ 7748e568-afc9-43cc-b2bd-5a231d86f455
 Foldable("Hint",
-md"The *natural* zero-finding problem is $G(\lambda, u) := (M-\lambda I)u$, but it has one too many unknowns. This is consistent with the fact that zeros of $G$ are not isolated (one can always rescale the eigenvector). Therefore, a suitable zero-finding problem needs to incorporate a normalization condition, for instance:
+md"""
+The "natural" zero-finding problem is $G(\lambda, u) \overset{\text{def}}{=} (M - \lambda I)u$, but it has one too many unknowns.
+This is consistent with the fact that zeros of $G$ are not isolated (one can always rescale the eigenvector).
+Therefore, a suitable zero-finding problem needs to incorporate a normalization condition, for instance:
 
-$\begin{align}
-F(\lambda,u) =
+```math
+F(\lambda,u) \overset{\text{def}}{=}
 \begin{pmatrix}
-\langle u,\bar{u} \rangle -1 \\
-(M-\lambda I)u
+\langle u, \bar{u} \rangle - 1 \\
+(M - \lambda I)u
 \end{pmatrix}.
-\end{align}$
-"
+```
+"""
 )
 
 # ╔═╡ cab728f1-9ff5-4bdd-8101-5c39718c4d53
 md"""
 **2.** For any positive integer $N$, the Wilkinson matrix $W_{N}$ is the following $(2N+1)\times(2N+1)$ tridiagonal matrix:
 
-$\begin{align}
+```math
 W_{N} =
 \begin{pmatrix}
 N & 1 & & & & & \\
@@ -61,9 +81,10 @@ N & 1 & & & & & \\
  & & & & 1 & N-1 & 1 \\
  & & & & & 1 & N
 \end{pmatrix}
-\end{align}$
+```
 
-We provide below approximate eigenvalues and eigenvectors of $W_3$. Rigorously enclose all eigenpairs of $W_3$.
+We provide below approximate eigenvalues and eigenvectors of $W_3$.
+Rigorously enclose all eigenpairs of $W_3$.
 """
 
 # ╔═╡ d61514c3-3b0e-4658-8b31-de9f9514a9c3
@@ -85,10 +106,108 @@ end
 N = 3
 
 # ╔═╡ fe0054f0-4fd5-489f-9fcb-3af086876699
-wilkinson(N)
+W = wilkinson(N)
 
 # ╔═╡ 3509fe96-4a83-461f-8fed-23343d74dc8c
-eigenvalues, eigenvectors = eigen(wilkinson(N))
+eigenvalues, eigenvectors = eigen(W)
+
+# ╔═╡ 2e933681-3e48-4d27-8e78-3e9181ac8b46
+hide_everything_below =
+	html"""
+	<style>
+	pluto-cell.hide_everything_below ~ pluto-cell {
+		display: none;
+	}
+	</style>
+	
+	<script>
+	const cell = currentScript.closest("pluto-cell")
+	
+	const setclass = () => {
+		console.log("change!")
+		cell.classList.toggle("hide_everything_below", true)
+	}
+	setclass()
+	const observer = new MutationObserver(setclass)
+	
+	observer.observe(cell, {
+		subtree: false,
+		attributeFilter: ["class"],
+	})
+	
+	invalidation.then(() => {
+		observer.disconnect()
+		cell.classList.toggle("hide_everything_below", false)
+	})
+	
+	</script>
+	""";
+
+# ╔═╡ c31920c6-c4b9-4115-b580-6889b35d1fff
+begin
+    b = @bind reveal html"<input type=checkbox>"
+	md"""
+	#### Show the solution $b
+	"""
+end
+
+# ╔═╡ 97a5bec8-b6c7-4f03-8eb5-3f8038668954
+if !(reveal === true)
+	hide_everything_below
+end
+
+# ╔═╡ d0900787-8a4e-428a-879c-522d83ebddfb
+md"""
+**1.**
+"""
+
+# ╔═╡ 46182c83-3585-4f68-a259-35a6cfac153d
+function F(X, M, u0)
+	λ = X[1]
+	u = X[2:end]
+	return [sum(u .* conj(u0)) - 1;
+		    M*u - λ*u]
+end
+
+# ╔═╡ 541aa302-e6d9-4e9f-b9b4-719ddbd61e63
+function DF(X, M, u0)
+	λ = X[1]
+	u = X[2:end]
+	n = length(X) - 1
+	mat = zeros(eltype(X), n+1, n+1)
+	mat[2:end,1] = -u
+	mat[1,2:end] = u0'
+	mat[2:end,2:end] = M - λ*I
+	return mat
+end
+
+# ╔═╡ 839e8550-a261-4712-8c84-555a51027b71
+function validate_eigenpair(λ, u, M)
+	X = [λ ; u]
+	u0 = u
+	iA = interval(inv(DF(X, M, u0)))
+	iX = interval(X)
+	Y = norm(iA * F(iX, M, u0), 1)
+	Z₁ = opnorm(I - iA * DF(iX, M, u0), 1)
+	Z₂ = opnorm(iA, 1)
+	return interval_of_existence(Y, Z₁, Z₂, Inf)
+end
+
+# ╔═╡ b4fa6058-c9d8-42c5-b681-7a0544c6e3da
+md"""
+**2.**
+"""
+
+# ╔═╡ a1acd6a1-cd2e-4039-8529-183f908bdfae
+begin
+	radii = interval(zeros(2*N+1))
+	for n = 1:2*N+1
+		λ0 = eigenvalues[n]
+		u0 = eigenvectors[:,n]
+		radii[n] = validate_eigenpair(λ0, u0, W)
+		println("λ̄ = ", λ0, ", validation radii: ", bounds(radii[n]))
+	end
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -505,13 +624,23 @@ version = "17.4.0+2"
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
 # ╠═70740a99-ec98-45c8-ba8f-06d63dd396b0
-# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╟─c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
 # ╟─7748e568-afc9-43cc-b2bd-5a231d86f455
 # ╟─cab728f1-9ff5-4bdd-8101-5c39718c4d53
 # ╠═d61514c3-3b0e-4658-8b31-de9f9514a9c3
 # ╠═1bba510b-be86-44b0-a3c9-419b3b6ada37
 # ╠═fe0054f0-4fd5-489f-9fcb-3af086876699
+# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╠═3509fe96-4a83-461f-8fed-23343d74dc8c
+# ╟─2e933681-3e48-4d27-8e78-3e9181ac8b46
+# ╟─c31920c6-c4b9-4115-b580-6889b35d1fff
+# ╟─97a5bec8-b6c7-4f03-8eb5-3f8038668954
+# ╟─d0900787-8a4e-428a-879c-522d83ebddfb
+# ╠═46182c83-3585-4f68-a259-35a6cfac153d
+# ╠═541aa302-e6d9-4e9f-b9b4-719ddbd61e63
+# ╠═839e8550-a261-4712-8c84-555a51027b71
+# ╟─b4fa6058-c9d8-42c5-b681-7a0544c6e3da
+# ╠═f0c2d1b7-8dd4-44d0-b962-bb8fe166b496
+# ╠═a1acd6a1-cd2e-4039-8529-183f908bdfae
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -5,7 +5,7 @@
 #> chapter = 2
 #> order = 2
 #> title = "Square root"
-#> tags = ["module2"]
+#> tags = ["lecture", "module2"]
 #> layout = "layout.jlhtml"
 
 using Markdown
@@ -18,12 +18,13 @@ using PlutoTeachingTools, PlutoUI # packages for the notebook
 using RadiiPolynomial, Plots
 
 # ╔═╡ 564092a6-546d-4772-a3a4-9f78a1801667
-html"""<style>
+html"""
+<style>
 main {
-    margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
+</style>
 """
 
 # ╔═╡ 91bb507e-5871-46f4-9042-0ce4cc97617c
