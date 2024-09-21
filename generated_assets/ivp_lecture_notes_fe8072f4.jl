@@ -28,7 +28,7 @@ main {
 """
 
 # ╔═╡ 5ed309bf-dc26-4008-b199-f1de5078130e
-TableOfContents(title="Table of Contents"; indent=true, depth=4, aside=true)
+TableOfContents(title = "Table of Contents"; indent = true, depth = 4, aside = true)
 
 # ╔═╡ 3e086655-fc49-42bb-803e-27b82c7a7577
 md"""
