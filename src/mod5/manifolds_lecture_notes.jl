@@ -3,8 +3,8 @@
 
 #> [frontmatter]
 #> chapter = 5
-#> order = 1
-#> title = "Invariant manifolds of equilibria"
+#> order = 2
+#> title = "Lorenz system"
 #> tags = ["lecture", "module5"]
 #> layout = "layout.jlhtml"
 
@@ -27,304 +27,18 @@ main {
 </style>
 """
 
+# ╔═╡ 8f59e349-74a6-4a6f-9a47-6ca26d187aeb
+html"""
+<style>
+main {
+    margin-right: auto;
+    text-align: justify;
+}
+</style>
+"""
+
 # ╔═╡ 4412bd33-8b3f-41de-9e1a-a8f1187c793f
-TableOfContents(title="Table of Contents"; indent=true, depth=4, aside=true)
-
-# ╔═╡ 584fad48-cadf-4c57-a4c8-4de54f53ebbe
-md"""
-# Local stable manifolds of equilibria
-"""
-
-# ╔═╡ d5a510a3-c518-47ed-96bc-7bb22e3b08b5
-md"""
-This part of the tutorial is concerned with the computation of local stable manifolds (the computation of local unstable manifolds is done similarly). Our focus is the development of efficient high order approximation methods --with validated error bounds--
-for these manifolds.
-
-To be more specific, consider a differential equation $\dot{x} = f(x)$ with associated flow $\varphi\colon \mathbb{R} \times \mathbb{R}^n \to \mathbb{R}^n$ and assume that $\tilde{x}$ is an equilibrium.
-The *stable set* for $\tilde{x}$ is defined to be
-
-$\begin{align}
-W^s(\tilde{x}) = \{x\in\mathbb{R}^n : \lim_{t\to \infty} \varphi(t,x) = \tilde{x} \}.
-\end{align}$
-
-At this level of generality there is very little that can be said about $W^s(\tilde{x})$, however a natural step is to simplify the problem by restricting the dynamics to a neighborhood of $\tilde{x}$. Hence, let us define a more localized notion of a stable set. Given a neighborhood $U$ of $\tilde{x}$ the associated *local stable manifold* is given by
-
-$\begin{align}
-W^s_{\text{loc}}(\tilde{x}) = W^s(\tilde{x},U) := \{x \in W^s(\tilde{x}) \mid \varphi([0,\infty),x) \subset U \}.
-\end{align}$"""
-
-# ╔═╡ f73b88cb-19e2-4d50-a45e-fbe90fb691cd
-md"""
-## The Parameterization Method
-"""
-
-# ╔═╡ cf717e9b-26d8-449d-9f3b-d1d5d0bd2bb5
-md"""
-### Assumptions
-"""
-
-# ╔═╡ c33dc650-3f94-11ef-398a-8bbc4a2b69b8
-md"""
-
-**For sake of simplicity of the presentation**, we make the following assumptions:
-
--  $\tilde{x}$ is an equilibrium solution of $\dot{x}=f(x)$
--  there are exactly $m$ stable eigenvalues $\{\lambda_1, \ldots, \lambda_m \}$, they are real and there exist $m$ linearly independent associated eigenvector $\xi_i \in \mathbb{R}^n$
-
-Denote
-$\begin{align}
-\Lambda =
-\begin{pmatrix}
- \lambda_1 &  \ldots & 0  \\
- \vdots & \ddots  & \vdots  \\
- 0  & \ldots  & \lambda_m
-\end{pmatrix} \in M_m(\mathbb{R})
-\quad \text{and} \quad A_0 = [\xi_1 | \ldots | \xi_m]
-\end{align}$
-an $n \times m$ matrix whose columns are the associated (stable) eigenvectors.
-
-The linearized equation restricted to the stable subspace is $\dot{\theta} = \Lambda \theta$ ($\theta \in \mathbb{R}^m$) with associated flow $e^{\Lambda t}$.
-"""
-
-# ╔═╡ e0c480c1-ab86-4af4-9027-75ebb4fba960
-md"""
-### The conjugacy relation
-"""
-
-# ╔═╡ 1ea9c840-369e-48e6-a87b-7e4bdaa1abb0
-md"""
-Denote by $B^m := \{ \theta = (\theta_1,\dots,\theta_m) : |\theta_j| \le 1 \}$ the unit closed $\ell^\infty$ ball in $\mathbb{R}^m$.
-
-To solve for the parameterization $P:B^m \to \mathbb{R}^n$ of the local stable manifold, we impose
-
-(1) $P(0) = \tilde{x}$ (equilibria are mapped to one another)
-
-(2) $DP(0) = A_0$ ($P$ is tangent to the stable eigenspace $\mathbb{E}^s$ at $0$})
-
-(3) $\varphi (t, P(\theta)) = P( e^{\Lambda t} \theta)$, for all $\theta \in B^m$ (**conjugacy relation**)
-"""
-
-# ╔═╡ 1bfcc76a-266a-4784-b76b-3871445e603e
-Foldable("""Why such parameterization provides a local stable manifold?""", md"""
-We get that $P(B^m) \subset W^s_{\text{loc}}(\tilde{x})$, since for $\theta \in B^m$,
-
-$\begin{align}
-\lim_{t \to \infty} \varphi (t, P(\theta) ) = \lim_{t \to \infty}
-	P( e^{\Lambda t} \theta)
-			= P\left(\lim_{t \to \infty} e^{\Lambda t} \theta \right)
-		    = P(0)
-		    = \tilde{x}.
-\end{align}$
-""")
-
-# ╔═╡ 3e3a3a60-f76f-401d-b265-a99e713d98c5
-md"""
-### The parameterization lemma
-"""
-
-# ╔═╡ 8f3e96dc-0cdc-411e-8f94-e9e47488abf3
-md"""
-
-*Remark.* The utility of (3) above is limited by the appearance of the flow $\varphi$, which is only known implicitly. Let us introduce a more practical infinitesimal version of the conjugacy relation, which requires the following important result."""
-
-# ╔═╡ 56bbfe4c-1f28-47e5-9a16-e521f1d55350
-Markdown.MD(Markdown.Admonition("tip", "Parameterization Lemma",[md"""
-Let $P \colon B^m  \to \mathbb{R}^n$ be a function satisfying (1) and (2). Then $P$ satisfies (3) $\Longleftrightarrow$ $P$ solves the *partial* differential equation
-
-$\begin{align}
-\text{(4)} \quad DP(\theta) \Lambda \theta = f(P(\theta)), \quad \theta \in B^m.
-\end{align}$"""]))
-
-# ╔═╡ be501ea1-e0d3-4a4b-8f9e-19135d21aa9d
-Foldable("""Proof""", md"""
-($\Longleftarrow$) Assume that the assumption (4) above holds and let $\theta \in B^m$. Let $\gamma(t) := P(e^{\Lambda t} \theta)$. Then, $\gamma(0) = P(\theta)$ and
-
-$\begin{align}
-\gamma'(t) = \frac{d}{dt}  P\left( e^{\Lambda t} \theta \right)
-   	= D P\left( e^{\Lambda t} \theta \right) \Lambda e^{\Lambda t} \theta
- 	= f\left( P\left( e^{\Lambda t} \theta \right)\right)
- 	= f ( \gamma(t)),
-\end{align}$
-
-that is $\gamma$ solves the IVP $x'=f(x), x(0) = P(\theta)$. By uniqueness, $\varphi( t, P(\theta)) = \gamma(t) = P(e^{\Lambda t} \theta)$.
-
-($\Longrightarrow$) Suppose that $P$ solves (3). Differentiate on both sides with respect to $t$
-
-$\begin{align}
-f(\varphi(t,P(\theta))) = DP( e^{\Lambda t} \theta) \Lambda e^{\Lambda t} \theta, \quad \text{and take } t=0. \quad \square
-\end{align}$
-""")
-
-# ╔═╡ b5d97ade-bcde-4c7a-ae78-697e73c10a0c
-md"""
-From the Parameterization Lemma, to solve for the parameterization $P:B^m \to \mathbb{R}^n$, we impose
-
-(1) $P(0) = \tilde{x}$ (equilibria are mapped to one another)
-
-(2) $DP(0) = A_0$ ($P$ is tangent to the stable eigenspace $\mathbb{E}^s$ at $0$)
-
-(4) $DP(\theta) \Lambda \theta = f(P(\theta))$, $\forall~\theta \in B^m$ (invariance equation)
-
-The invariance equation can be written more explicitly, for $\theta = (\theta_1, \ldots, \theta_m) \in B^m$, as
-
-$\begin{align}
-(4) \quad \lambda_1 \theta_1 \frac{\partial}{\partial \theta_1} P(\theta_1, \ldots, \theta_m)
-+ \ldots + \lambda_m \theta_m \frac{\partial}{\partial \theta_m} P(\theta_1, \ldots, \theta_m)
-= f(P(\theta_1, \ldots, \theta_m))
-\end{align}$
-"""
-
-# ╔═╡ 3ebed1fa-923d-4a0e-9d80-f2919972b1ff
-md"""
-### Taylor series representation
-"""
-
-# ╔═╡ 62868ea5-3018-4e1a-a71e-89ede6e443c2
-md"""
-We use a Taylor series representation of the form
-
-$\begin{align}
-P(\theta) = \sum_{|\alpha|=0}^\infty \begin{pmatrix} (a_1)_\alpha \\ (a_2)_\alpha \\ \vdots \\ (a_n)_\alpha \end{pmatrix}
-\theta^\alpha
-\end{align}$
-
-where $\alpha = (\alpha_1,\dots,\alpha_m) \in \mathbb{N}^m$, $|\alpha| = \alpha_1 + \dots + \alpha_m$, $\theta=(\theta_1,\dots,\theta_m)$ and $\theta^\alpha = \theta_1^{\alpha_1} \cdots \theta_m^{\alpha_m}$.
-
-Denote $a = (a_1,\dots,a_n)$, where each $a_i = ((a_i)_\alpha)_{|\alpha| \ge 0}$. Plugging the above Taylor series in equations (1), (2) and (4):
-
-(1*) $\begin{pmatrix} (a_1)_{(0,\dots,0)} \\ \vdots \\ (a_n)_{(0,\dots,0)} \end{pmatrix} = \tilde{x}$, (for $|\alpha|=0$: the equilibrium solution)
-
-(2*) $\begin{pmatrix} (a_1)_{e_j} \\ \vdots \\ (a_n)_{e_j} \end{pmatrix} = \xi_j$, $j=1,\dots,m$
- (for $|\alpha|=1$: the $m$ stable eigenvectors)
-
-(4*) $(\alpha \cdot \lambda) (a_i)_{\alpha} = (\phi_i(a))_{\alpha}$, $i=1,\dots,n$ (for $|\alpha| \ge 2$)
-
-where
-
-$\begin{align}
-\alpha \cdot \lambda = \alpha_1 \lambda_1 +\cdots + \alpha_m \lambda_m \quad \text{and} \quad f_i(P(\theta))= \sum_{|\alpha| \ge 0} (\phi_i(a))_\alpha \theta^\alpha
-\end{align}$
-"""
-
-# ╔═╡ f5a85447-f9a0-4f56-b2bd-49da4d74326c
-md"""
-### The Zero Finding Problem, Banach Space and Norm
-"""
-
-# ╔═╡ 31104635-eb81-42b0-b412-b26a3635d25f
-md"""
-For each $i=1,\dots,n$, define $F_i(a)=\{ (F_i(a))_\alpha \}_{|\alpha| \ge 0}$ component-wise by
-
-$\begin{align}
-(F_i(a))_\alpha := \begin{cases}
-(a_i)_{(0,\dots,0)}  - \tilde{x}_i,&  |\alpha| = 0, \\
-(a_i)_{e_j}  - (\xi_{j})_i, & |\alpha| = 1, {\rm~with~} \alpha=e_j {\rm~for~}j=1,\dots,m,  \\
-(a_i)_{\alpha} - \frac{1}{\alpha \cdot \lambda}(\phi_i(a))_{\alpha}, & |\alpha| \ge 2.
-\end{cases}
-\end{align}$
-
-For each $i=1,\dots,n$, let $c_i = \{ (c_i)_\alpha\}_{|\alpha| \ge 0}$ component-wise as
-
-$\begin{align}
-(c_i)_\alpha =
-\begin{cases}
-\tilde{x}_i, &  {\rm~if~} |\alpha| = 0, \\
-\xi_{j}, &  {\rm~for~} |\alpha| = 1 {\rm~with~} \alpha=e_j {\rm~for~} j=1,\dots,m,  \\
-0, & {\rm~if~} |\alpha| \ge 2
-\end{cases}
-\end{align}$
-
-and let $c := (c_1,\dots,c_n)$. Define the diagonal operator $K$ acting on a sequence $b = \{ b_\alpha\}_{|\alpha| \ge 0}$ as
-
-$\begin{align}
-(K b)_\alpha =
-\begin{cases}
-0, &   {\rm~if~} |\alpha| = 0, \\
-0, &   {\rm~if~} |\alpha| = 1,  \\
-\frac{1}{\alpha \cdot \lambda} b_\alpha, &  {\rm~if~} |\alpha| \ge 2.
-\end{cases}
-\end{align}$
-
-Define the operator $\mathcal{K}$ acting on $a=(a_1,\dots,a_n)$ as
-$\begin{align}
-\mathcal{K} a = (K a_1,K a_2,\dots,K a_n).
-\end{align}$
-
-With the above notation, for each $i=1,\dots,n$,
-
-$\begin{align}
-F_i(a) = a_i - K \phi_i(a) - c_i.
-\end{align}$
-
-Letting $F(a) = (F_1(a),\dots,F_n(a))$ and $\phi(a) = (\phi_1(a),\dots,\phi_n(a))$, one can densely write
-
-$\begin{align}
-F(a) = a - \mathcal{K} \phi(a) - c
-\end{align}$
-
-Define the Banach space $\mathcal{X} = (\ell^1)^n$, where
-
-$\begin{align}
-\ell^1 := \left\{ c = (c_\alpha)_{|\alpha| \ge 0} : c_\alpha \in \mathbb{R}, \quad \|c\|_1 := \sum_{|\alpha|=0}^\infty |c_\alpha| < \infty  \right\}.
-\end{align}$
-
-The norm on $\mathcal{X}$ is given by
-
-$\begin{align}
-\|a\|_{\mathcal{X}} = \sum_{i=1}^n \| a_i \|_1
-\end{align}$
-"""
-
-# ╔═╡ 96bb7a72-c10b-45d7-aa64-4b61e488249a
-md"""
-###### Code that implements the operator $K$
-"""
-
-# ╔═╡ 3752c9c6-dd41-4194-aaf2-1cd1c2160665
-function K(λ, N)
-    op = zeros(typeof(λ), Taylor(N), Taylor(N))
-    for n = 2:N
-        op[n,n] = inv(λ * n)
-    end
-    return op
-end
-
-# ╔═╡ dbaf57aa-8a89-476e-b21f-56fe3d8696db
-K(-2.0,5)
-
-# ╔═╡ 97729076-0443-4740-9b0a-6e64cc75b567
-Markdown.MD(Markdown.Admonition("note", "Exercise (Compact operator)",[md"""
-Show that the operator $\mathcal{K}:\mathcal{X} \to \mathcal{X}$ is compact.
-"""]))
-
-# ╔═╡ 1c12da5f-7c44-49c2-8077-d93d9de9f32e
-md"""
-We now formalize how a solution to the above zero finding problem leads to local stable manifolds of equilibria of our differential equation.
-"""
-
-# ╔═╡ fc8635b9-2867-4580-a9ca-fd2383c0efd1
-Markdown.MD(Markdown.Admonition("lemma", "Lemma (A solution to the zero finding problem yields a parameterization of the local stable manifold)",[md""" Assume that
--  $\tilde{x}$ is an equilibrium solution of $\dot{x}=f(x)$;
--  there are exactly $m$ stable eigenvalues $\{\lambda_1, \ldots, \lambda_m \}$, they are real and there exist $m$ linearly independent associated eigenvector $\xi_i \in \mathbb{R}^n$.
-
-If $a \in \mathcal{X}$ is a solution to $F(a)=0$, then the corresponding Taylor series expansion
-
-$\begin{align}
-P(\theta) = \sum_{|\alpha|=0}^\infty \begin{pmatrix} (a_1)_\alpha \\ (a_2)_\alpha \\ \vdots \\ (a_n)_\alpha \end{pmatrix}
-\theta^\alpha
-\end{align}$
-
-converges on $B^m := \{ \theta = (\theta_1,\dots,\theta_m) : |\theta_j| \le 1 \}$ and the function $P:B^m \to \mathbb{R}^n$ provides a parameterization of the local stable manifold $W^s_{\text{loc}}(\tilde{x})$, that is
-
-$\begin{align}
-P(B^m) = W^s_{\text{loc}}(\tilde{x}).
-\end{align}$
-"""]))
-
-# ╔═╡ a1f8e3df-15ff-4c95-b88b-717901b67c1d
-md"""
-Rather than presenting the bounds for the Newton-Kantorovich Theorem in general, let us rather focus on an example. Specifically, we compute a rigorous parameterization of a one-dimensional local stable manifold of an equilibrium solution in the Lorenz system.
-"""
+TableOfContents(title = "Table of Contents"; indent = true, depth = 4, aside = true)
 
 # ╔═╡ d9604e75-0e9e-44b6-bf2e-885f01a96bdc
 md"""
@@ -454,6 +168,15 @@ $\begin{align}
 md"""
 Here is an example of how to compute the operator norm of $\pi^{\le 5}\mathcal{K}$
 """
+
+# ╔═╡ c8c8856f-fe43-4b77-aad9-57723b6dcf9c
+function K(λ, N)
+    op = zeros(typeof(λ), Taylor(N), Taylor(N))
+    for n = 2:N
+        op[n,n] = inv(λ * n)
+    end
+    return op
+end
 
 # ╔═╡ 5e6482db-9b76-4bf0-bc58-0a6f779c4556
 begin
@@ -1083,24 +806,6 @@ r_star = Inf
 r = interval_of_existence(Y, Z₁, Z₂, r_star)
 end
 
-# ╔═╡ f82c6a7a-fffb-4a7b-97df-bfafd2072f5c
-md"""
-## Your main task now: the following Exercise.
-"""
-
-# ╔═╡ 9a0d1fd7-e8b6-4737-b764-95f917442335
-Markdown.MD(Markdown.Admonition("note", "Exercise",[md"""Using Taylor series, compute rigorously (that is with the Newton-Kantorovich approach) a parameterization of order $N=20$ of the stable and unstable manifold of the steady state $(0,0)$ for the equation
-
-$\begin{align}
-\dot x = \begin{pmatrix} \dot x_1  \\ \dot x_2 \end{pmatrix} =
-\begin{pmatrix}
-x_1+6 x_2 + x_1 x_2
-\\
-4 x_1 + 3 x_2 - x_1^2
-\end{pmatrix}.
-\end{align}$
-"""]))
-
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -1519,31 +1224,8 @@ version = "17.4.0+2"
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
 # ╠═d0e623ee-b096-4a27-977d-dc32567d6020
 # ╠═018ecc45-8638-4a59-b561-efb086bdc751
+# ╟─8f59e349-74a6-4a6f-9a47-6ca26d187aeb
 # ╟─4412bd33-8b3f-41de-9e1a-a8f1187c793f
-# ╟─584fad48-cadf-4c57-a4c8-4de54f53ebbe
-# ╟─d5a510a3-c518-47ed-96bc-7bb22e3b08b5
-# ╟─f73b88cb-19e2-4d50-a45e-fbe90fb691cd
-# ╟─cf717e9b-26d8-449d-9f3b-d1d5d0bd2bb5
-# ╟─c33dc650-3f94-11ef-398a-8bbc4a2b69b8
-# ╟─e0c480c1-ab86-4af4-9027-75ebb4fba960
-# ╟─1ea9c840-369e-48e6-a87b-7e4bdaa1abb0
-# ╟─1bfcc76a-266a-4784-b76b-3871445e603e
-# ╟─3e3a3a60-f76f-401d-b265-a99e713d98c5
-# ╟─8f3e96dc-0cdc-411e-8f94-e9e47488abf3
-# ╟─56bbfe4c-1f28-47e5-9a16-e521f1d55350
-# ╟─be501ea1-e0d3-4a4b-8f9e-19135d21aa9d
-# ╟─b5d97ade-bcde-4c7a-ae78-697e73c10a0c
-# ╟─3ebed1fa-923d-4a0e-9d80-f2919972b1ff
-# ╟─62868ea5-3018-4e1a-a71e-89ede6e443c2
-# ╟─f5a85447-f9a0-4f56-b2bd-49da4d74326c
-# ╟─31104635-eb81-42b0-b412-b26a3635d25f
-# ╟─96bb7a72-c10b-45d7-aa64-4b61e488249a
-# ╠═3752c9c6-dd41-4194-aaf2-1cd1c2160665
-# ╠═dbaf57aa-8a89-476e-b21f-56fe3d8696db
-# ╟─97729076-0443-4740-9b0a-6e64cc75b567
-# ╟─1c12da5f-7c44-49c2-8077-d93d9de9f32e
-# ╟─fc8635b9-2867-4580-a9ca-fd2383c0efd1
-# ╟─a1f8e3df-15ff-4c95-b88b-717901b67c1d
 # ╟─d9604e75-0e9e-44b6-bf2e-885f01a96bdc
 # ╟─62719aa9-bfda-4913-8b74-f3694bfc33c0
 # ╟─fc381b29-6671-4364-a9df-b35db07af45b
@@ -1555,6 +1237,7 @@ version = "17.4.0+2"
 # ╟─0562b884-0653-4d5b-8a66-e35467e6693e
 # ╟─a47a4e2a-371e-4244-8574-493f00d456df
 # ╟─beca7238-ca9b-409a-8d5a-240ca720f58a
+# ╠═c8c8856f-fe43-4b77-aad9-57723b6dcf9c
 # ╠═5e6482db-9b76-4bf0-bc58-0a6f779c4556
 # ╟─8c0ac2a2-b3db-455a-8a6d-3de6728b61d3
 # ╟─7cfbe32b-d677-4611-97d9-ed775c60e48e
@@ -1622,7 +1305,5 @@ version = "17.4.0+2"
 # ╟─5d0b6b50-0170-4f8b-ad5a-0dda212a00e1
 # ╟─a9f597fe-4058-47a8-8a39-8d6b36594a96
 # ╠═1082f423-448c-4d74-8baa-76b2e6508084
-# ╟─f82c6a7a-fffb-4a7b-97df-bfafd2072f5c
-# ╟─9a0d1fd7-e8b6-4737-b764-95f917442335
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
