@@ -4,7 +4,7 @@
 #> [frontmatter]
 #> chapter = 1
 #> order = 0.5
-#> title = "Lecture notes: Finite-dimensional problems"
+#> title = "Finite-dimensional problems"
 #> tags = ["lecture", "module1"]
 #> layout = "layout.jlhtml"
 
@@ -28,12 +28,13 @@ using PlutoTeachingTools, PlutoUI # packages for the notebook
 using RadiiPolynomial, Plots
 
 # ╔═╡ a5169b4b-f0d4-4f66-8198-0aec5f8e135a
-html"""<style>
+html"""
+<style>
 main {
-    margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
+</style>
 """
 
 # ╔═╡ b3845641-1537-4a27-8550-1eff30900a6b
@@ -124,14 +125,14 @@ md"""
 	\| DT(x) \| &\le Z(\| x-\bar{x} \|), \qquad \forall x \in \mathcal{X}.
 	\end{align}
 	```
-	
+
 	If there exists $r_0 > 0$ such that
-	
+
 	$\begin{align}
 	Y + \int_0^{r_0} Z(s) \, ds &\le r_0, \\
 	Z(r_0) &< 1,
 	\end{align}$
-	
+
 	then $T$ has a unique fixed point $x_0$ such that $\| x_0 - \bar{x} \| \le r_0$.
 """
 
@@ -167,7 +168,7 @@ md"""
 !!! corollary "Corollary (Newton-Kantorovich)"
 	Let $\mathcal{X}$ and $\mathcal{Y}$ be two Banach spaces, $\bar{x} \in \mathcal{X}$, $F : \mathcal{X} \to \mathcal{Y}$ a continuously differentiable map, $A : \mathcal{Y} \to \mathcal{X}$ an injective linear map, and $r_* > 0$.
 	Assume that there exist constants $Y$, $Z_1$ and $Z_2$ such that
-	
+
 	```math
 	\begin{align}
 	\| AF(\bar{x}) \| &\le Y, \\
@@ -175,16 +176,16 @@ md"""
 	\| A(DF(x)-DF(\bar{x})) \| &\le Z_2 \| x-\bar{x} \|, \qquad \forall x \in \mathcal{X} \text{ such that } \| x-\bar{x} \| \le r_*.
 	\end{align}
 	```
-	
+
 	If there exists $r_0 \in (0,r_*]$ such that
-	
-	```math	
+
+	```math
 	\begin{align}
 	Y + Z_1 r_0 + \frac{1}{2} Z_2 r_0^2 &\le r_0, \\
 	Z_1 + Z_2 r_0 &< 1,
 	\end{align}
 	```
-	
+
 	then $F$ has a unique zero $x_0$ such that $\| x_0 - \bar{x} \| \le r_0$.
 """
 
@@ -1510,7 +1511,7 @@ version = "1.4.1+1"
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╟─b3845641-1537-4a27-8550-1eff30900a6b
 # ╟─ed6f44f4-3696-494a-b8e3-b30184f5bb06
-# ╠═c33dc650-3f94-11ef-398a-8bbc4a2b69b8
+# ╟─c33dc650-3f94-11ef-398a-8bbc4a2b69b8
 # ╟─05df1902-b4b8-4fd7-ab91-ad01f4fa413e
 # ╟─2653b081-ac49-4ccc-afa6-3d6253d93ed7
 # ╟─730eeed9-a736-48df-a853-94f45dedd836

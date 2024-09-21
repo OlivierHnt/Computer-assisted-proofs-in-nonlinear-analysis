@@ -2,143 +2,254 @@
 # v0.19.46
 
 #> [frontmatter]
-#> chapter = 3
-#> order = 1
-#> title = "Lecture notes: Taylor integration"
-#> tags = ["lecture", "module3"]
+#> chapter = 2
+#> order = 2
+#> title = "Square root"
+#> tags = ["lecture", "module2"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 50fe9144-4966-4135-b9f6-56086333f3db
+# ╔═╡ d0e623ee-b096-4a27-977d-dc32567d6020
 using PlutoTeachingTools, PlutoUI # packages for the notebook
 
-# ╔═╡ 4dfe3d7f-aed8-487b-952c-8d8d502a7e46
+# ╔═╡ 018ecc45-8638-4a59-b561-efb086bdc751
 using RadiiPolynomial, Plots
 
-# ╔═╡ 551ab699-e4c5-4748-b567-9a29b8783b33
-html"""<style>
+# ╔═╡ 564092a6-546d-4772-a3a4-9f78a1801667
+html"""
+<style>
 main {
-    margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
+</style>
 """
 
-# ╔═╡ 5ed309bf-dc26-4008-b199-f1de5078130e
+# ╔═╡ 91bb507e-5871-46f4-9042-0ce4cc97617c
 TableOfContents(title="Table of Contents"; indent=true, depth=4, aside=true)
 
-# ╔═╡ 3e086655-fc49-42bb-803e-27b82c7a7577
-md"""
-In this lecture we will learn how to solve initial value problems for ODEs using Taylor series.
+# ╔═╡ 5e8827db-6a95-4726-89cf-0dc34f821c31
+md"## Introduction and setup"
 
-# Solving the logistic equation
+# ╔═╡ d5a510a3-c518-47ed-96bc-7bb22e3b08b5
+md"""
+In this lecture we will discuss how to solve the following square root problem.
+
+Given $v(t) = 1 + \cos(t)$, find the function $u$ such that
+
+```math
+u(t) ^ 2 = v(t), \qquad t \in \mathbb{R}.
+```
+
+We will search for $u$ in the following form $u(t) = \sum_{k \in \mathbb{Z}} a_k e^{i k t}$.
+
+The first step is to discretize this function space.
+We consider
+
+```math
+\ell^1 \overset{\text{def}}{=} \left\{ a \in \mathbb{C}^\mathbb{Z} \, : \, \| a \|_1 \overset{\text{def}}{=} \sum_{k \in \mathbb{Z}} |a_k| < \infty \right\}.
+```
 """
 
-# ╔═╡ 4e6473ec-02c6-4ed5-ab05-8f0086853313
-f(x) = x * (1 - x)
+# ╔═╡ d087eda1-d093-448e-bbbd-2a52534140d3
+md"#### Operator norm"
 
-# ╔═╡ abc4b3dd-518c-4239-87bb-e9688b34a8db
-Df(x) = 1 - 2x
-
-# ╔═╡ c454f8a4-5553-494a-8d08-7c7d756805a0
+# ╔═╡ 4f63ab38-1f21-4879-a91f-553d4979bfd2
 md"""
-## Zero-finding problem: Taylor integration
+Prove that if $A \in B(\ell^1)$, then $\| A \|_{B(\ell^1)} \le \max_{l \in \mathbb{Z}} \sum_{k \in \mathbb{Z}} |A_{k,l}|$ (in fact the inequality is an equality).
 """
 
-# ╔═╡ d53d988f-da50-4839-aae6-d7bdac46d4ac
-F(x, x0, τ, N) = project(x - x0 - τ * integrate(f(x)), Taylor(N))
+# ╔═╡ 5ae5251a-b873-4aaa-9d0b-2ac7bb8c2237
+md"#### Convolution"
 
-# ╔═╡ 7e5be3bf-ea25-4269-b05f-8263d5ede515
-DF(x, τ, N, M) = project(I -
-    τ * (Integral(1) * project(Multiplication(Df(x)), Taylor(N), Taylor(N))),
-    Taylor(N), Taylor(M))
-
-# ╔═╡ 8c99fd06-bea2-462e-ba47-aaa9da05d740
-begin
-# Numerical approximation
-
-N = 140 # order of the Taylor series
-
-x0 = 0.5 # initial condition
-
-τ = 2.5 # time rescaling
-
-initialguess = ones(Taylor(N))
-
-bx, success = newton(x -> (F(x, x0, τ, N), DF(x, τ, N, N)), initialguess)
-end
-
-# ╔═╡ 25e484d2-e228-45a8-9a8f-53ec54326fd9
-begin
-	plot(LinRange(-τ, τ, 101), t -> bx(t/τ); legend = false)
-	xlabel!("t")
-	ylabel!("u")
-	xlims!(-τ, τ)
-end
-
-# ╔═╡ 641caade-ff17-4484-af95-988b92977bb5
+# ╔═╡ e50cd72a-eecd-46e5-8f98-37f135658011
 md"""
-## The Newton-Kantorovich proof
+The second step is to observe that the product of two functions yields a product in $\ell^1$.
+This is the discrete convolution.
 """
 
-# ╔═╡ c4254d37-06d5-4502-9136-717f9404a7ff
-function tail(x, N)
-    # get the tail of a Taylor series
-    y = zeros(eltype(x), space(x))
-    for n = N+1:order(x)
-        y[n] = x[n]
-    end
-    return y
-end
-
-# ╔═╡ 84d0a349-66a1-45e4-887f-2bd19b5ccf4a
-begin
-	#- approximate inverse
-
-A_finite = interval.( inv(DF(bx, τ, N, N)) )
-opnormA_finite = opnorm(A_finite, 1)
-opnormA_tail = interval(1)
-opnormA = max(opnormA_finite, opnormA_tail)
-end
-
-# ╔═╡ 34152734-45ff-4dfe-bc25-3d60ba4c9d19
-begin
-	#- Y bound
-
-full_F = F(interval.(bx), interval(x0), interval(τ), 2N+1) # the order of F is 2N+1
-Y = norm(A_finite * project(full_F, Taylor(N)), 1) + norm(tail(full_F, N), 1)
-end
-
-# ╔═╡ 4bce0a13-ca2f-46c4-9ef3-12f07d525fbf
-begin
-#- Z₁ bound
-
-Df_bx = Df(interval.(bx))
-
-Z₁ = opnorm(I - A_finite * DF(interval.(bx), τ, N, N), 1) +
-    τ * norm(Df_bx, 1) / (interval(N + 1))
-
-end
-
-# ╔═╡ 031ab1e8-d479-4197-919c-20416f19aa9f
-begin
-	#- Z₂ bound
-
-Z₂ = 2 * τ * opnormA
-end
-
-# ╔═╡ 7fc34159-4b00-4e5e-b969-b4550b38ab53
-#- interval of existence (cf. Radii Polynomial Theorem)
-# r_star = Inf # since the second-order derivative is constant
-r = interval_of_existence(Y, Z₁, Z₂, Inf)
-
-# ╔═╡ a618d08d-3f68-4a84-ac24-f6fbd2d93818
+# ╔═╡ c9228651-9c4f-42f2-ad7f-34065aa2e529
 md"""
-# Next steps and further reading
+!!! tip "Lemma"
+	If $u(t) = \sum_{k \in \mathbb{Z}} a_k t^k$ and $v(t) = \sum_{k \in \mathbb{Z}} b_k t^k$, then for their product we have $u(t) v(t) = \sum_{k \in \mathbb{Z}} (a*b)_k t^k$ where
 
-We remark that we need a large number of Taylor coefficients for our proof to succeed despite a relatively small length of integration ($N = 140$ to have last Taylor coefficient of order $10^{-14}$). One should consider using Chebyshev series instead.
+	```math
+	(a*b)_k \overset{\text{def}}{=} \sum_{l \in \mathbb{Z}} a_{k-l} b_l, \qquad k \in \mathbb{Z}.
+	```
+"""
+
+# ╔═╡ afa31d93-85e1-46d5-8bd9-177666ba2098
+md"""
+Then, the problem of finding the square root of $v$ corresponds to finding a sequence of coefficients $a \in (\ell^1, *)$ such that
+
+```math
+a * a = b,
+```
+
+where $b_0 = 1$ and $b_1 = b_{-1} = 1/2$.
+Moreover, to ease the notation, we simply write $\ell^1 = (\ell^1, *)$.
+"""
+
+# ╔═╡ 6bb627ea-0b12-4495-8b39-c79bc5a35890
+md"""
+The space $X$ together with $*$ forms a Banach algebra.
+"""
+
+# ╔═╡ e5754113-7f92-4946-a684-99d9bd5d830f
+Markdown.MD(Markdown.Admonition("tip", "Lemma (Banach algebra property)", [md"""For any $a, b \in X$ we have $\|a*b\|_X \le \|a\|_X \|b\|_X$."""]))
+
+# ╔═╡ 2f541fb5-79a8-4755-a611-a14fdf3f532b
+Foldable("""Proof""", md"""**Exercise** (rearrange the series and use the triangle inequality)""")
+
+# ╔═╡ 9f5cf201-871a-4afb-95ed-4bdba6152d23
+md"""
+The multiplication operator $M_a (b) \overset{\text{def}}{=} a * b$ can be represented by an infinite dimensional matrix. For our proof we will only need to construct a finite part of it.
+"""
+
+# ╔═╡ 597941ec-81f4-4887-abd2-2f303166c2d4
+b = Sequence(Fourier(1, 1.0), [0.5, 2.0, 0.5])
+
+# ╔═╡ 27de2c2a-f7b6-46c5-97e7-e15341706cd5
+project(Multiplication(b), space(b), space(b))
+
+# ╔═╡ 37739d69-090f-4d0e-b2ad-1322da629dd2
+md"## Zero-finding problem"
+
+# ╔═╡ 90fe50ee-89e8-4047-a115-533c90082957
+md"""
+Let us now go back to our task of finding the square root of $b$ with respect to $*$.
+To this end, we consider the zero-finding problem $F : \ell^1 \to \ell^1$ given by
+
+F(a) \overset{\text{def}}{=} a*a - b.
+
+We aim to prove that, for some injective $A \approx DF(\bar{a})^{-1} \in B(\ell^1)$ yet to be constructed, the fixed-point operator
+
+```math
+T(a) \overset{\text{def}}{=} a - A F(a) = a - A (a * a - b),
+```
+
+is contracting around $\bar{a}$ with $F(\bar{a}) \approx 0$.
+
+Observe that
+
+```math
+DF(a) h = 2a * h,
+```
+
+that is $DF(a)$ is the mutliplication operator $M_c$ associated with $c = 2a$.
+
+As a bounded linear operator acting on infinite sequences in $\ell^1$, $M_c$ can be visualized as a matrix with an infinite number of rows and columns.
+Specifically, one can check that $M_c$ is a [Topepliz matrix](https://en.wikipedia.org/wiki/Toeplitz_matrix) so that
+
+```math
+M_b =
+\begin{pmatrix}
+\ddots & \ddots & \ddots \\
+\ddots & c_0    & c_{-1} & c_{-2} \\
+\ddots & c_1    & c_0    & c_{-1} & \ddots \\
+       & c_2    & c_1    & c_0    & \ddots \\
+       &        & \ddots & \ddots & \ddots
+\end{pmatrix}.
+```
+"""
+
+# ╔═╡ 2787dcd4-9e81-43e6-a74a-0574499e3687
+md"### Finite dimensional projection"
+
+# ╔═╡ 26a18a45-7106-4956-a5a0-1ac46349e020
+md"""
+We introduce a projection operator on a finite number of modes ($2K+1$ coefficients) and its complement:
+
+```math
+(\pi^{\le K} a)_k
+\overset{\text{def}}{=}
+\begin{cases}
+a_k, & |k| \le K, \\
+0, & |k| > K,
+\end{cases}
+```
+
+as well as $\pi^{>K} \overset{\text{def}}{=} I - \pi^{\le K}$.
+"""
+
+# ╔═╡ 2c076e0d-5f35-40e3-9612-d5351b019559
+F(a, b, space) = project(a*a - b, space)
+
+# ╔═╡ f688e26c-dc4f-4faa-bd69-82c2366bd696
+DF(a, space) = project(Multiplication(2a), space, space)
+
+# ╔═╡ db4c62ae-bef8-4c90-8e54-e38e7ec357b0
+begin
+	K = 2
+	initial_guess = zeros(Fourier(K, 1.0))
+	initial_guess[0] = sqrt(b[0])
+	a0, _ = newton(a -> (F(a, b, space(a)), DF(a, space(a))), initial_guess)
+end
+
+# ╔═╡ fafde27b-9714-484f-a882-2f13b7ce22be
+md"### Approximate inverse"
+
+# ╔═╡ 062005af-9af6-47af-a534-a64581ecb0bf
+md"#### Computing the approximate inverse"
+
+# ╔═╡ dc403fed-22ac-43a5-aabd-b5bb198a3a4b
+M = project(Multiplication(2a0), Fourier(K, 1.0), Fourier(K, 1.0))
+
+# ╔═╡ a82b583b-9a63-44d3-8e62-378a1d8212c1
+c = interval.( M \ Sequence(Fourier(K, 1.0), I[1:(2K+1),K+1]) )
+
+# ╔═╡ af117c60-f433-4751-92ff-6d5a3744fbb1
+md"### Newton-Kantorovich"
+
+# ╔═╡ 4a4b7fff-17c3-4339-9ca5-d8dac1012d9e
+md"""
+Observe that $\| M_a \|_{B(\ell^1)} = \| a \|_1$ for all $a \in \ell^1$ (the proof is left as an exercise).
+
+Let us now apply our contraction argument and compute the required bounds:
+
+```math
+\begin{align}
+Y &\ge \| A F(\bar{a}) \|_1 = \| c * (\bar{a} * \bar{a} - b) \|_1, \\
+Z_1 &\ge \| A DF(\bar{a}) - I \|_{B(\ell^1)} = \| 2c * \bar{a} - 1 \|_1, \\
+Z_2 &= 2\| c \|_1.
+\end{align}
+```
+
+To conclude the proof, note that $Z_1 < 1$ implies that $A DF(\bar{a})$ is invertible, since $A DF(\bar{a}) = 2c * M_{\bar{a}} = 2M_{\bar{a}} * c = DF(\bar{a}) A$, this guarantees that $A$ is in fact injective.
+
+Note that all the above quantities are computable since $A F(\bar{a}) \in \pi^{3K \le} \ell^1$.
+"""
+
+# ╔═╡ 4230279b-fe77-4c9a-b144-1e2f9538e046
+Y = norm(c * F(a0, b, Fourier(2K, 1.0)), 1)
+
+# ╔═╡ e6871d6c-0890-4472-8c75-070393939da6
+Z₁ = norm(2c * a0 - 1, 1)
+
+# ╔═╡ 63093c7b-66a8-457d-bbdd-75eddc5f74a5
+Z₂ = 2norm(c, 1)
+
+# ╔═╡ 507d49af-d127-41d6-9c34-6d357b6d4a7c
+interval_of_existence(Y, Z₁, Z₂, 1e-1)
+
+# ╔═╡ db76f769-0281-4502-8065-e94f701bfa7a
+begin
+	plot(LinRange(-π, π, 101), t -> real(a0(t)); label = "approx")
+	plot!(LinRange(-π, π, 101), t -> sqrt(2+cos(t)); label = "theoretical")
+end
+
+# ╔═╡ 05507eeb-df0a-4980-9d2c-083743e3fcd8
+md"## Next steps"
+
+# ╔═╡ ea41caa2-69c8-4b97-8643-90d85bfc3756
+md"""
+What if $v$ is an infinite power series...
+
+Analyticity (weighted $\ell^1$ space)...
+
+Implement the cubic root as an exercise...
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -1367,25 +1478,43 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╟─551ab699-e4c5-4748-b567-9a29b8783b33
-# ╠═50fe9144-4966-4135-b9f6-56086333f3db
-# ╠═4dfe3d7f-aed8-487b-952c-8d8d502a7e46
-# ╟─5ed309bf-dc26-4008-b199-f1de5078130e
-# ╟─3e086655-fc49-42bb-803e-27b82c7a7577
-# ╠═4e6473ec-02c6-4ed5-ab05-8f0086853313
-# ╠═abc4b3dd-518c-4239-87bb-e9688b34a8db
-# ╟─c454f8a4-5553-494a-8d08-7c7d756805a0
-# ╠═d53d988f-da50-4839-aae6-d7bdac46d4ac
-# ╠═7e5be3bf-ea25-4269-b05f-8263d5ede515
-# ╠═8c99fd06-bea2-462e-ba47-aaa9da05d740
-# ╟─25e484d2-e228-45a8-9a8f-53ec54326fd9
-# ╟─641caade-ff17-4484-af95-988b92977bb5
-# ╠═c4254d37-06d5-4502-9136-717f9404a7ff
-# ╠═84d0a349-66a1-45e4-887f-2bd19b5ccf4a
-# ╠═34152734-45ff-4dfe-bc25-3d60ba4c9d19
-# ╠═4bce0a13-ca2f-46c4-9ef3-12f07d525fbf
-# ╟─031ab1e8-d479-4197-919c-20416f19aa9f
-# ╠═7fc34159-4b00-4e5e-b969-b4550b38ab53
-# ╟─a618d08d-3f68-4a84-ac24-f6fbd2d93818
+# ╟─564092a6-546d-4772-a3a4-9f78a1801667
+# ╠═d0e623ee-b096-4a27-977d-dc32567d6020
+# ╠═018ecc45-8638-4a59-b561-efb086bdc751
+# ╟─91bb507e-5871-46f4-9042-0ce4cc97617c
+# ╟─5e8827db-6a95-4726-89cf-0dc34f821c31
+# ╟─d5a510a3-c518-47ed-96bc-7bb22e3b08b5
+# ╟─d087eda1-d093-448e-bbbd-2a52534140d3
+# ╟─4f63ab38-1f21-4879-a91f-553d4979bfd2
+# ╟─5ae5251a-b873-4aaa-9d0b-2ac7bb8c2237
+# ╟─e50cd72a-eecd-46e5-8f98-37f135658011
+# ╟─c9228651-9c4f-42f2-ad7f-34065aa2e529
+# ╟─afa31d93-85e1-46d5-8bd9-177666ba2098
+# ╟─6bb627ea-0b12-4495-8b39-c79bc5a35890
+# ╟─e5754113-7f92-4946-a684-99d9bd5d830f
+# ╟─2f541fb5-79a8-4755-a611-a14fdf3f532b
+# ╟─9f5cf201-871a-4afb-95ed-4bdba6152d23
+# ╠═597941ec-81f4-4887-abd2-2f303166c2d4
+# ╠═27de2c2a-f7b6-46c5-97e7-e15341706cd5
+# ╟─37739d69-090f-4d0e-b2ad-1322da629dd2
+# ╟─90fe50ee-89e8-4047-a115-533c90082957
+# ╟─2787dcd4-9e81-43e6-a74a-0574499e3687
+# ╟─26a18a45-7106-4956-a5a0-1ac46349e020
+# ╠═2c076e0d-5f35-40e3-9612-d5351b019559
+# ╠═f688e26c-dc4f-4faa-bd69-82c2366bd696
+# ╠═db4c62ae-bef8-4c90-8e54-e38e7ec357b0
+# ╟─fafde27b-9714-484f-a882-2f13b7ce22be
+# ╟─062005af-9af6-47af-a534-a64581ecb0bf
+# ╠═dc403fed-22ac-43a5-aabd-b5bb198a3a4b
+# ╠═a82b583b-9a63-44d3-8e62-378a1d8212c1
+# ╟─af117c60-f433-4751-92ff-6d5a3744fbb1
+# ╟─4a4b7fff-17c3-4339-9ca5-d8dac1012d9e
+# ╠═4230279b-fe77-4c9a-b144-1e2f9538e046
+# ╠═e6871d6c-0890-4472-8c75-070393939da6
+# ╟─63093c7b-66a8-457d-bbdd-75eddc5f74a5
+# ╠═507d49af-d127-41d6-9c34-6d357b6d4a7c
+# ╟─db76f769-0281-4502-8065-e94f701bfa7a
+# ╟─05507eeb-df0a-4980-9d2c-083743e3fcd8
+# ╟─ea41caa2-69c8-4b97-8643-90d85bfc3756
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

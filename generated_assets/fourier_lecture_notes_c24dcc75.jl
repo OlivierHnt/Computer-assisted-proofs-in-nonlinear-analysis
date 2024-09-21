@@ -4,7 +4,7 @@
 #> [frontmatter]
 #> chapter = 4
 #> order = 1
-#> title = "Lecture notes: periodic orbit problems"
+#> title = "Periodic orbits"
 #> tags = ["lecture", "module4"]
 #> layout = "layout.jlhtml"
 
@@ -18,12 +18,13 @@ using PlutoTeachingTools, PlutoUI # packages for the notebook
 using RadiiPolynomial, Plots
 
 # ╔═╡ 044aabf3-b817-4266-93a9-a4cabce1ec4e
-html"""<style>
+html"""
+<style>
 main {
-    margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
+</style>
 """
 
 # ╔═╡ 2ae8d07b-a05e-4136-a121-6317641916fe

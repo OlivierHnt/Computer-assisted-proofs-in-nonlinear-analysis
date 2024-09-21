@@ -4,7 +4,7 @@
 #> [frontmatter]
 #> chapter = 5
 #> order = 1
-#> title = "Lecture notes: invariant manifolds of equilibria"
+#> title = "Invariant manifolds of equilibria"
 #> tags = ["lecture", "module5"]
 #> layout = "layout.jlhtml"
 
@@ -18,12 +18,13 @@ using PlutoTeachingTools, PlutoUI # packages for the notebook
 using RadiiPolynomial, LinearAlgebra
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
-html"""<style>
+html"""
+<style>
 main {
-    margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
+</style>
 """
 
 # ╔═╡ 4412bd33-8b3f-41de-9e1a-a8f1187c793f

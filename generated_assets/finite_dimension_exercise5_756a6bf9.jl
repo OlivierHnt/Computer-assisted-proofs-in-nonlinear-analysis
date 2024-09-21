@@ -1,72 +1,162 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.19.46
 
 #> [frontmatter]
-#> homework_number = 3
-#> order = 3
-#> title = "Rigorous computation of an eigenpair"
+#> homework_number = 5
+#> order = 5
+#> title = "Rigorous control of the entire spectrum"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+end
+
+# ╔═╡ 9099f41e-6239-4f7f-a3ec-82e7d4787f8f
+using PlutoTeachingTools # package for the notebook
+
+# ╔═╡ bffff867-d9a0-4f7c-aa94-426003d9dde0
+using LinearAlgebra, IntervalArithmetic
+
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
-html"""<style>
+html"""
+<style>
 main {
     max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
+</style>
 """
 
-# ╔═╡ 70740a99-ec98-45c8-ba8f-06d63dd396b0
-using PlutoTeachingTools
-
-# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial, LinearAlgebra
-
-# ╔═╡ c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
+# ╔═╡ 45e10c91-f161-43a5-9c9e-5b4dca6a8e53
 md"""
-**1.** Consider a matrix $M$, and an approximate eigenpair $(\bar{\lambda},\bar{u})$ of $M$. The goal of this exercise is to *capify* $(\bar{\lambda},\bar{u})$, i.e., to prove that there exists an exact eigenpair $(\lambda,u)$ nearby. Assuming the corresponding exact eigenvalue $\lambda$ is simple, define a suitable $F=0$ problem, and derive the bounds needed to apply the Newton-Kantorovich theorem in that context.
+Exercise 3 can be used to enclose eigenvalues of a given matrix one by one.
+We now present an alternate strategy to enclose the entire spectrum at once (but not the corresponding eigenvectors), which can sometimes also be adapted in infinite dimension.
+This strategy relies on the [Gershgorin circle theorem](https://en.wikipedia.org/wiki/Gershgorin_circle_theorem), which we recall below.
 """
 
-# ╔═╡ 7748e568-afc9-43cc-b2bd-5a231d86f455
-Foldable("Hint",
-md"The *natural* zero-finding problem is $G(\lambda, u) := (M-\lambda I)u$, but it has one too many unknowns. This is consistent with the fact that zeros of $G$ are not isolated (one can always rescale the eigenvector). Therefore, a suitable zero-finding problem needs to incorporate a normalization condition, for instance:
+# ╔═╡ 916f5d37-2bde-4a35-923a-2ff9e606371d
+Markdown.MD(Markdown.Admonition("tip", "Theorem", [md"For any matrix $A=\left(A_{i,j}\right)_{1\leq i,j\leq d}$, its spectrum $\sigma(A)$ is controlled as follows.
 
 $\begin{align}
-F(\lambda,u) =
-\begin{pmatrix}
-\langle u,\bar{u} \rangle -1 \\
-(M-\lambda I)u
-\end{pmatrix}.
+\sigma(A) \subset \bigcup_{i=1}^d D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right),
 \end{align}$
-"
+
+where $D(z,r)$ denotes the closed disk of center $z$ and radius $r$ in the complex plane. Moreover, if $I \subset \{1,\ldots,d\}$ is such that $\bigcup_{i \in I} D\left(A_{i,i},\, \sum_{j \ne i} \vert A_{i,j} \vert\right)$ is disjoint from $\bigcup_{i \notin I} D\left(A_{i,i},\, \sum_{j \ne i} \vert A_{i,j} \vert\right)$, then $\bigcup_{i \in I} D\left(A_{i,i},\, \sum_{j \ne i} \vert A_{i,j} \vert\right)$ contains exactly $\vert I \vert$ eigenvalues."]))
+
+# ╔═╡ d01c5817-c4b6-4502-81f6-51ae5715117b
+md"""
+**1.** Using the Gershgorin circle theorem, get as tight as possible rigorous enclosures of all eigenvalues of $W_{3}$ (defined in Exercise 3).
+"""
+
+# ╔═╡ 02939955-c9aa-4152-8e08-f31e1e0c0e9c
+Foldable("Hint",
+md"""
+You may first compute numerically a matrix $P$ of approximate eigenvectors of $W_3$, then rigorously compute $\tilde W_{3} = P^{-1}W_3 P$, and finally apply the Gershgoring circle theorem to $\tilde W_{3}$.
+"""
 )
 
-# ╔═╡ cab728f1-9ff5-4bdd-8101-5c39718c4d53
+# ╔═╡ bc052916-db0e-43a2-bbb0-76b917d6f638
 md"""
-**2.** For any positive integer $N$, the Wilkinson matrix $W_{N}$ is the following $(2N+1)\times(2N+1)$ tridiagonal matrix:
-
-$\begin{align}
-W_{N} =
-\begin{pmatrix}
-N & 1 & & & & & \\
-1 & N-1 & 1 & & & & \\
- & 1 & \ddots & \ddots & & & \\
- & & \ddots & 0 & \ddots & & \\
- & & & \ddots & \ddots & 1 & \\
- & & & & 1 & N-1 & 1 \\
- & & & & & 1 & N
-\end{pmatrix}
-\end{align}$
-
-We provide below approximate eigenvalues and eigenvectors of $W_3$. Rigorously enclose all eigenpairs of $W_3$.
+**2.** Prove that $W_{1000}$ has exactly one eigenvalue with negative real part.
 """
 
-# ╔═╡ d61514c3-3b0e-4658-8b31-de9f9514a9c3
+# ╔═╡ 3686e5b2-daac-470d-b9e3-4bd5706e5894
+Foldable("Hint",
+md"""
+You do not need to numerically diagonalize all of $W_{1000}$: for most rows, the corresponding Gershgorin disk already lies in the left half of the complex plane.
+""")
+
+# ╔═╡ b9b3efbe-1f36-4d60-a5f1-c55f10ca3bae
+hide_everything_below =
+	html"""
+	<style>
+	pluto-cell.hide_everything_below ~ pluto-cell {
+		display: none;
+	}
+	</style>
+	
+	<script>
+	const cell = currentScript.closest("pluto-cell")
+	
+	const setclass = () => {
+		console.log("change!")
+		cell.classList.toggle("hide_everything_below", true)
+	}
+	setclass()
+	const observer = new MutationObserver(setclass)
+	
+	observer.observe(cell, {
+		subtree: false,
+		attributeFilter: ["class"],
+	})
+	
+	invalidation.then(() => {
+		observer.disconnect()
+		cell.classList.toggle("hide_everything_below", false)
+	})
+	
+	</script>
+	""";
+
+# ╔═╡ 8be0e6f2-c07a-4aa8-9ecd-c63143cc53a0
+begin
+    b = @bind reveal html"<input type=checkbox>"
+	md"""
+	#### Show the solution $b
+	"""
+end
+
+# ╔═╡ 35ecc852-2cd8-465c-b8a3-2f58a2749b43
+if !(reveal === true)
+	hide_everything_below
+end
+
+# ╔═╡ 3eef5dee-ca8c-4fec-92b4-37cadb65c3f9
+md"""
+**1.**
+"""
+
+# ╔═╡ 2b9c8b52-1c00-40a7-8744-785662cb7206
+function my_rigorous_inv(A)
+	B = inv(A)
+	δ = opnorm(I - interval(A)*interval(B), 1)
+	if sup(δ) < 1
+		r = δ/(1-δ) * opnorm(interval(B), 1)
+	else
+		println("Unable to rigorously invert")
+		r = NaN
+	end
+	return interval(B, sup(r)*ones(size(B)); format = :midpoint)
+end
+
+# ╔═╡ 816d5874-5766-4934-b853-119d5fc40378
+function gershgorin(M)
+	eigenvalues, P = eigen(M)
+	iP = interval(P)
+	iPinv = my_rigorous_inv(P)
+	M̃ = iPinv * M * iP
+	centers = mid.(diag(M̃))
+	temp = M̃
+	for n = 1:size(M,1)
+		temp[n,n] = 0
+	end
+	radii = sum(abs.(temp); dims=2) + radius.(diag(M̃))
+	return interval(centers, sup.(radii); format = :midpoint)
+end
+
+# ╔═╡ d6c566fe-2ba0-487b-b789-d383bc5d7b46
 function wilkinson(N)
 	M = zeros(2N+1, 2N+1)
 	for i = 1:2N+1
@@ -81,25 +171,66 @@ function wilkinson(N)
 	return M
 end
 
-# ╔═╡ 1bba510b-be86-44b0-a3c9-419b3b6ada37
+# ╔═╡ 5efb4716-32b3-4c28-8e3f-38c7ac7713a7
 N = 3
 
-# ╔═╡ fe0054f0-4fd5-489f-9fcb-3af086876699
-wilkinson(N)
+# ╔═╡ b094ef52-1321-4a9a-a5b8-fe5121b5fd47
+spectrum = gershgorin(wilkinson(N))
 
-# ╔═╡ 3509fe96-4a83-461f-8fed-23343d74dc8c
-eigenvalues, eigenvectors = eigen(wilkinson(N))
+# ╔═╡ 7a50a962-2704-4b09-a098-e8e50beb032a
+function count_nb_neg_eig(spectrum)
+	nb_neg = sum(isstrictless.(spectrum, interval(0)))
+	nb_pos = sum(isstrictless.(interval(0), spectrum))
+	if nb_neg + nb_pos == length(spectrum)
+		println("We have proven that there is exactly ",nb_neg," negative eigenvalue(s)")
+	else
+		println("We have proven that there are at least ",nb_neg," negative eigenvalue(s) and at least ",nb_pos," positive eigenvalue(s)")
+	end
+end
+
+# ╔═╡ eaff3727-bb02-43ba-a4bd-fb6247694e4a
+count_nb_neg_eig(spectrum)
+
+# ╔═╡ 500d62c7-3151-4a0a-adf8-53e3adeb72c2
+md"""
+**2.**
+"""
+
+# ╔═╡ 7dda07fa-51fe-4222-8b33-ed2cd7c468e1
+function gershgorin_wilkinson_cheap(N, d)
+	Md = wilkinson(d)
+	eigenvalues, P = eigen(Md)
+	iPd = interval(Matrix(I(2*d+3)))
+	iPd[2:2*d+2,2:2*d+2] = interval.(P)
+	iPdinv = interval(Matrix(I(2*d+3)))
+	iPdinv[2:2*d+2,2:2*d+2] = my_rigorous_inv(P)
+	M̃ = interval.(wilkinson(N))
+	M̃[N-(d+1).+(1:2*d+3),N-(d+1).+(1:2*d+3)] = iPdinv * M̃[N-(d+1).+(1:2*d+3),N-(d+1).+(1:2*d+3)] * iPd
+	centers = mid.(diag(M̃))
+	temp = M̃
+	for n = 1:2*N+1
+		temp[n,n] = 0
+	end
+	radii = sum(abs.(temp); dims=2) + radius.(diag(M̃))
+	return interval(centers, sup.(radii); format = :midpoint)
+end
+
+# ╔═╡ d0e7f221-e4e6-4f2c-a7f7-0a41e27ad16e
+spectrum_approx = gershgorin_wilkinson_cheap(1000, 5)
+
+# ╔═╡ 41f4fd4e-4f5e-426e-9f25-62895ec0d945
+count_nb_neg_eig(spectrum_approx)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+IntervalArithmetic = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
-RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
+IntervalArithmetic = "~0.22.16"
 PlutoTeachingTools = "~0.2.15"
-RadiiPolynomial = "~0.8.13"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -108,7 +239,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.5"
 manifest_format = "2.0"
-project_hash = "5cbcd9c3886f5990007357c5249b3600ed2e62a4"
+project_hash = "ea4aa617acb64ed7a84cf805eb3c88beae5cdeae"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -393,12 +524,6 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
-[[deps.RadiiPolynomial]]
-deps = ["IntervalArithmetic", "LinearAlgebra", "Printf", "Reexport", "SparseArrays"]
-git-tree-sha1 = "8442e84088a316034b2b9d8128d6af0ac4ab4fad"
-uuid = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
-version = "0.8.13"
-
 [[deps.Random]]
 deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
@@ -504,14 +629,28 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╠═70740a99-ec98-45c8-ba8f-06d63dd396b0
-# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
-# ╟─c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
-# ╟─7748e568-afc9-43cc-b2bd-5a231d86f455
-# ╟─cab728f1-9ff5-4bdd-8101-5c39718c4d53
-# ╠═d61514c3-3b0e-4658-8b31-de9f9514a9c3
-# ╠═1bba510b-be86-44b0-a3c9-419b3b6ada37
-# ╠═fe0054f0-4fd5-489f-9fcb-3af086876699
-# ╠═3509fe96-4a83-461f-8fed-23343d74dc8c
+# ╠═9099f41e-6239-4f7f-a3ec-82e7d4787f8f
+# ╟─45e10c91-f161-43a5-9c9e-5b4dca6a8e53
+# ╟─916f5d37-2bde-4a35-923a-2ff9e606371d
+# ╟─d01c5817-c4b6-4502-81f6-51ae5715117b
+# ╟─02939955-c9aa-4152-8e08-f31e1e0c0e9c
+# ╟─bc052916-db0e-43a2-bbb0-76b917d6f638
+# ╟─3686e5b2-daac-470d-b9e3-4bd5706e5894
+# ╟─b9b3efbe-1f36-4d60-a5f1-c55f10ca3bae
+# ╟─8be0e6f2-c07a-4aa8-9ecd-c63143cc53a0
+# ╟─35ecc852-2cd8-465c-b8a3-2f58a2749b43
+# ╟─3eef5dee-ca8c-4fec-92b4-37cadb65c3f9
+# ╠═bffff867-d9a0-4f7c-aa94-426003d9dde0
+# ╠═816d5874-5766-4934-b853-119d5fc40378
+# ╠═2b9c8b52-1c00-40a7-8744-785662cb7206
+# ╠═d6c566fe-2ba0-487b-b789-d383bc5d7b46
+# ╠═5efb4716-32b3-4c28-8e3f-38c7ac7713a7
+# ╠═b094ef52-1321-4a9a-a5b8-fe5121b5fd47
+# ╠═7a50a962-2704-4b09-a098-e8e50beb032a
+# ╠═eaff3727-bb02-43ba-a4bd-fb6247694e4a
+# ╟─500d62c7-3151-4a0a-adf8-53e3adeb72c2
+# ╠═7dda07fa-51fe-4222-8b33-ed2cd7c468e1
+# ╠═d0e7f221-e4e6-4f2c-a7f7-0a41e27ad16e
+# ╠═41f4fd4e-4f5e-426e-9f25-62895ec0d945
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -1,38 +1,33 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
-
-#> [frontmatter]
-#> homework_number = 5
-#> order = 5
-#> title = "Rigorous control of the entire spectrum"
-#> tags = ["module1", "homeworks"]
-#> layout = "layout.jlhtml"
+# v0.19.46
 
 using Markdown
 using InteractiveUtils
 
+# ╔═╡ 9099f41e-6239-4f7f-a3ec-82e7d4787f8f
+using PlutoTeachingTools # package for the notebook
+
+# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
+using LinearAlgebra, IntervalArithmetic
+
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
-html"""<style>
+html"""
+<style>
 main {
     max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
+</style>
 """
-
-# ╔═╡ 9099f41e-6239-4f7f-a3ec-82e7d4787f8f
-using PlutoTeachingTools
-
-# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using RadiiPolynomial
 
 # ╔═╡ 45e10c91-f161-43a5-9c9e-5b4dca6a8e53
 md"""
 Exercise 3 can be used to enclose eigenvalues of a given matrix one by one. We now present an alternate strategy to enclose the entire spectrum at once (but not the corresponding eigenvectors), which can sometimes also be adapted in infinite dimension. This strategy relies on the Gershgorin circle theorem, which we recall below.
 """
 
-# ╔═╡ 916f5d37-2bde-4a35-923a-2ff9e606371d
+# ╔═╡ a6e349ff-ba01-48c4-91a8-5400faa05346
 Markdown.MD(Markdown.Admonition("tip", "Theorem", [md"For any matrix $A=\left(A_{i,j}\right)_{1\leq i,j\leq d}$, its spectrum $\sigma(A)$ is controlled as follows.
 
 $\begin{align}
@@ -43,13 +38,76 @@ where $D(z,r)$ denotes the closed disk of center $z$ and radius $r$ in the compl
 
 # ╔═╡ d01c5817-c4b6-4502-81f6-51ae5715117b
 md"""
-**1.** Using the Gershgorin circle theorem, get as tight as possible rigorous enclosures of all eigenvalues of $W_{3}$ (defined in Exercise 3).
+**1.** Using the Gershgorin circle theorem, get as tight as possible rigorous enclosures of all eigenvalues of $W_{3}$ (defined in the third exercise)).
 """
 
 # ╔═╡ 02939955-c9aa-4152-8e08-f31e1e0c0e9c
 Foldable("Hint",
 md"You may first compute numerically a matrix $P$ of approximate eigenvectors of $W_3$, then rigorously compute $\tilde W_{3} = P^{-1}W_3 P$, and finally apply the Gershgoring circle theorem to $\tilde W_{3}$."
 )
+
+# ╔═╡ 257d92b2-ccc4-4351-b3ac-ff53f6f2d54d
+function my_rigorous_inv(A)
+	B = inv(A)
+	δ = opnorm(I - interval(A)*interval(B), 1)
+	if sup(δ) < 1
+		r = δ/(1-δ) * opnorm(interval(B), 1)
+	else
+		println("Unable to rigorously invert")
+		r = NaN
+	end
+	return interval(B, sup(r)*ones(size(B)); format = :midpoint)
+end
+
+# ╔═╡ 773d5d67-2819-4225-add4-f7913fd6d296
+function gershgorin(M)
+	eigenvalues, P = eigen(M)
+	iP = interval(P)
+	iPinv = my_rigorous_inv(P)
+	M̃ = iPinv * M * iP
+	centers = mid.(diag(M̃))
+	temp = M̃
+	for n = 1:size(M,1)
+		temp[n,n] = 0
+	end
+	radii = sum(abs.(temp); dims=2) + radius.(diag(M̃))
+	return interval(centers, sup.(radii); format = :midpoint)
+end
+
+# ╔═╡ 0db57db5-c43a-451a-9ebb-eccd799514ef
+function W(N)
+	M = zeros(2N+1, 2N+1)
+	for i = 1:2N+1
+		M[i,i] = abs(N - i + 1)
+		if i+1 ≤ 2N+1
+			M[i,i+1] = 1
+		end
+		if i-1 ≥ 1
+			M[i,i-1] = 1
+		end
+	end
+	return M
+end
+
+# ╔═╡ 6339a6ca-985b-4cc0-891f-72b943b5b812
+N = 3
+
+# ╔═╡ ad19ec24-3779-453d-9315-ce70db1b9b4e
+spectrum = gershgorin(W(N))
+
+# ╔═╡ ab8f264a-c1a4-40d5-a38c-dc1a5ef398a6
+function count_nb_neg_eig(spectrum)
+	nb_neg = sum(isstrictless.(spectrum, interval(0)))
+	nb_pos = sum(isstrictless.(interval(0), spectrum))
+	if nb_neg + nb_pos == length(spectrum)
+		println("We have proven that there is exactly ",nb_neg," negative eigenvalue(s)")
+	else
+		println("We have proven that there are at least ",nb_neg," negative eigenvalue(s) and at least ",nb_pos," positive eigenvalue(s)")
+	end
+end
+
+# ╔═╡ c308fcbf-d094-4f5b-9cb5-23c17a6c6b73
+count_nb_neg_eig(spectrum)
 
 # ╔═╡ bc052916-db0e-43a2-bbb0-76b917d6f638
 md"""
@@ -59,15 +117,41 @@ md"""
 # ╔═╡ 3686e5b2-daac-470d-b9e3-4bd5706e5894
 Foldable("Hint",md"You do not need to numerically diagonalize all of $W_{1000}$: for most rows, the corresponding Gershgorin disk already lies in the left half of the complex plane. ")
 
+# ╔═╡ a75b3d18-e03e-4fc6-a5e0-0c03579e53a9
+function gershgorin_wilkinson_cheap(N, d)
+	Md = W(d)
+	eigenvalues, P = eigen(Md)
+	iPd = interval.(Matrix(I(2*d+3)))
+	iPd[2:2*d+2,2:2*d+2] = interval.(P)
+	iPdinv = interval.(Matrix(I(2*d+3)))
+	iPdinv[2:2*d+2,2:2*d+2] = my_rigorous_inv(P)
+	M̃ = interval.(W(N))
+	M̃[N-(d+1).+(1:2*d+3),N-(d+1).+(1:2*d+3)] = iPdinv * M̃[N-(d+1).+(1:2*d+3),N-(d+1).+(1:2*d+3)] * iPd
+	centers = mid.(diag(M̃))
+	temp = M̃
+	for n = 1:2*N+1
+		temp[n,n] = 0
+	end
+	radii = sum(abs.(temp); dims=2) + radius.(diag(M̃))
+	return interval(centers, sup.(radii); format = :midpoint)
+end
+
+# ╔═╡ eb4abb7a-9605-4099-ba30-716af7e2d173
+spectrum_approx = gershgorin_wilkinson_cheap(1000, 5)
+
+# ╔═╡ cdcdea86-7463-47d2-9416-930f816caad5
+count_nb_neg_eig(spectrum_approx)
+
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+IntervalArithmetic = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
-RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
+IntervalArithmetic = "~0.22.16"
 PlutoTeachingTools = "~0.2.15"
-RadiiPolynomial = "~0.8.13"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -76,7 +160,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.5"
 manifest_format = "2.0"
-project_hash = "c3b90feecc2a59f02712df6921ac7b9538719543"
+project_hash = "ea4aa617acb64ed7a84cf805eb3c88beae5cdeae"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -361,12 +445,6 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
-[[deps.RadiiPolynomial]]
-deps = ["IntervalArithmetic", "LinearAlgebra", "Printf", "Reexport", "SparseArrays"]
-git-tree-sha1 = "8442e84088a316034b2b9d8128d6af0ac4ab4fad"
-uuid = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
-version = "0.8.13"
-
 [[deps.Random]]
 deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
@@ -475,10 +553,20 @@ version = "17.4.0+2"
 # ╠═9099f41e-6239-4f7f-a3ec-82e7d4787f8f
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╟─45e10c91-f161-43a5-9c9e-5b4dca6a8e53
-# ╟─916f5d37-2bde-4a35-923a-2ff9e606371d
+# ╟─a6e349ff-ba01-48c4-91a8-5400faa05346
 # ╟─d01c5817-c4b6-4502-81f6-51ae5715117b
 # ╟─02939955-c9aa-4152-8e08-f31e1e0c0e9c
+# ╠═773d5d67-2819-4225-add4-f7913fd6d296
+# ╠═257d92b2-ccc4-4351-b3ac-ff53f6f2d54d
+# ╠═0db57db5-c43a-451a-9ebb-eccd799514ef
+# ╠═6339a6ca-985b-4cc0-891f-72b943b5b812
+# ╠═ad19ec24-3779-453d-9315-ce70db1b9b4e
+# ╠═ab8f264a-c1a4-40d5-a38c-dc1a5ef398a6
+# ╠═c308fcbf-d094-4f5b-9cb5-23c17a6c6b73
 # ╟─bc052916-db0e-43a2-bbb0-76b917d6f638
 # ╟─3686e5b2-daac-470d-b9e3-4bd5706e5894
+# ╠═a75b3d18-e03e-4fc6-a5e0-0c03579e53a9
+# ╠═eb4abb7a-9605-4099-ba30-716af7e2d173
+# ╠═cdcdea86-7463-47d2-9416-930f816caad5
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

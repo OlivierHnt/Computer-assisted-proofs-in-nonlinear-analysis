@@ -66,7 +66,7 @@ div.banner h1 {
     /* background: #FF99CC; */
     background-color: #AEE0E5; /* #00CCCC */ /* #B0E0E6 */
     box-shadow: 20px 20px 0px #FFDAB9;
-    transform: skewX(-15deg);
+    /* transform: skewX(-15deg); */
     padding: 0.2em 0.5em;
     margin: 0px 10px;
     border-radius: 0.4em;
