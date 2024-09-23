@@ -1,6 +1,13 @@
 ### A Pluto.jl notebook ###
 # v0.19.46
 
+#> [frontmatter]
+#> homework_number = 1
+#> order = 4
+#> title = "2D manifold"
+#> tags = ["module5", "homeworks"]
+#> layout = "layout.jlhtml"
+
 using Markdown
 using InteractiveUtils
 
