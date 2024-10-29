@@ -4,7 +4,7 @@
 #> [frontmatter]
 #> homework_number = 2
 #> order = 2
-#> title = "Cubic root"
+#> title = "Radius of convergence"
 #> tags = ["module2", "homeworks"]
 #> layout = "layout.jlhtml"
 
