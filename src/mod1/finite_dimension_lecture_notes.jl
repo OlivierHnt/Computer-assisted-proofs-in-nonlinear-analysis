@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.1
 
 #> [frontmatter]
 #> chapter = 1
@@ -78,25 +78,26 @@ end
 
 # ╔═╡ 1d9286fa-647a-4743-806f-9cea5aab6be1
 md"""
-As values of $\mu$ increase, the dynamics seem increasingly more complex.
-Such behaviour result from a cascade of [period doubling bifurcations](https://en.wikipedia.org/wiki/Period-doubling_bifurcation) eventually leading to chaotic dynamics.
-A celebrated result for discrete dynamical systems is that a period 3 orbits implies chaos.
+As $\mu$ increases, the dynamics become progressively more complex.
+This behaviour arises from a cascade of [period doubling bifurcations](https://en.wikipedia.org/wiki/Period-doubling_bifurcation), ultimately leading to [chaos](https://en.wikipedia.org/wiki/Chaos_theory).
+A well-known result for discrete dynamical systems states that the existence of a period-3 orbit implies chaos.
 """
 
 # ╔═╡ 1e56532e-9886-4a41-9ba0-1a619a85e014
 md"""
 !!! theorem "Theorem"
 	Let $f : [0,1] \to [0,1]$ be continuous, and consider the dynamical system defined by $x_{n+1} = f(x_n)$.
-	If there exists an orbit of period 3, i.e. $x_0$ in $[0,1]$ such that $x_0 \ne x_1 \ne x_2$ and $x_3 = x_0$, then the system is chaotic.
+	If there exists an orbit of period 3, i.e. $x_0 \in [0,1]$ such that $x_0 \ne x_1 \ne x_2$ and $x_3 = x_0$, then the system is chaotic.
 	In particular, there exist orbits of any period.[^Sha64][^LY75]
 """
 
 # ╔═╡ 8d6c631f-832a-48a9-891f-650f53a0ac6c
 md"""
-Let us fix a value of $\mu$ for which the dynamics seems complicated, say $\mu = 3.9$.
-Our goal will be to prove the existence of a period 3 orbit, by first finding numerically an approximate period 3 orbit, and then proving a posteriori the existence of a true period 3 orbit nearby.
+Let us fix a value of $\mu$ for which the dynamics seem complicated, say $\mu = 3.9$.
+Our goal is to demonstrate the existence of a period-3 orbit.
+We will begin by numerically approximating such an orbit and then rigorously establish the existence of a true period-3 orbit nearby.
 
-There are several ways to prove the existence of a period 3 orbit for this example (with and without computer assistance), but the ideas we are going to present and use will generalize to more complicated infinite dimensional problems.
+While there are various methods to prove the existence of a period-3 orbit (both with and without computer assistance), the approach we present will extend naturally to more challenging infinite-dimensional problems.
 """
 
 # ╔═╡ 429e5261-d7d0-47a3-94b5-8e7905a5bd53
@@ -109,8 +110,8 @@ Given a problem and an approximate solution $\bar{x}$, our goal is to define a f
 -  $T$ is a contraction on a small neighborhood of $\bar{x}$.
 
 The specific form of $T$ may vary depending on the nature of the problem, but we can outline a general strategy for constructing such an operator.
-We provide sufficient conditions that can be verified in practice to demonstrate that an operator $T$ is contracting on a small neighborhood of $\bar{x}$.
-Even though we only deal with finite dimentional problems in this first module, we already state these conditions in a general [Banach space](https://en.wikipedia.org/wiki/Banach_space), as they will also be heavily used in the next modules.
+First, we provide sufficient conditions that can be verified in practice to demonstrate that an operator $T$ is contracting on a small neighborhood of $\bar{x}$.
+Although this first module focuses on finite-dimentional problems, we state these conditions in the more general setting of a [Banach space](https://en.wikipedia.org/wiki/Banach_space), as they will play an important role in the next modules.
 """
 
 # ╔═╡ a801e2c7-c907-40d2-9976-bba19c590b2b
@@ -126,73 +127,75 @@ md"""
 	\end{align}
 	```
 
-	If there exists $r_0 > 0$ such that
+	If there exists $r > 0$ such that
 
-	$\begin{align}
-	Y + \int_0^{r_0} Z(s) \, ds &\le r_0, \\
-	Z(r_0) &< 1,
-	\end{align}$
+	```math
+	\begin{align}
+	Y + \int_0^r Z(s) \, ds &\le r, \\
+	Z(r) &< 1,
+	\end{align}
+	```
 
-	then $T$ has a unique fixed point $x_0$ such that $\| x_0 - \bar{x} \| \le r_0$.
+	then $T$ has a unique fixed point $\tilde{x}$ such that $\| \tilde{x} - \bar{x} \| \le r$.
 """
 
 # ╔═╡ 6caaf267-3015-4a66-975f-ec1c3a6f86f8
 md"""
 !!! note "Remarks"
-	- The bound $Z$ is actually only needed locally, i.e. we only need $Z(s)$ for $s \le r_0$.
-	  Therefore, one can fix a priori some $r_* > 0$, and weaken the assumption by only asking for $Z$ to be defined on $[0, r_*]$ and to satisfy $\| DT(x) \| \le Z(\| x-\bar{x} \|)$ for all $x$ in $\mathcal{X}$ such that $\| x-\bar{x} \| \le r_*$.
-	  Of course, we are then only allowed to consider $r \in (0, r_*]$.
-	- In practice, studying carefully how $\| DT(x) \|$ depends on $\| x-\bar{x} \|$ allows us to get better bounds.
-	  However, we can sometimes get away with cruder estimates.
-	  That is, we derive a constant $Z_*$ such that $\| DT(x) \| \le Z_*$ for all $x \in \mathcal{X}$ such that $\| x-\bar{x} \| \le r_*$, and then use $Z(s) = Z_*$ for all $s \le r_*$.
-	  The conditions on $r_0$ then simplify, and, if $Z_* < 1$, we can take any $r_0 \ge \frac{Y}{1-Z_*}$.
+	- The bound $Z$ is actually only needed locally, i.e. we only need $Z(s)$ for $s \le r$.
+	  Therefore, one can fix a priori some $R > 0$, and weaken the assumption by only asking for $Z$ to be defined on $[0, R]$ and to satisfy $\| DT(x) \| \le Z(\| x-\bar{x} \|)$ for all $x \in \mathcal{X}$ such that $\| x-\bar{x} \| \le R$.
+	  Of course, we are then only allowed to consider $r \in (0, R]$.
+	- In practice, studying carefully how $\| DT(x) \|$ depends on $\| x-\bar{x} \|$ helps us to get better bounds.
+	  However, we can sometimes get away with coarser estimates.
+	  Specifically, we derive a constant $Z_*$ such that $\| DT(x) \| \le Z_*$ for all $x \in \mathcal{X}$ such that $\| x-\bar{x} \| \le R$, and then use $Z(s) = Z_*$ for all $s \in [0, R]$.
+	  The conditions on $r$ then simplify, and, if $Z_* < 1$, we can take any $r \ge \frac{Y}{1-Z_*}$.
 """
 
 # ╔═╡ 77380230-67f2-4794-bb51-39ceeac7bef1
 md"""
-For a dynamical system $x_{n+1} = f(x_n)$, a natural fixed-point operator for period 3 orbits is given by $T(x) = f^3(x)$, i.e. $f$ composed with itself three times.
-However, such a $T$ has no reason to be contracting.
+For a dynamical system $x_{n+1} = f(x_n)$, a natural fixed-point operator for period-3 orbits is given by $T(x) \overset{\text{def}}{=} f^3(x)$, which represents $f$ composed with itself three times.
+However, in general such a $T$ has no reason to be contracting.
 
 To develop a more general procedure for constructing a fixed-point problem, one can start by finding a map $F$ whose isolated zeros are solutions to our problem.
-Given an approximate solution $\bar{x}$, one can consider the Newton-like operator $T(x) = x - DF(\bar{x})^{-1} F(x)$.
+Given an approximate solution $\bar{x}$, one can consider the Newton-like operator $T(x) \overset{\text{def}}{=} x - DF(\bar{x})^{-1} F(x)$.
 This operator should be contracting in a neighborhood of $\bar{x}$, as $DT(\bar{x}) = 0$.
 
-For finite dimensional problems of moderate size, computing the inverse of $DF(\bar{x})$ is feasible.
-However, in infinite dimensional problems, $DF(\bar{x})^{-1}$ may become challenging to work with.
-To address this, one often considers an approximate inverse $A \approx DF(\bar{x})^{-1}$ and the fixed-point operator $T(x) = x - AF(x)$.
-We state all following results in this context, for an $A$ which is not specified and could actually (but does not have to) be $DF(\bar{x})^{-1}$.
+For finite-dimensional problems of moderate size, computing the inverse of $DF(\bar{x})$ is possible.
+However, in infinite-dimensional problems, working with $DF(\bar{x})^{-1}$ can be challenging.
+To address this, we often consider an approximate inverse $A \approx DF(\bar{x})^{-1}$ and define the fixed-point operator $T(x) \overset{\text{def}}{=} x - AF(x)$.
+In the following results, we will operate under this framework, where $A$ is not specified and could be $DF(\bar{x})^{-1}$ or another suitable approximation.
 """
 
 # ╔═╡ 08dab1b4-c78d-4e85-89b6-cf9b485030e0
 md"""
 !!! corollary "Corollary (Newton-Kantorovich)"
-	Let $\mathcal{X}$ and $\mathcal{Y}$ be two Banach spaces, $\bar{x} \in \mathcal{X}$, $F : \mathcal{X} \to \mathcal{Y}$ a continuously differentiable map, $A : \mathcal{Y} \to \mathcal{X}$ an injective linear map, and $r_* > 0$.
+	Let $\mathcal{X}$ and $\mathcal{Y}$ be two Banach spaces, $\bar{x} \in \mathcal{X}$, $F : \mathcal{X} \to \mathcal{Y}$ a continuously differentiable map, $A : \mathcal{Y} \to \mathcal{X}$ am injective linear map, and $R > 0$.
 	Assume that there exist constants $Y$, $Z_1$ and $Z_2$ such that
 
 	```math
 	\begin{align}
 	\| AF(\bar{x}) \| &\le Y, \\
 	\| I-ADF(\bar{x}) \| &\le Z_1, \\
-	\| A(DF(x)-DF(\bar{x})) \| &\le Z_2 \| x-\bar{x} \|, \qquad \forall x \in \mathcal{X} \text{ such that } \| x-\bar{x} \| \le r_*.
+	\| A(DF(x)-DF(\bar{x})) \| &\le Z_2 \| x-\bar{x} \|, \qquad \forall x \in \mathcal{X} \text{ such that } \| x-\bar{x} \| \le R.
 	\end{align}
 	```
 
-	If there exists $r_0 \in (0,r_*]$ such that
+	If there exists $r \in (0,R]$ such that
 
 	```math
 	\begin{align}
-	Y + Z_1 r_0 + \frac{1}{2} Z_2 r_0^2 &\le r_0, \\
-	Z_1 + Z_2 r_0 &< 1,
+	Y + Z_1 r + \frac{1}{2} Z_2 r^2 &\le r, \\
+	Z_1 + Z_2 r &< 1,
 	\end{align}
 	```
 
-	then $F$ has a unique zero $x_0$ such that $\| x_0 - \bar{x} \| \le r_0$.
+	then $F$ has a unique zero $\tilde{x}$ such that $\| \tilde{x} - \bar{x} \| \le r$.
 """
 
 # ╔═╡ 3dc209e6-d7c0-464b-a477-0c46ede9483e
 md"""
 This corollary is a simplified version of the [Newton-Kantorovich Theorem](https://en.wikipedia.org/wiki/Kantorovich_theorem) [^Ort68].
-Many (slight) variations of this result appear throughout the literature and are frequently applied in CAPs (see for instance [^BL15] [^NPW19] and the references therein).
+Variations of this result can be found throughout the literature and are commonly used in computer-assisted proofs (CAPs) (see e.g. [^BL15] [^NPW19] and the references therein).
 """
 
 # ╔═╡ f0d6ab5b-13cf-4408-aaae-93f959ce29c4
@@ -200,12 +203,12 @@ md"## Interval arithmetic"
 
 # ╔═╡ 24ddc2c5-7976-4c67-8525-f6bb5d2e04a5
 md"""
-When we want to use the contraction mapping theorem with $\bar{x}$ being an approximate solution obtained using the computer, we also need to use the computer to evaluate quantities to obtain the bounds $Y$ and $Z$.
-However, these computations typically rely on floating-point arithmetic, which introduces rounding errors.
-In particular, if we set $Y = \| T(\bar{x}) -\bar{x} \|$ on the computer, we cannot be certain that $Y$ actually satifies the assumption of the Newton-Kantorovich theorem.
+When we want to apply the contraction mapping theorem with $\bar{x}$ as an approximate solution obtained using the computer, we also need to compute values for the bounds $Y$ and $Z$.
+However, these calculations typically rely on floating-point arithmetic, which introduces rounding errors.
+For instance, if we execute `Y = norm(A * F(x̄))` on the computer, we cannot be certain that $Y$ is an upper bound for $\|A F(\bar{x})\|$.
 
-[Interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic) provides a way to control rounding errors and obtain guaranteed results from computer calculations.
-Here, we only give a brief description of interval arithmetic; refer to [^Moo79] [^Tuc11] for more detailed discussions.
+[Interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic) provides a robust method to control rounding errors and ensuring guaranteed results from computer calculations.
+In this section, we offer a brief description of interval arithmetic; for more detailed discussions, please refer to [^Moo79] and [^Tuc11].
 """
 
 # ╔═╡ 3b123092-1241-4a2a-bb61-36c7f68a0b35
@@ -213,21 +216,22 @@ md"### Overview"
 
 # ╔═╡ 66ca51ad-0f2e-4f3c-8dd0-e66649b224d9
 md"""
-When using interval arithmetic, we represent any real number by an interval, whose end-points are floating-point numbers.
-More precisely, for $a \in \mathbb{R}$, we consider the interval $[\underline{a}, \overline{a}]$ where $\underline{a}, \overline{a}$ are floating-point numbers satisfying $\underline{a} \le a \le \overline{a}$.
-We give up the hope of representing numbers exactly, but we recover guaranteed information: the real number $a$ is contained in the interval stored in the computer.
+The central concept of interval arithmetic is to represent any real number by an interval, whose endpoints are floating-point numbers.
+More precisely, for $a \in \mathbb{R}$, we define the interval $[\underline{a}, \overline{a}]$ where $\underline{a}, \overline{a}$ are floating-point numbers satisfying $\underline{a} \le a \le \overline{a}$.
+While we give up the hope of representing numbers exactly, we recover guaranteed information: the real number $a$ is contained within the interval stored in the computer.
 
-The rules of interval arithmetic then ensure that this property is preserved when doing arithmetic operations.
-For instance, consider two intervals `a` and `b` of the form $[\underline{a}, \overline{a}]$ and $[\underline{b}, \overline{b}]$, containing the reals numbers $a$ and $b$, respectively.
-When we perform $c = a + b`, the resulting interval $[\underline{c},\overline{c}]$ for `c` is computed as follows.
-For $\underline{c}$, we take $\underline{a}+\underline{b}$ **rounded downward**, and for $\overline{c}$ we take $\overline{a}+\overline{b}$ **rounded upward**.
-In particular, the real number $c = a + b$ is contained in the interval `c`.
+The rules of interval arithmetic ensure that this containment property is preserved for arithmetic operations.
+For instance, consider two intervals $[a]$ and $[b]$ of the form $[\underline{a}, \overline{a}]$ and $[\underline{b}, \overline{b}]$, which enclose the reals numbers $a$ and $b$ respectively.
+When we perform the operation $[c] = [a] + [b]$, the resulting interval $[c] = [\underline{c}, \overline{c}]$ is computed as follows:
+- for $\underline{c}$, we take $\underline{a} + \underline{b}$ **rounded downward**, and
+- for $\overline{c}$, we take $\overline{a}+\overline{b}$ **rounded upward**.
+In particular, the real number $c = a + b$ is contained within the interval $[c]$.
 
-Similarly, if the variable `c` is an interval $[\underline{c}, \overline{c}]$, and we compute `d = exp(c)`, we have that `d` contains $\exp(c)$.
+Similarly, if $[c]$ is an interval $[\underline{c}, \overline{c}]$ and we compute $[d] = e^{[c]}$, the resulting interval $[d]$ contains $e^c$.
 
-We use the Julia library [IntervalArithmetic](https://github.com/JuliaIntervals/IntervalArithmetic.jl) in this course, but there are many other interval arithmetic librairies in different languages (e.g. [Intlab](https://www.tuhh.de/ti3/rump/intlab/) for Matlab).
-Note that IntervalArithmetic is automatically available when using [RadiiPolynomial](https://github.com/OlivierHnt/RadiiPolynomial.jl).
-Usual arithmetic operations, as well as implementations of elementary functions (e.g. `exp`, `log`, `cos`, etc.) complying with these rules are provided in IntervalArithmetic.
+In this course, we use the Julia library [IntervalArithmetic](https://github.com/JuliaIntervals/IntervalArithmetic.jl), though many other interval arithmetic libraries are available in different programming languages.
+Note that IntervalArithmetic is automatically included when using [RadiiPolynomial](https://github.com/OlivierHnt/RadiiPolynomial.jl).
+This library provides standard arithmetic operations as well as implementations of elementary functions (such as `exp`, `log`, `cos`, etc.) that comply with the rules of interval arithmetic.
 """
 
 # ╔═╡ f8eab26f-c893-4d2e-b4e8-6b59f33cbc9c
@@ -239,8 +243,9 @@ cos(exp(sqrt(a)))
 # ╔═╡ 97fadca1-fcf9-46b8-aa07-c615ca0deb7f
 md"""
 !!! note "Remarks"
-	Even when doing computer-assisted proofs, one should not use interval arithmetics for every computations.
-	Typically, when trying to find an approximate solution $\bar{x}$, floating-point calculations are perfectly fine, and it is only when evaluating the bounds in the Newton-Kantorovich theorem that interval arithmetic must be used.
+	Even when doing computer-assisted proofs, it’s not necessary to use interval arithmetic for every computation.
+	For finding an approximate solution $\bar{x}$, floating-point calculations are perfectly fine.
+	It’s only when computing the bounds for the contraction theorem, and verifying the radii polynomial inequalities, that interval arithmetic must be used.
 """
 
 # ╔═╡ 0bf1cce8-6caf-40d5-93a6-b495b764d943
@@ -248,10 +253,10 @@ md"### Beware of typed-in floating-point numbers"
 
 # ╔═╡ c09b05d4-0325-486a-a433-6b32fbb7dfc7
 md"""
-When a command like `x = 0.1` is executed in Julia, the computer associates to the variable `x` a floating-point number: the floating-point number which is the closest to $1/10$.
-Since $1/10$ does not have a finite representation in base $2$, the value stored in `x` is already not equal to the typed-in number `0.1`.
-It turns out to be slightly larger than $1/10$, but it could very well have been the other way around (see what happens for `x = 0.3`).
-See also this [webpage](https://0.30000000000000004.com) on the topic.
+When you execute a command like `x = 0.1` in Julia, the variable `x` is assigned the closest floating-point number approximating $1/10$.
+Since $1/10$ cannot be represented exactly in base 2, the value stored in `x` is not precisely equal to the typed-in number `0.1`.
+In fact, it turns out to be slightly larger than $1/10$, but it could just as easily have been smaller (as seen with `x = 0.3`).
+For more information on this topic, you can refer to this [webpage](https://0.30000000000000004.com).
 """
 
 # ╔═╡ 2d68d26d-6e10-407f-8227-515ddadd9599
@@ -261,7 +266,7 @@ x = 0.1
 x > 1//10
 
 # ╔═╡ c44fd902-7655-43b5-82cc-53c2ecc4f77b
-ix = I"0.1" #interval(1)/interval(10)
+ix = I"0.1" # interval(1)/interval(10)
 
 # ╔═╡ 4c15bb79-2591-4f2a-9243-ff811de70df7
 in_interval(1//10, ix)
@@ -299,7 +304,7 @@ RadiiPolynomial = "~0.8.13"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.5"
+julia_version = "1.10.6"
 manifest_format = "2.0"
 project_hash = "a064359e34f654ceb201746cdb4cbc9e20b50f00"
 

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.1
 
 #> [frontmatter]
 #> homework_number = 3
@@ -11,24 +11,11 @@
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
-end
-
 # ╔═╡ 70740a99-ec98-45c8-ba8f-06d63dd396b0
 using PlutoTeachingTools # package for the notebook
 
 # ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
 using LinearAlgebra
-
-# ╔═╡ f0c2d1b7-8dd4-44d0-b962-bb8fe166b496
-using RadiiPolynomial
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""
@@ -44,23 +31,23 @@ main {
 
 # ╔═╡ c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
 md"""
-**1.** Consider a matrix $M$, and an approximate eigenpair $(\bar{\lambda}, \bar{u})$ of $M$.
-The goal of this exercise is to validate $(\bar{\lambda}, \bar{u})$, i.e. to prove that there exists an exact eigenpair $(\lambda, u)$ nearby.
-Assuming the corresponding exact eigenvalue $\lambda$ is simple, define a suitable $F = 0$ problem, and derive the bounds needed to apply the Newton-Kantorovich theorem in that context.
+**1.** Consider a matrix $M$, and an approximate eigenpair $(\bar{\lambda}, \bar{v})$ of $M$.
+The goal of this exercise is to validate $(\bar{\lambda}, \bar{v})$, i.e. to prove that there exists an exact eigenpair $(\tilde{\lambda}, \tilde{v})$ nearby.
+Assuming that the corresponding exact eigenvalue $\tilde{\lambda}$ is simple, define a suitable $F = 0$ problem, and derive the bounds needed to apply the Newton-Kantorovich theorem in that context.
 """
 
 # ╔═╡ 7748e568-afc9-43cc-b2bd-5a231d86f455
 Foldable("Hint",
 md"""
-The "natural" zero-finding problem is $G(\lambda, u) \overset{\text{def}}{=} (M - \lambda I)u$, but it has one too many unknowns.
+The "natural" zero-finding problem is $G(\lambda, v) \overset{\text{def}}{=} (M - \lambda I)v$, but it has one too many unknowns.
 This is consistent with the fact that zeros of $G$ are not isolated (one can always rescale the eigenvector).
 Therefore, a suitable zero-finding problem needs to incorporate a normalization condition, for instance:
 
 ```math
-F(\lambda,u) \overset{\text{def}}{=}
+F(\lambda, v) \overset{\text{def}}{=}
 \begin{pmatrix}
-\langle u, \bar{u} \rangle - 1 \\
-(M - \lambda I)u
+\langle v, \bar{v} \rangle - 1 \\
+(M - \lambda I)v
 \end{pmatrix}.
 ```
 """
@@ -111,123 +98,23 @@ W = wilkinson(N)
 # ╔═╡ 3509fe96-4a83-461f-8fed-23343d74dc8c
 eigenvalues, eigenvectors = eigen(W)
 
-# ╔═╡ 2e933681-3e48-4d27-8e78-3e9181ac8b46
-hide_everything_below =
-	html"""
-	<style>
-	pluto-cell.hide_everything_below ~ pluto-cell {
-		display: none;
-	}
-	</style>
-	
-	<script>
-	const cell = currentScript.closest("pluto-cell")
-	
-	const setclass = () => {
-		console.log("change!")
-		cell.classList.toggle("hide_everything_below", true)
-	}
-	setclass()
-	const observer = new MutationObserver(setclass)
-	
-	observer.observe(cell, {
-		subtree: false,
-		attributeFilter: ["class"],
-	})
-	
-	invalidation.then(() => {
-		observer.disconnect()
-		cell.classList.toggle("hide_everything_below", false)
-	})
-	
-	</script>
-	""";
-
-# ╔═╡ c31920c6-c4b9-4115-b580-6889b35d1fff
-begin
-    b = @bind reveal html"<input type=checkbox>"
-	md"""
-	#### Show the solution $b
-	"""
-end
-
-# ╔═╡ 97a5bec8-b6c7-4f03-8eb5-3f8038668954
-if !(reveal === true)
-	hide_everything_below
-end
-
-# ╔═╡ d0900787-8a4e-428a-879c-522d83ebddfb
-md"""
-**1.**
-"""
-
-# ╔═╡ 46182c83-3585-4f68-a259-35a6cfac153d
-function F(X, M, u0)
-	λ = X[1]
-	u = X[2:end]
-	return [sum(u .* conj(u0)) - 1;
-		    M*u - λ*u]
-end
-
-# ╔═╡ 541aa302-e6d9-4e9f-b9b4-719ddbd61e63
-function DF(X, M, u0)
-	λ = X[1]
-	u = X[2:end]
-	n = length(X) - 1
-	mat = zeros(eltype(X), n+1, n+1)
-	mat[2:end,1] = -u
-	mat[1,2:end] = u0'
-	mat[2:end,2:end] = M - λ*I
-	return mat
-end
-
-# ╔═╡ 839e8550-a261-4712-8c84-555a51027b71
-function validate_eigenpair(λ, u, M)
-	X = [λ ; u]
-	u0 = u
-	iA = interval(inv(DF(X, M, u0)))
-	iX = interval(X)
-	Y = norm(iA * F(iX, M, u0), 1)
-	Z₁ = opnorm(I - iA * DF(iX, M, u0), 1)
-	Z₂ = opnorm(iA, 1)
-	return interval_of_existence(Y, Z₁, Z₂, Inf)
-end
-
-# ╔═╡ b4fa6058-c9d8-42c5-b681-7a0544c6e3da
-md"""
-**2.**
-"""
-
-# ╔═╡ a1acd6a1-cd2e-4039-8529-183f908bdfae
-begin
-	radii = interval(zeros(2*N+1))
-	for n = 1:2*N+1
-		λ0 = eigenvalues[n]
-		u0 = eigenvectors[:,n]
-		radii[n] = validate_eigenpair(λ0, u0, W)
-		println("λ̄ = ", λ0, ", validation radii: ", bounds(radii[n]))
-	end
-end
-
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
-RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
 PlutoTeachingTools = "~0.2.15"
-RadiiPolynomial = "~0.8.13"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.5"
+julia_version = "1.10.6"
 manifest_format = "2.0"
-project_hash = "5cbcd9c3886f5990007357c5249b3600ed2e62a4"
+project_hash = "c92e9176b4b4905ecf65fbdea3395a3777b89a7e"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -244,12 +131,6 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
-
-[[deps.CRlibm_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "e329286945d0cfc04456972ea732551869af1cfc"
-uuid = "4e9b3aee-d8a1-5a3d-ad8b-7d824db253f0"
-version = "1.0.1+0"
 
 [[deps.CodeTracking]]
 deps = ["InteractiveUtils", "UUIDs"]
@@ -316,32 +197,6 @@ version = "0.2.5"
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
-
-[[deps.IntervalArithmetic]]
-deps = ["CRlibm_jll", "MacroTools", "RoundingEmulator"]
-git-tree-sha1 = "fe30dec78e68f27fc416901629c6e24e9d5f057b"
-uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-version = "0.22.16"
-
-    [deps.IntervalArithmetic.extensions]
-    IntervalArithmeticDiffRulesExt = "DiffRules"
-    IntervalArithmeticForwardDiffExt = "ForwardDiff"
-    IntervalArithmeticIntervalSetsExt = "IntervalSets"
-    IntervalArithmeticLinearAlgebraExt = "LinearAlgebra"
-    IntervalArithmeticRecipesBaseExt = "RecipesBase"
-
-    [deps.IntervalArithmetic.weakdeps]
-    DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
-    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
-    IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
-    LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-
-[[deps.JLLWrappers]]
-deps = ["Artifacts", "Preferences"]
-git-tree-sha1 = "f389674c99bfcde17dc57454011aa44d5a260a40"
-uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
-version = "1.6.0"
 
 [[deps.JSON]]
 deps = ["Dates", "Mmap", "Parsers", "Unicode"]
@@ -512,12 +367,6 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
-[[deps.RadiiPolynomial]]
-deps = ["IntervalArithmetic", "LinearAlgebra", "Printf", "Reexport", "SparseArrays"]
-git-tree-sha1 = "8442e84088a316034b2b9d8128d6af0ac4ab4fad"
-uuid = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
-version = "0.8.13"
-
 [[deps.Random]]
 deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
@@ -538,11 +387,6 @@ deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibG
 git-tree-sha1 = "7b7850bb94f75762d567834d7e9802fc22d62f9c"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
 version = "3.5.18"
-
-[[deps.RoundingEmulator]]
-git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
-uuid = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
-version = "0.2.1"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -632,15 +476,5 @@ version = "17.4.0+2"
 # ╠═fe0054f0-4fd5-489f-9fcb-3af086876699
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
 # ╠═3509fe96-4a83-461f-8fed-23343d74dc8c
-# ╟─2e933681-3e48-4d27-8e78-3e9181ac8b46
-# ╟─c31920c6-c4b9-4115-b580-6889b35d1fff
-# ╟─97a5bec8-b6c7-4f03-8eb5-3f8038668954
-# ╟─d0900787-8a4e-428a-879c-522d83ebddfb
-# ╠═46182c83-3585-4f68-a259-35a6cfac153d
-# ╠═541aa302-e6d9-4e9f-b9b4-719ddbd61e63
-# ╠═839e8550-a261-4712-8c84-555a51027b71
-# ╟─b4fa6058-c9d8-42c5-b681-7a0544c6e3da
-# ╠═f0c2d1b7-8dd4-44d0-b962-bb8fe166b496
-# ╠═a1acd6a1-cd2e-4039-8529-183f908bdfae
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.1
 
 #> [frontmatter]
 #> homework_number = 5
@@ -11,21 +11,8 @@
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
-end
-
 # ╔═╡ 9099f41e-6239-4f7f-a3ec-82e7d4787f8f
 using PlutoTeachingTools # package for the notebook
-
-# ╔═╡ bffff867-d9a0-4f7c-aa94-426003d9dde0
-using LinearAlgebra, IntervalArithmetic
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""
@@ -47,13 +34,19 @@ This strategy relies on the [Gershgorin circle theorem](https://en.wikipedia.org
 """
 
 # ╔═╡ 916f5d37-2bde-4a35-923a-2ff9e606371d
-Markdown.MD(Markdown.Admonition("tip", "Theorem", [md"For any matrix $A=\left(A_{i,j}\right)_{1\leq i,j\leq d}$, its spectrum $\sigma(A)$ is controlled as follows.
-
-$\begin{align}
-\sigma(A) \subset \bigcup_{i=1}^d D\left(A_{i,i},\, \sum_{j\neq i} \vert A_{i,j}\vert\right),
-\end{align}$
-
-where $D(z,r)$ denotes the closed disk of center $z$ and radius $r$ in the complex plane. Moreover, if $I \subset \{1,\ldots,d\}$ is such that $\bigcup_{i \in I} D\left(A_{i,i},\, \sum_{j \ne i} \vert A_{i,j} \vert\right)$ is disjoint from $\bigcup_{i \notin I} D\left(A_{i,i},\, \sum_{j \ne i} \vert A_{i,j} \vert\right)$, then $\bigcup_{i \in I} D\left(A_{i,i},\, \sum_{j \ne i} \vert A_{i,j} \vert\right)$ contains exactly $\vert I \vert$ eigenvalues."]))
+md"""
+!!! theorem "Theorem (Gershgorin)"
+	For any matrix $M = \left(M_{i,j}\right)_{1 \le i, j \le d}$, its spectrum $\sigma(M)$ satisfies
+	
+	```math
+	\begin{align}
+	\sigma(M) \subset \bigcup_{i=1}^d D\left( M_{i,i},\, \sum_{j \ne i} | M_{i,j} | \right),
+	\end{align}
+	```
+	
+	where $D(z,r)$ denotes the closed disk of center $z$ and radius $r$ in the complex plane.
+	Moreover, if $\mathscr{J} \subset \{1, \dots, d\}$ is such that $\bigcup_{i \in \mathscr{J}} D\left(M_{i,i},\, \sum_{j \ne i} | M_{i,j} |\right)$ is disjoint from $\bigcup_{i \notin \mathscr{J}} D\left(M_{i,i},\, \sum_{j \ne i} | M_{i,j} |\right)$, then $\bigcup_{i \in \mathscr{J}} D\left(M_{i,i},\, \sum_{j \ne i} | M_{i,j} |\right)$ contains exactly $| \mathscr{J} |$ eigenvalues.
+"""
 
 # ╔═╡ d01c5817-c4b6-4502-81f6-51ae5715117b
 md"""
@@ -78,158 +71,12 @@ md"""
 You do not need to numerically diagonalize all of $W_{1000}$: for most rows, the corresponding Gershgorin disk already lies in the left half of the complex plane.
 """)
 
-# ╔═╡ b9b3efbe-1f36-4d60-a5f1-c55f10ca3bae
-hide_everything_below =
-	html"""
-	<style>
-	pluto-cell.hide_everything_below ~ pluto-cell {
-		display: none;
-	}
-	</style>
-	
-	<script>
-	const cell = currentScript.closest("pluto-cell")
-	
-	const setclass = () => {
-		console.log("change!")
-		cell.classList.toggle("hide_everything_below", true)
-	}
-	setclass()
-	const observer = new MutationObserver(setclass)
-	
-	observer.observe(cell, {
-		subtree: false,
-		attributeFilter: ["class"],
-	})
-	
-	invalidation.then(() => {
-		observer.disconnect()
-		cell.classList.toggle("hide_everything_below", false)
-	})
-	
-	</script>
-	""";
-
-# ╔═╡ 8be0e6f2-c07a-4aa8-9ecd-c63143cc53a0
-begin
-    b = @bind reveal html"<input type=checkbox>"
-	md"""
-	#### Show the solution $b
-	"""
-end
-
-# ╔═╡ 35ecc852-2cd8-465c-b8a3-2f58a2749b43
-if !(reveal === true)
-	hide_everything_below
-end
-
-# ╔═╡ 3eef5dee-ca8c-4fec-92b4-37cadb65c3f9
-md"""
-**1.**
-"""
-
-# ╔═╡ 2b9c8b52-1c00-40a7-8744-785662cb7206
-function my_rigorous_inv(A)
-	B = inv(A)
-	δ = opnorm(I - interval(A)*interval(B), 1)
-	if sup(δ) < 1
-		r = δ/(1-δ) * opnorm(interval(B), 1)
-	else
-		println("Unable to rigorously invert")
-		r = NaN
-	end
-	return interval(B, sup(r)*ones(size(B)); format = :midpoint)
-end
-
-# ╔═╡ 816d5874-5766-4934-b853-119d5fc40378
-function gershgorin(M)
-	eigenvalues, P = eigen(M)
-	iP = interval(P)
-	iPinv = my_rigorous_inv(P)
-	M̃ = iPinv * M * iP
-	centers = mid.(diag(M̃))
-	temp = M̃
-	for n = 1:size(M,1)
-		temp[n,n] = 0
-	end
-	radii = sum(abs.(temp); dims=2) + radius.(diag(M̃))
-	return interval(centers, sup.(radii); format = :midpoint)
-end
-
-# ╔═╡ d6c566fe-2ba0-487b-b789-d383bc5d7b46
-function wilkinson(N)
-	M = zeros(2N+1, 2N+1)
-	for i = 1:2N+1
-		M[i,i] = abs(N - i + 1)
-		if i+1 ≤ 2N+1
-			M[i,i+1] = 1
-		end
-		if i-1 ≥ 1
-			M[i,i-1] = 1
-		end
-	end
-	return M
-end
-
-# ╔═╡ 5efb4716-32b3-4c28-8e3f-38c7ac7713a7
-N = 3
-
-# ╔═╡ b094ef52-1321-4a9a-a5b8-fe5121b5fd47
-spectrum = gershgorin(wilkinson(N))
-
-# ╔═╡ 7a50a962-2704-4b09-a098-e8e50beb032a
-function count_nb_neg_eig(spectrum)
-	nb_neg = sum(isstrictless.(spectrum, interval(0)))
-	nb_pos = sum(isstrictless.(interval(0), spectrum))
-	if nb_neg + nb_pos == length(spectrum)
-		println("We have proven that there is exactly ",nb_neg," negative eigenvalue(s)")
-	else
-		println("We have proven that there are at least ",nb_neg," negative eigenvalue(s) and at least ",nb_pos," positive eigenvalue(s)")
-	end
-end
-
-# ╔═╡ eaff3727-bb02-43ba-a4bd-fb6247694e4a
-count_nb_neg_eig(spectrum)
-
-# ╔═╡ 500d62c7-3151-4a0a-adf8-53e3adeb72c2
-md"""
-**2.**
-"""
-
-# ╔═╡ 7dda07fa-51fe-4222-8b33-ed2cd7c468e1
-function gershgorin_wilkinson_cheap(N, d)
-	Md = wilkinson(d)
-	eigenvalues, P = eigen(Md)
-	iPd = interval(Matrix(I(2*d+3)))
-	iPd[2:2*d+2,2:2*d+2] = interval.(P)
-	iPdinv = interval(Matrix(I(2*d+3)))
-	iPdinv[2:2*d+2,2:2*d+2] = my_rigorous_inv(P)
-	M̃ = interval.(wilkinson(N))
-	M̃[N-(d+1).+(1:2*d+3),N-(d+1).+(1:2*d+3)] = iPdinv * M̃[N-(d+1).+(1:2*d+3),N-(d+1).+(1:2*d+3)] * iPd
-	centers = mid.(diag(M̃))
-	temp = M̃
-	for n = 1:2*N+1
-		temp[n,n] = 0
-	end
-	radii = sum(abs.(temp); dims=2) + radius.(diag(M̃))
-	return interval(centers, sup.(radii); format = :midpoint)
-end
-
-# ╔═╡ d0e7f221-e4e6-4f2c-a7f7-0a41e27ad16e
-spectrum_approx = gershgorin_wilkinson_cheap(1000, 5)
-
-# ╔═╡ 41f4fd4e-4f5e-426e-9f25-62895ec0d945
-count_nb_neg_eig(spectrum_approx)
-
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-IntervalArithmetic = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
 
 [compat]
-IntervalArithmetic = "~0.22.16"
 PlutoTeachingTools = "~0.2.15"
 """
 
@@ -237,9 +84,9 @@ PlutoTeachingTools = "~0.2.15"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.5"
+julia_version = "1.10.6"
 manifest_format = "2.0"
-project_hash = "ea4aa617acb64ed7a84cf805eb3c88beae5cdeae"
+project_hash = "b873fd5571111b4c454c95ca5fa58b75bfb4ab46"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -256,12 +103,6 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
-
-[[deps.CRlibm_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "e329286945d0cfc04456972ea732551869af1cfc"
-uuid = "4e9b3aee-d8a1-5a3d-ad8b-7d824db253f0"
-version = "1.0.1+0"
 
 [[deps.CodeTracking]]
 deps = ["InteractiveUtils", "UUIDs"]
@@ -328,32 +169,6 @@ version = "0.2.5"
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
-
-[[deps.IntervalArithmetic]]
-deps = ["CRlibm_jll", "MacroTools", "RoundingEmulator"]
-git-tree-sha1 = "fe30dec78e68f27fc416901629c6e24e9d5f057b"
-uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-version = "0.22.16"
-
-    [deps.IntervalArithmetic.extensions]
-    IntervalArithmeticDiffRulesExt = "DiffRules"
-    IntervalArithmeticForwardDiffExt = "ForwardDiff"
-    IntervalArithmeticIntervalSetsExt = "IntervalSets"
-    IntervalArithmeticLinearAlgebraExt = "LinearAlgebra"
-    IntervalArithmeticRecipesBaseExt = "RecipesBase"
-
-    [deps.IntervalArithmetic.weakdeps]
-    DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
-    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
-    IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
-    LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-
-[[deps.JLLWrappers]]
-deps = ["Artifacts", "Preferences"]
-git-tree-sha1 = "f389674c99bfcde17dc57454011aa44d5a260a40"
-uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
-version = "1.6.0"
 
 [[deps.JSON]]
 deps = ["Dates", "Mmap", "Parsers", "Unicode"]
@@ -545,11 +360,6 @@ git-tree-sha1 = "7b7850bb94f75762d567834d7e9802fc22d62f9c"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
 version = "3.5.18"
 
-[[deps.RoundingEmulator]]
-git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
-uuid = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
-version = "0.2.1"
-
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 version = "0.7.0"
@@ -636,21 +446,5 @@ version = "17.4.0+2"
 # ╟─02939955-c9aa-4152-8e08-f31e1e0c0e9c
 # ╟─bc052916-db0e-43a2-bbb0-76b917d6f638
 # ╟─3686e5b2-daac-470d-b9e3-4bd5706e5894
-# ╟─b9b3efbe-1f36-4d60-a5f1-c55f10ca3bae
-# ╟─8be0e6f2-c07a-4aa8-9ecd-c63143cc53a0
-# ╟─35ecc852-2cd8-465c-b8a3-2f58a2749b43
-# ╟─3eef5dee-ca8c-4fec-92b4-37cadb65c3f9
-# ╠═bffff867-d9a0-4f7c-aa94-426003d9dde0
-# ╠═816d5874-5766-4934-b853-119d5fc40378
-# ╠═2b9c8b52-1c00-40a7-8744-785662cb7206
-# ╠═d6c566fe-2ba0-487b-b789-d383bc5d7b46
-# ╠═5efb4716-32b3-4c28-8e3f-38c7ac7713a7
-# ╠═b094ef52-1321-4a9a-a5b8-fe5121b5fd47
-# ╠═7a50a962-2704-4b09-a098-e8e50beb032a
-# ╠═eaff3727-bb02-43ba-a4bd-fb6247694e4a
-# ╟─500d62c7-3151-4a0a-adf8-53e3adeb72c2
-# ╠═7dda07fa-51fe-4222-8b33-ed2cd7c468e1
-# ╠═d0e7f221-e4e6-4f2c-a7f7-0a41e27ad16e
-# ╠═41f4fd4e-4f5e-426e-9f25-62895ec0d945
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

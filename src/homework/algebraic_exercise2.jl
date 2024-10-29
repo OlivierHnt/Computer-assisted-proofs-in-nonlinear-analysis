@@ -1,14 +1,18 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.1
+
+#> [frontmatter]
+#> homework_number = 2
+#> order = 2
+#> title = "Cubic root"
+#> tags = ["module2", "homeworks"]
+#> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 70740a99-ec98-45c8-ba8f-06d63dd396b0
+# ╔═╡ 71e175af-407e-4a0e-9930-0e6d208fa625
 using PlutoTeachingTools # package for the notebook
-
-# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using LinearAlgebra, RadiiPolynomial
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""
@@ -22,132 +26,53 @@ main {
 </style>
 """
 
-# ╔═╡ c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
+# ╔═╡ 1a0e2f9c-dd27-4141-97fc-a4ebddb61cb8
 md"""
-**1.** Consider a matrix $M$, and an approximate eigenpair $(\bar{\lambda},\bar{u})$ of $M$. The goal of this exercise is to *capify* $(\bar{\lambda},\bar{u})$, i.e., to prove that there exists an exact eigenpair $(\lambda,u)$ nearby. Assuming the corresponding exact eigenvalue $\lambda$ is simple, define a suitable $F=0$ problem, and derive the bounds needed to apply the Newton-Kantorovich theorem in that context.
+For $\nu \ge 1$, consider the weighted sequence space
+
+```math
+\ell^1_{\nu, \mathbb{N}} \overset{\text{def}}{=} \left\{ a \in \mathbb{R}^\mathbb{N} \, : \, \| a \|_\nu \overset{\text{def}}{=} \sum_{n \ge 0} |a_n| \nu^n < \infty \right\}.
+```
 """
 
-# ╔═╡ 7748e568-afc9-43cc-b2bd-5a231d86f455
-Foldable("Hint",
-md"The *natural* zero finding problem is $G(\lambda,u) = (M-\lambda I)u$, but it has one too many unknowns. This is consistent with the fact that zeros of $G$ are not isolated (one can always rescale the eigenvector). Therefore, a suitable zero finding problem needs to incorporate a normalization condition, for instance:
-
-$\begin{align}
-F(\lambda,u) =
-\begin{pmatrix}
-\langle u,\bar{u} \rangle -1 \\
-(M-\lambda I)u
-\end{pmatrix}.
-\end{align}$
-"
-)
-
-# ╔═╡ 8e04cef7-d8ae-4284-98cc-61318e13e326
-function F(X, M, u0)
-	λ = X[1]
-	u = X[2:end]
-	return [sum(u .* conj(u0)) - 1;
-		    M*u - λ*u]
-end
-
-# ╔═╡ c26c7bf0-38d6-4990-879d-c6ca8bb29e20
-function DF(X, M, u0)
-	λ = X[1]
-	u = X[2:end]
-	n = length(X) - 1
-	mat = zeros(eltype(X), n+1, n+1)
-	mat[2:end,1] = -u
-	mat[1,2:end] = u0'
-	mat[2:end,2:end] = M - λ*I
-	return mat
-end
-
-# ╔═╡ 6052a4ee-333e-45f6-a7f4-9756f4357377
-function validate_eigenpair(λ, u, M)
-	X = [λ ; u]
-	u0 = u
-	iA = interval(inv(DF(X, M, u0)))
-	iX = interval(X)
-	Y = norm(iA * F(iX, M, u0), 1)
-	Z₁ = opnorm(I - iA * DF(iX, M, u0), 1)
-	Z₂ = opnorm(iA, 1)
-	return interval_of_existence(Y, Z₁, Z₂, Inf)
-end
-
-# ╔═╡ cab728f1-9ff5-4bdd-8101-5c39718c4d53
+# ╔═╡ 15be0e8a-408b-4db2-af7e-15261f54238e
 md"""
-**2.** For any positive integer $N$, the Wilkinson matrix $W_{N}$ is the following $(2N+1)\times(2N+1)$ tridiagonal matrix:
-
-$\begin{align}
-W_{N} =
-\begin{pmatrix}
-N & 1 & & & & & \\
-1 & N-1 & 1 & & & & \\
- & 1 & \ddots & \ddots & & & \\
- & & \ddots & 0 & \ddots & & \\
- & & & \ddots & \ddots & 1 & \\
- & & & & 1 & N-1 & 1 \\
- & & & & & 1 & N
-\end{pmatrix}
-\end{align}$
-
-We provide below approximate eigenvalues and eigenvectors of $W_3$. Rigorously enclose all eigenpairs of $W_3$.
+**1.** Show that $(\ell^1_{\nu, \mathbb{N}}, *)$ is a unital Banach algebra, where $*$ denotes the Cauchy product.
 """
 
-# ╔═╡ d61514c3-3b0e-4658-8b31-de9f9514a9c3
-function W(N)
-	M = zeros(2N+1, 2N+1)
-	for i = 1:2N+1
-		M[i,i] = abs(N - i + 1)
-		if i+1 ≤ 2N+1
-			M[i,i+1] = 1
-		end
-		if i-1 ≥ 1
-			M[i,i-1] = 1
-		end
-	end
-	return M
-end
+# ╔═╡ 4ea373ca-e44b-49cf-9e6c-74a5043dee79
+md"""
+**2.** Show that $\|M\|_{B(\ell^1_{\nu, \mathbb{N}})} = \max_{j \ge 0} \nu^{-j} \sum_{i \ge 0} |M_{i,j}| \nu^i$ for all $M \in B(\ell^1_{\nu, \mathbb{N}})$.
+"""
 
-# ╔═╡ 1bba510b-be86-44b0-a3c9-419b3b6ada37
-N = 3
+# ╔═╡ c3cf2193-105f-46da-8bbc-9a95082a805d
+md"""
+**3.** Find the inverse of $v(t) = 2 + t$ for all $t \in [-\nu, \nu]$ as a Taylor series.
+Take $\nu$ as large as you can.
+"""
 
-# ╔═╡ fe0054f0-4fd5-489f-9fcb-3af086876699
-W(N)
-
-# ╔═╡ 3509fe96-4a83-461f-8fed-23343d74dc8c
-eigenvalues, eigenvectors = eigen(W(N))
-
-# ╔═╡ 0efa6e4e-cd15-496e-b51a-9fefd8cf42d1
-begin
-	M = W(N)
-	radii = zeros(Interval{Float64}, 2*N+1)
-	for n = 1:2*N+1
-		λ0 = eigenvalues[n]
-		u0 = eigenvectors[:,n]
-		radii[n] = validate_eigenpair(λ0, u0, M)
-		println("λ̄ = ", λ0, ", validation radii: ", bounds(radii[n]))
-	end
-end
+# ╔═╡ 0746bcdf-dd75-4726-92dc-696ec0a510b1
+md"""
+**4.** Find the inverse of $v(t) = e^t$ for all $t \in [-\nu, \nu]$ as a Taylor series.
+Take $\nu$ as large as you can.
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
-RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
-PlutoTeachingTools = "~0.2.15"
-RadiiPolynomial = "~0.8.13"
+PlutoTeachingTools = "~0.3.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.5"
+julia_version = "1.10.6"
 manifest_format = "2.0"
-project_hash = "5cbcd9c3886f5990007357c5249b3600ed2e62a4"
+project_hash = "cd1e693ed5c336a13fe635f54c9a0cac09e8115c"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -164,12 +89,6 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
-
-[[deps.CRlibm_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "e329286945d0cfc04456972ea732551869af1cfc"
-uuid = "4e9b3aee-d8a1-5a3d-ad8b-7d824db253f0"
-version = "1.0.1+0"
 
 [[deps.CodeTracking]]
 deps = ["InteractiveUtils", "UUIDs"]
@@ -237,32 +156,6 @@ version = "0.2.5"
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
-[[deps.IntervalArithmetic]]
-deps = ["CRlibm_jll", "MacroTools", "RoundingEmulator"]
-git-tree-sha1 = "fe30dec78e68f27fc416901629c6e24e9d5f057b"
-uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-version = "0.22.16"
-
-    [deps.IntervalArithmetic.extensions]
-    IntervalArithmeticDiffRulesExt = "DiffRules"
-    IntervalArithmeticForwardDiffExt = "ForwardDiff"
-    IntervalArithmeticIntervalSetsExt = "IntervalSets"
-    IntervalArithmeticLinearAlgebraExt = "LinearAlgebra"
-    IntervalArithmeticRecipesBaseExt = "RecipesBase"
-
-    [deps.IntervalArithmetic.weakdeps]
-    DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
-    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
-    IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
-    LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-
-[[deps.JLLWrappers]]
-deps = ["Artifacts", "Preferences"]
-git-tree-sha1 = "f389674c99bfcde17dc57454011aa44d5a260a40"
-uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
-version = "1.6.0"
-
 [[deps.JSON]]
 deps = ["Dates", "Mmap", "Parsers", "Unicode"]
 git-tree-sha1 = "31e996f0a15c7b280ba9f76636b3ff9e2ae58c9a"
@@ -276,9 +169,9 @@ uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
 version = "0.9.36"
 
 [[deps.LaTeXStrings]]
-git-tree-sha1 = "50901ebc375ed41dbf8058da26f9de442febbbec"
+git-tree-sha1 = "dda21b8cbd6a6c40d9d02a73230f9d70fed6918c"
 uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
-version = "1.3.1"
+version = "1.4.0"
 
 [[deps.Latexify]]
 deps = ["Format", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "OrderedCollections", "Requires"]
@@ -332,9 +225,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.LoweredCodeUtils]]
 deps = ["JuliaInterpreter"]
-git-tree-sha1 = "c2b5e92eaf5101404a58ce9c6083d595472361d6"
+git-tree-sha1 = "260dc274c1bc2cb839e758588c63d9c8b5e639d1"
 uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "3.0.2"
+version = "3.0.5"
 
 [[deps.MIMEs]]
 git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
@@ -401,10 +294,10 @@ uuid = "0ff47ea0-7a50-410d-8455-4348d5de0420"
 version = "0.1.6"
 
 [[deps.PlutoTeachingTools]]
-deps = ["Downloads", "HypertextLiteral", "LaTeXStrings", "Latexify", "Markdown", "PlutoLinks", "PlutoUI", "Random"]
-git-tree-sha1 = "5d9ab1a4faf25a62bb9d07ef0003396ac258ef1c"
+deps = ["Downloads", "HypertextLiteral", "Latexify", "Markdown", "PlutoLinks", "PlutoUI"]
+git-tree-sha1 = "e2593782a6b53dc5176058d27e20387a0576a59e"
 uuid = "661c6b06-c737-4d37-b85c-46df65de6f69"
-version = "0.2.15"
+version = "0.3.0"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
@@ -432,12 +325,6 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
-[[deps.RadiiPolynomial]]
-deps = ["IntervalArithmetic", "LinearAlgebra", "Printf", "Reexport", "SparseArrays"]
-git-tree-sha1 = "8442e84088a316034b2b9d8128d6af0ac4ab4fad"
-uuid = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
-version = "0.8.13"
-
 [[deps.Random]]
 deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
@@ -455,14 +342,9 @@ version = "1.3.0"
 
 [[deps.Revise]]
 deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "REPL", "Requires", "UUIDs", "Unicode"]
-git-tree-sha1 = "7b7850bb94f75762d567834d7e9802fc22d62f9c"
+git-tree-sha1 = "7f4228017b83c66bd6aa4fddeb170ce487e53bc7"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.5.18"
-
-[[deps.RoundingEmulator]]
-git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
-uuid = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
-version = "0.2.1"
+version = "3.6.2"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -543,18 +425,11 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╠═70740a99-ec98-45c8-ba8f-06d63dd396b0
-# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
-# ╟─c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
-# ╟─7748e568-afc9-43cc-b2bd-5a231d86f455
-# ╠═8e04cef7-d8ae-4284-98cc-61318e13e326
-# ╠═c26c7bf0-38d6-4990-879d-c6ca8bb29e20
-# ╠═6052a4ee-333e-45f6-a7f4-9756f4357377
-# ╟─cab728f1-9ff5-4bdd-8101-5c39718c4d53
-# ╠═d61514c3-3b0e-4658-8b31-de9f9514a9c3
-# ╠═1bba510b-be86-44b0-a3c9-419b3b6ada37
-# ╠═fe0054f0-4fd5-489f-9fcb-3af086876699
-# ╠═3509fe96-4a83-461f-8fed-23343d74dc8c
-# ╠═0efa6e4e-cd15-496e-b51a-9fefd8cf42d1
+# ╠═71e175af-407e-4a0e-9930-0e6d208fa625
+# ╟─1a0e2f9c-dd27-4141-97fc-a4ebddb61cb8
+# ╟─15be0e8a-408b-4db2-af7e-15261f54238e
+# ╟─4ea373ca-e44b-49cf-9e6c-74a5043dee79
+# ╟─c3cf2193-105f-46da-8bbc-9a95082a805d
+# ╟─0746bcdf-dd75-4726-92dc-696ec0a510b1
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

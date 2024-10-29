@@ -1,9 +1,9 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.1
 
 #> [frontmatter]
 #> chapter = 2
-#> order = 1
+#> order = 0.5
 #> title = "Inverse"
 #> tags = ["lecture", "module2"]
 #> layout = "layout.jlhtml"
@@ -42,14 +42,13 @@ Namely, given $v(t) = 2 + t$, find the function $u$ such that
 u(t) v(t) = 1, \qquad t \in [-1, 1].
 ```
 
-This constitutes the first example of infinite dimensional problems.
-Indeed, we will search for a function $u$ in the following form $u(t) = \sum_{n \ge 0} a_n t^n$.
+This constitutes the first example of infinite-dimensional problems.
+Indeed, we will search for a function $u$ in the following form $u(t) = \sum_{n \ge 0} a_n t^n$, defined for all $t \in [-1, 1]$.
 
-The first step is to discretize this function space.
-We consider
+The first step is to discretize the function space as the sequence space
 
 ```math
-\ell^1 \overset{\text{def}}{=} \left\{ a \in \mathbb{R}^\mathbb{N} \, : \, \| a \|_1 \overset{\text{def}}{=} \sum_{n \ge 0} |a_n| < \infty \right\}.
+\ell^1_{\mathbb{N}} \overset{\text{def}}{=} \left\{ a \in \mathbb{R}^\mathbb{N} \, : \, \| a \|_1 \overset{\text{def}}{=} \sum_{n \ge 0} |a_n| < \infty \right\}.
 ```
 """
 
@@ -58,7 +57,7 @@ md"### Operator norm"
 
 # ╔═╡ 5654a167-0b32-4768-98c1-00dd1ad473c3
 md"""
-Prove that if $A \in B(\ell^1)$, then $\| A \|_{B(\ell^1)} \le \max_{l \ge 0} \sum_{n \ge 0} |A_{n,l}|$ (in fact the inequality is an equality).
+Prove that if $A \in B(\ell^1_{\mathbb{N}})$, then $\| A \|_{B(\ell^1_{\mathbb{N}})} \le \max_{j \ge 0} \sum_{i \ge 0} |A_{i,j}|$ (in fact the inequality is an equality).
 """
 
 # ╔═╡ 526f434e-075f-4207-a481-43b144d7c2f1
@@ -96,7 +95,7 @@ md"### Cauchy product"
 
 # ╔═╡ 3cb18cba-18e5-4e6f-8b16-eccd1dcef9fd
 md"""
-Observe that the product of two functions yields a product in $\ell^1$.
+Observe that the product of two functions yields a product in $\ell^1_{\mathbb{N}}$.
 
 !!! tip "Lemma"
 	If $u(t) = \sum_{n \ge 0} a_n t^n$ and $v(t) = \sum_{n \ge 0} b_n t^n$, then for their product we have $u(t) v(t) = \sum_{n \ge 0} (a*b)_n t^n$ where
@@ -108,7 +107,7 @@ Observe that the product of two functions yields a product in $\ell^1$.
 
 # ╔═╡ f737a8eb-0fa4-49e6-ad07-502099edc3e1
 md"""
-Then, the problem of finding the inverse of $v$ corresponds to finding a sequence of coefficients $a \in (\ell^1, *)$ such that
+Then, the problem of finding the inverse of $v$ corresponds to finding a sequence of coefficients $a \in (\ell^1_{\mathbb{N}}, *)$ such that
 
 ```math
 a * b = 1,
@@ -116,7 +115,7 @@ a * b = 1,
 
 where $b \overset{\text{def}}{=} (2, 1, 0, \dots)$.
 Here we slightly abuse notation by identifying the constant $1$ with its sequence of Taylor coefficients $(1, 0, \dots)$.
-To simplify the notation, we also denote $(\ell^1, *)$ just by $\ell^1$.
+To simplify the notation, we also denote $(\ell^1_{\mathbb{N}}, *)$ just by $\ell^1_{\mathbb{N}}$.
 """
 
 # ╔═╡ 6badcd71-0e20-482e-8858-631b6357add2
@@ -203,13 +202,13 @@ md"## Zero-finding problem"
 # ╔═╡ 151f9f5f-65ab-4ccb-94a6-c530d924962f
 md"""
 Let us now go back to our task of finding the inverse of $b$ with respect to $*$.
-To this end, we consider the zero-finding problem $F : \ell^1 \to \ell^1$ given by
+To this end, we consider the zero-finding problem $F : \ell^1_{\mathbb{N}} \to \ell^1_{\mathbb{N}}$ given by
 
 ```math
 F(a) \overset{\text{def}}{=} a*b - 1.
 ```
 
-We aim to prove that, for some injective $A \approx DF(\bar{a})^{-1} \in B(\ell^1)$ yet to be constructed, the fixed-point operator
+We aim to prove that, for some injective $A \approx DF(\bar{a})^{-1} \in B(\ell^1_{\mathbb{N}})$ yet to be constructed, the fixed-point operator
 
 ```math
 T(a) \overset{\text{def}}{=} a - A F(a) = a - A (a * b - 1),
@@ -225,7 +224,7 @@ DF(a) h = b * h,
 
 that is $DF(a)$ is the mutliplication operator $M_b$ associated with $b$.
 
-As a bounded linear operator acting on infinite sequences in $\ell^1$, $M_b$ can be visualized as a matrix with an infinite number of rows and columns.
+As a bounded linear operator acting on infinite sequences in $\ell^1_{\mathbb{N}}$, $M_b$ can be visualized as a matrix with an infinite number of rows and columns.
 Specifically, one can check that $M_b$ is a lower triangular operator so that
 
 ```math
@@ -279,8 +278,7 @@ infinite_M(b) # infinite_M * b
 
 # ╔═╡ 299c15a2-253a-428f-9a23-cd48bd8238c2
 md"""
-Our custom function `mult_operator` returned $\pi^{\le N} M_b \pi^{\le N}$.
-In RadiiPolynomial, the projection operator $\pi^{\le N}$ is performed through the `project` function:
+In RadiiPolynomial, we can represent the operator as a finite matrix using the `project` function:
 """
 
 # ╔═╡ 82143c8d-7009-4537-975f-c832330caa9e
@@ -294,7 +292,7 @@ md"""
 We introduce a projection operator on a finite number of modes ($N+1$ coefficients)
 
 ```math
-(\pi^{\le N} a)_n
+(\Pi_N a)_n
 \overset{\text{def}}{=}
 \begin{cases}
 a_n, & n \le N, \\
@@ -302,7 +300,7 @@ a_n, & n \le N, \\
 \end{cases}
 ```
 
-together with its complement $\pi^{> N} \overset{\text{def}}{=} I - \pi^{\le N}$.
+together with its complement $\Pi_{> N} \overset{\text{def}}{=} I - \Pi_N$.
 """
 
 # ╔═╡ 1d1277bf-2aa3-4c89-b34d-b2a2e5fc6fc5
@@ -310,22 +308,19 @@ md"### Approximate inverse"
 
 # ╔═╡ 8a4513a5-9049-48df-ae9b-ea8c5d5f1076
 md"""
-For $T$ to be a contraction, we want $A$ to be a "good" approximate inverse of $M_b$. We seek
+For $T$ to be a contraction, we want $A$ to be a "good" approximate inverse of $M_b$.
+So we want the inverse of $b$ with respect to the Cauchy product $*$.
+Let $\bar{a} \in \Pi_N \ell^1_{\mathbb{N}}$ satisfy $\bar{a} * b \approx (1, 0, \dots)$.
+Then,
 
 ```math
-A \overset{\text{def}}{=} M_{\bar{a}}
-```
-
-where
-
-```math
-M_b \bar{a} \approx (1, 0, \dots).
+A \overset{\text{def}}{=} M_{\bar{a}}.
 ```
 
 We can numerically solve this linear system for a finite number of modes
 
 ```math
-\pi^{\le N} M_b \pi^{\le N} \bar{a} = \pi^{\le N} (1, 0, \dots)
+\Pi_N M_b \Pi_N \bar{a} = \Pi_N (1, 0, \dots)
 ```
 
 Consequently,
@@ -333,7 +328,7 @@ Consequently,
 ```math
 F(\bar{a}) = \bar{a} * b - 1 \approx 0
 \qquad \text{and} \qquad
-A DF(\bar{a}) = \bar{a} * b \approx 1,
+A DF(\bar{a}) = \bar{a} * b \approx 1.
 ```
 """
 
@@ -341,38 +336,38 @@ A DF(\bar{a}) = \bar{a} * b \approx 1,
 md"#### Computing the approximate inverse"
 
 # ╔═╡ a3124717-6741-4769-8fb0-2b489f13dc94
-a0 = interval.( M \ Sequence(Taylor(5), I[1:6,1]) )
+a_bar = interval.( M \ Sequence(Taylor(5), I[1:6,1]) )
 
 # ╔═╡ 7edef822-8f17-4a17-8dc7-f476fd610a29
 md"### Newton-Kantorovich"
 
 # ╔═╡ 63b48726-18f5-4bab-8675-f90ec50166ac
 md"""
-Observe that $\| M_a \|_{B(\ell^1)} = \| a \|_1$ for all $a \in \ell^1$ (the proof is left as an exercise).
+Observe that $\| M_a \|_{B(\ell^1_{\mathbb{N}})} = \| a \|_1$ for all $a \in \ell^1_{\mathbb{N}}$ (the proof is left as an exercise).
 
 Let us now apply our contraction argument and compute the required bounds:
 
 ```math
 \begin{align}
 Y &\ge \| A F(\bar{a}) \|_1 = \| \bar{a} * (\bar{a} * b - 1) \|_1, \\
-Z_1 &\ge \| A DF(\bar{a}) - I \|_{B(\ell^1)} = \| \bar{a} * b - 1 \|_1 = \| F(\bar{a}) \|_1, \\
+Z_1 &\ge \| A DF(\bar{a}) - I \|_{B(\ell^1_{\mathbb{N}})} = \| \bar{a} * b - 1 \|_1 = \| F(\bar{a}) \|_1, \\
 Z_2 &= 0.
 \end{align}
 ```
 
 To conclude the proof, note that $Z_1 < 1$ implies that $A DF(\bar{a})$ is invertible, since $A DF(\bar{a}) = M_\bar{a} * M_b = M_b * M_\bar{a} = DF(\bar{a}) A$, this guarantees that $A$ is in fact injective.
 
-Note that all the above quantities are computable since $A F(\bar{a}) \in \pi^{2N + 1 \le} \ell^1$ (recall that $b \in \pi^{\le 1} \ell^1, \bar{a} \in \pi^{\le N} \ell^1$).
+Note that all the above quantities are computable since $A F(\bar{a}) \in \Pi_{2N + 1} \ell^1_{\mathbb{N}}$ (recall that $b \in \Pi_1 \ell^1_{\mathbb{N}}, \bar{a} \in \Pi_N \ell^1_{\mathbb{N}}$).
 """
 
 # ╔═╡ 4f37b759-371e-4042-82d0-720523718021
 F(a, b) = a * b - 1
 
 # ╔═╡ d27d66a6-4717-4d6d-895f-cdebd649cebd
-Y = norm(a0 * F(a0, b), 1)
+Y = norm(a_bar * F(a_bar, b), 1)
 
 # ╔═╡ 9d468890-c155-442d-bcbf-6a33bc991f72
-Z₁ = norm(F(a0, b), 1)
+Z₁ = norm(F(a_bar, b), 1)
 
 # ╔═╡ d02c07ee-77f2-4317-9692-558323e37b54
 Z₂ = interval(0)
@@ -382,7 +377,7 @@ interval_of_existence(Y, Z₁, Z₂, Inf)
 
 # ╔═╡ 04417cef-c3d9-4adb-a449-7b26bbe20056
 begin
-	plot(LinRange(-1, 1, 51), t -> mid(a0(t)); label = "approx")
+	plot(LinRange(-1, 1, 51), t -> mid(a_bar(t)); label = "approx")
 	plot!(LinRange(-1, 1, 51), t -> inv(2+t); label = "theoretical")
 end
 
@@ -399,15 +394,15 @@ For the sake of completeness, let us compare what the code of the proof would ha
 """
 
 # ╔═╡ 28be86e3-a1b2-4562-8d6a-6ebff88a3bb4
-my_F(a0, b, N) = cauchy_product(a0, b, N) - [1 ; zeros(N)]
+my_F(a_bar, b, N) = cauchy_product(a_bar, b, N) - [1 ; zeros(N)]
 
 # ╔═╡ a31c1107-aa7e-43e5-b4c3-4c3f2b3fbfad
-my_a0 = interval.( my_M \ I[1:6,1] )
+my_a_bar = interval.( my_M \ I[1:6,1] )
 
 # ╔═╡ 9a4f9f19-2fe8-44ee-aa8f-bdbe811b86dd
 my_Y = sum(abs.(cauchy_product(
-	my_a0,
-	my_F(my_a0, [my_b ; zeros(max(5-length(my_b), 0))], 6),
+	my_a_bar,
+	my_F(my_a_bar, [my_b ; zeros(max(5-length(my_b), 0))], 6),
 	11)))
 
 # ╔═╡ a980db33-ab3a-4b19-8ccd-7c9922bf6928
@@ -426,17 +421,7 @@ Lastly, the problem is simple enough that we can compute by hand both the first 
 """
 
 # ╔═╡ e40b7fc3-1ce6-4583-9bbe-51525c4c1cb0
-bounds.(coefficients(a0))
-
-# ╔═╡ 46b2d787-095a-4f15-873c-8d0bae1b6750
-md"## Next steps"
-
-# ╔═╡ 5d28a250-9c3d-4105-8d75-1c8f2c585a0f
-md"""
-Larger domain, introduce $\nu$...
-
-What if $v$ is an infinite power series...
-"""
+bounds.(coefficients(a_bar))
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -457,7 +442,7 @@ RadiiPolynomial = "~0.8.13"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.5"
+julia_version = "1.10.6"
 manifest_format = "2.0"
 project_hash = "2a778c5d86a1bdd14fe9b7b4da3a6bda20a31af0"
 
@@ -1731,7 +1716,5 @@ version = "1.4.1+1"
 # ╟─a980db33-ab3a-4b19-8ccd-7c9922bf6928
 # ╟─2d99c89c-c23d-4b6e-a0e2-58d209ffd96b
 # ╠═e40b7fc3-1ce6-4583-9bbe-51525c4c1cb0
-# ╟─46b2d787-095a-4f15-873c-8d0bae1b6750
-# ╟─5d28a250-9c3d-4105-8d75-1c8f2c585a0f
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

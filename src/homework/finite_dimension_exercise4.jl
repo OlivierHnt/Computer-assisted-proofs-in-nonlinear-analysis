@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.1
 
 #> [frontmatter]
 #> homework_number = 4
@@ -34,7 +34,7 @@ Our goal will be to guarantee a posteriori that $M$ is indeed invertible, and to
 
 # ╔═╡ 6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
 md"""
-**1.** Denoting $\| = \Vert I - M \bar{X} \|$, and assuming $\delta < 1$, show that $M$ is invertible and
+**1.** Denoting $\delta = \Vert I - M \bar{X} \|$, and assuming $\delta < 1$, show that $M$ is invertible and
 
 ```math
 \| M^{-1} - \bar{X} \| \le \frac{\delta}{1-\delta} \| \bar{X} \|.
@@ -72,7 +72,7 @@ PlutoTeachingTools = "~0.2.15"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.5"
+julia_version = "1.10.6"
 manifest_format = "2.0"
 project_hash = "b873fd5571111b4c454c95ca5fa58b75bfb4ab46"
 

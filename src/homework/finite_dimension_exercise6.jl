@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.1
 
 #> [frontmatter]
 #> homework_number = 6
@@ -25,7 +25,7 @@ main {
 
 # ╔═╡ afef60df-375e-439b-a973-ee36439731f2
 md"""
-Prove that there exists a period 3 orbit to $x_{n+1} = \mu x_n (1-x_n)$ for all $\mu$ in an interval containing $3.9$.
+Prove that there exists a period-3 orbit to $x_{n+1} = \mu x_n (1-x_n)$ for all $\mu$ in an interval containing $3.9$.
 Make that interval as large as you can.
 """
 

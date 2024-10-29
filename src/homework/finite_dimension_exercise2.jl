@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.1
 
 #> [frontmatter]
 #> homework_number = 2
@@ -11,21 +11,8 @@
 using Markdown
 using InteractiveUtils
 
-# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
-macro bind(def, element)
-    quote
-        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
-        local el = $(esc(element))
-        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
-        el
-    end
-end
-
 # ╔═╡ 1658541d-29b1-417e-9895-88fbbd37d312
 using PlutoTeachingTools # package for the notebook
-
-# ╔═╡ 7337c633-a51b-4642-875c-9b623df2657f
-using RadiiPolynomial
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""
@@ -41,7 +28,7 @@ main {
 
 # ╔═╡ aff38e1d-416c-472b-81ea-820d7430dded
 md"""
-To study period 3 orbits of the dynamical system $x_{n+1} = \mu x_n (1-x_n)$, we consider the map
+To study period-3 orbits of the dynamical system $x_{n+1} = \mu x_n (1-x_n)$, we consider the map
 
 $\begin{align}
 F : \ \left\{
@@ -55,7 +42,7 @@ F : \ \left\{
 
 # ╔═╡ f283c615-fcde-4752-8d02-fafaa0e73b7d
 md"""
-**1.** Using the implementation of $F$ and $DF$ provided in the following cells, and the function `newton` from the RadiiPolynomial library, find an approximate period 3 orbit $\bar{x}$ for $\mu = 3.9$.
+**1.** Using the implementation of $F$ and $DF$ provided in the following cells, and the function `newton` from the RadiiPolynomial library, find an approximate period-3 orbit $\bar{x}$ for $\mu = 3.9$.
 """
 
 # ╔═╡ 3b098d28-5fc8-4463-a59b-08bca638d5be
@@ -78,10 +65,10 @@ end
 μ = 3.9
 
 # ╔═╡ 698891fa-5637-40de-8756-f507551c25d4
-# initial_data = ...
+# x_init = ...
 
 # ╔═╡ 5ee47406-c6cc-40d8-adb9-c37146f9db01
-# x0, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
+# x_bar, success = newton(x -> (F(x, μ), DF(x, μ)), x_init)
 
 # ╔═╡ 7b944744-628c-4ac9-8528-6dc19789ddb0
 md"""
@@ -89,7 +76,7 @@ md"""
 """
 
 # ╔═╡ fdd9fd8b-a3df-455d-bfe8-321723f5c566
-# A = ... (you can call the `inv` function to invert a linear operator)
+# A = ... # you can call the `inv` function to invert a linear operator
 
 # ╔═╡ 8b9a0f39-21f0-4288-bb2b-a594d6712292
 md"""
@@ -105,7 +92,7 @@ For this example, one can easily compute $\| DF(x) - DF(\bar{x}) \|_1$.
 # ╔═╡ 03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
 md"""
 **4.** Implement and compute the bounds $Y$, $Z_1$ and $Z_2$.
-Use the function `interval_of_existence` from the RadiiPolynomial library in order to prove the existence of a period 3 orbit for $\mu = 3.9$.
+Use the function `interval_of_existence` from the RadiiPolynomial library in order to prove the existence of a period-3 orbit for $\mu = 3.9$.
 """
 
 # ╔═╡ 311ca566-451d-41e0-8420-7ed57b0cc08f
@@ -118,128 +105,33 @@ md"""
 # Y = ...
 
 # ╔═╡ 4ac782db-4d32-4bf8-bddf-cc8f8b5e6217
-# Z₁ = ...
+# Z₁ = ... # `Z₁` can be typed by `Z\_1<tab>`
 
 # ╔═╡ a4b2181e-d7dd-4c49-8c45-d6864cf878c6
-# r_star = ...
+# R = ...
 
 # ╔═╡ 2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
-# Z₂ = ...
+# Z₂ = ... # `Z₂` can be typed by `Z\_2<tab>`
 
 # ╔═╡ 5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
-# interval_of_existence(Y, Z₁, Z₂, r_star)
-
-# ╔═╡ ec53a5b5-5699-4a35-92d2-d9f43aab19ad
-hide_everything_below =
-	html"""
-	<style>
-	pluto-cell.hide_everything_below ~ pluto-cell {
-		display: none;
-	}
-	</style>
-	
-	<script>
-	const cell = currentScript.closest("pluto-cell")
-	
-	const setclass = () => {
-		console.log("change!")
-		cell.classList.toggle("hide_everything_below", true)
-	}
-	setclass()
-	const observer = new MutationObserver(setclass)
-	
-	observer.observe(cell, {
-		subtree: false,
-		attributeFilter: ["class"],
-	})
-	
-	invalidation.then(() => {
-		observer.disconnect()
-		cell.classList.toggle("hide_everything_below", false)
-	})
-	
-	</script>
-	""";
-
-# ╔═╡ ba9376cd-e5fb-48ef-a2c0-2687c60d0eb9
-begin
-    b = @bind reveal html"<input type=checkbox>"
-	md"""
-	#### Show the solution $b
-	"""
-end
-
-# ╔═╡ 08769acf-8651-4c66-941e-ba9f53729a47
-if !(reveal === true)
-	hide_everything_below
-end
-
-# ╔═╡ 0d1d131e-c236-4dae-8709-bc91ecb83f25
-md"""
-**1.**
-"""
-
-# ╔═╡ 2a4fe035-f7b3-49e1-b319-95a925248652
-initial_data = ones(3)
-
-# ╔═╡ aa7606f1-6088-48c1-99e7-74a947d0bf2c
-x0, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
-
-# ╔═╡ b3b5888f-23ba-4f8a-be79-00108a3fb012
-md"""
-**2.**
-"""
-
-# ╔═╡ 80b9c2e3-b196-46b4-b7e6-652bf8d4c7a1
-A = inv(DF(x0, μ))
-
-# ╔═╡ 0e20f8d9-ab43-4498-aec2-22e9e2bb87c2
-md"""
-**4.**
-"""
-
-# ╔═╡ c15c4c77-b377-401d-a5fb-8ff15d7c63e1
-ix0 = interval(x0)
-
-# ╔═╡ 8e640b5b-5573-4f4d-81e1-4237ba4e44fc
-iA = interval(A)
-
-# ╔═╡ 75130895-d903-4d0e-9dbb-64371a0d2557
-iμ = I"3.9"
-
-# ╔═╡ 20eafc06-01f0-4d75-8f24-27bb720afd8d
-Y = norm(iA * F(ix0, iμ), 1)
-
-# ╔═╡ e21fb93a-6524-45cd-9813-82cc721384a4
-Z₁ = opnorm(I - iA * DF(ix0, iμ), 1)
-
-# ╔═╡ 09d582d5-c52a-4e93-8582-424b4ee5a081
-r_star = Inf # since DF is linear
-
-# ╔═╡ 2f5bbbaa-1f9c-4025-a0cc-9b2f6349c382
-Z₂ = 2 * iμ * opnorm(iA, 1)
-
-# ╔═╡ c6e837a2-9d56-4fda-aa64-782aaac51e69
-interval_of_existence(Y, Z₁, Z₂, r_star)
+# interval_of_existence(Y, Z₁, Z₂, R)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
-RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
 PlutoTeachingTools = "~0.3.0"
-RadiiPolynomial = "~0.8.13"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.5"
+julia_version = "1.10.6"
 manifest_format = "2.0"
-project_hash = "8e8963d49545789be8a52e4eef48940789b63020"
+project_hash = "cd1e693ed5c336a13fe635f54c9a0cac09e8115c"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -256,12 +148,6 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
-
-[[deps.CRlibm_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "e329286945d0cfc04456972ea732551869af1cfc"
-uuid = "4e9b3aee-d8a1-5a3d-ad8b-7d824db253f0"
-version = "1.0.1+0"
 
 [[deps.CodeTracking]]
 deps = ["InteractiveUtils", "UUIDs"]
@@ -328,32 +214,6 @@ version = "0.2.5"
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
-
-[[deps.IntervalArithmetic]]
-deps = ["CRlibm_jll", "MacroTools", "RoundingEmulator"]
-git-tree-sha1 = "fe30dec78e68f27fc416901629c6e24e9d5f057b"
-uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-version = "0.22.16"
-
-    [deps.IntervalArithmetic.extensions]
-    IntervalArithmeticDiffRulesExt = "DiffRules"
-    IntervalArithmeticForwardDiffExt = "ForwardDiff"
-    IntervalArithmeticIntervalSetsExt = "IntervalSets"
-    IntervalArithmeticLinearAlgebraExt = "LinearAlgebra"
-    IntervalArithmeticRecipesBaseExt = "RecipesBase"
-
-    [deps.IntervalArithmetic.weakdeps]
-    DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
-    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
-    IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
-    LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-
-[[deps.JLLWrappers]]
-deps = ["Artifacts", "Preferences"]
-git-tree-sha1 = "f389674c99bfcde17dc57454011aa44d5a260a40"
-uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
-version = "1.6.0"
 
 [[deps.JSON]]
 deps = ["Dates", "Mmap", "Parsers", "Unicode"]
@@ -524,12 +384,6 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
-[[deps.RadiiPolynomial]]
-deps = ["IntervalArithmetic", "LinearAlgebra", "Printf", "Reexport", "SparseArrays"]
-git-tree-sha1 = "8442e84088a316034b2b9d8128d6af0ac4ab4fad"
-uuid = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
-version = "0.8.13"
-
 [[deps.Random]]
 deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
@@ -550,11 +404,6 @@ deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibG
 git-tree-sha1 = "7b7850bb94f75762d567834d7e9802fc22d62f9c"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
 version = "3.5.18"
-
-[[deps.RoundingEmulator]]
-git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
-uuid = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
-version = "0.2.1"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -654,23 +503,5 @@ version = "17.4.0+2"
 # ╠═a4b2181e-d7dd-4c49-8c45-d6864cf878c6
 # ╠═2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
 # ╠═5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
-# ╟─ec53a5b5-5699-4a35-92d2-d9f43aab19ad
-# ╟─ba9376cd-e5fb-48ef-a2c0-2687c60d0eb9
-# ╟─08769acf-8651-4c66-941e-ba9f53729a47
-# ╟─0d1d131e-c236-4dae-8709-bc91ecb83f25
-# ╠═7337c633-a51b-4642-875c-9b623df2657f
-# ╠═2a4fe035-f7b3-49e1-b319-95a925248652
-# ╠═aa7606f1-6088-48c1-99e7-74a947d0bf2c
-# ╟─b3b5888f-23ba-4f8a-be79-00108a3fb012
-# ╠═80b9c2e3-b196-46b4-b7e6-652bf8d4c7a1
-# ╟─0e20f8d9-ab43-4498-aec2-22e9e2bb87c2
-# ╠═c15c4c77-b377-401d-a5fb-8ff15d7c63e1
-# ╠═8e640b5b-5573-4f4d-81e1-4237ba4e44fc
-# ╠═75130895-d903-4d0e-9dbb-64371a0d2557
-# ╠═20eafc06-01f0-4d75-8f24-27bb720afd8d
-# ╠═e21fb93a-6524-45cd-9813-82cc721384a4
-# ╠═09d582d5-c52a-4e93-8582-424b4ee5a081
-# ╠═2f5bbbaa-1f9c-4025-a0cc-9b2f6349c382
-# ╠═c6e837a2-9d56-4fda-aa64-782aaac51e69
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

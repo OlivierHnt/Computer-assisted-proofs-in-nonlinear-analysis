@@ -1,14 +1,18 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.1
+
+#> [frontmatter]
+#> homework_number = 3
+#> order = 4
+#> title = "Cubic root"
+#> tags = ["module2", "homeworks"]
+#> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ ce10dbf5-5eab-4e98-bae0-abffc5ee25ba
+# ╔═╡ 71e175af-407e-4a0e-9930-0e6d208fa625
 using PlutoTeachingTools # package for the notebook
-
-# ╔═╡ 566da30c-ba51-47e2-89d5-231ae5cdaf31
-using RadiiPolynomial
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""
@@ -22,113 +26,32 @@ main {
 </style>
 """
 
-# ╔═╡ aff38e1d-416c-472b-81ea-820d7430dded
+# ╔═╡ 15be0e8a-408b-4db2-af7e-15261f54238e
 md"""
-In order to study period 3 orbits in the dynamical system $x_{n+1} = \mu x_n (1-x_n)$, we consider the map
-
-$\begin{align}
-F : \ \left\{
-\begin{aligned}
-\mathbb{R}^3 &\to \mathbb{R}^3 \\
-\begin{pmatrix} x_0 \\ x_1 \\ x_2 \end{pmatrix}  &\mapsto
-\begin{pmatrix} \mu x_0(1-x_0) - x_1 \\ \mu x_1(1-x_1) - x_2 \\ \mu x_2(1-x_2) - x_0 \end{pmatrix}
-\end{aligned} \right.
-\end{align}$
+**1.** Define a suitable $F = 0$ problem for the cubic root of a function using an $\ell^1$ sequence space, and derive the bounds needed to apply the Newton-Kantorovich theorem in that context.
 """
 
-# ╔═╡ f283c615-fcde-4752-8d02-fafaa0e73b7d
+# ╔═╡ 4ea373ca-e44b-49cf-9e6c-74a5043dee79
 md"""
-**1.** Using the implementation of $F$ and $DF$ provided in the following cells, and the function `newton` from RadiiPolynomial.jl, find an approximate period 3 orbit $\bar{x}$, for $\mu=3.9$.
+**2.** Find the cubic root of $v(t) = 2 + \cos (t)$ both as an absolutely converging Taylor series and Fourier series.
 """
-
-# ╔═╡ 3b098d28-5fc8-4463-a59b-08bca638d5be
-function F(x, μ)
-	x₀, x₁, x₂ = x
-	return [μ * x₀ * (1 - x₀) - x₁,
-		    μ * x₁ * (1 - x₁) - x₂,
-		    μ * x₂ * (1 - x₂) - x₀]
-end
-
-# ╔═╡ dda38796-c299-4d38-b479-fde4c1496941
-function DF(x, μ)
-	x₀, x₁, x₂ = x
-	return [ μ * (1 - 2x₀) -1              0
-		     0              μ * (1 - 2x₁) -1
-		    -1              0              μ * (1 - 2x₂)]
-end
-
-# ╔═╡ 8d22a89b-5531-4e0c-9c02-e351578df93e
-μ = 3.9
-
-# ╔═╡ 698891fa-5637-40de-8756-f507551c25d4
-initial_data = ones(3)
-
-# ╔═╡ 5ee47406-c6cc-40d8-adb9-c37146f9db01
-x0, success = newton(x -> (F(x, μ), DF(x, μ)), initial_data)
-
-# ╔═╡ 7b944744-628c-4ac9-8528-6dc19789ddb0
-md"""
-**2.** Define a suitable $A$ to be used later in the Newton-Kantorovich argument.
-"""
-
-# ╔═╡ fdd9fd8b-a3df-455d-bfe8-321723f5c566
-A = inv(DF(x0, μ))
-
-# ╔═╡ 8b9a0f39-21f0-4288-bb2b-a594d6712292
-md"""
-**3.** Using the 1-norm on $\mathbb{R}^3$, show that the constant $Z_2 = 2\mu \left\Vert A\right\Vert_1$ satisfies the assumption of the Newton-Kantorovich theorem.
-"""
-
-# ╔═╡ 3d27e2d3-e5e8-4e95-9294-23e416608b6a
-Foldable("Hint",	md"You may first compute $D^2F(\bar{x})(u,v)$ and show that $\Vert D^2F(\bar{x})(u,v) \Vert_1 \leq 2\mu  \Vert u\Vert_1 \Vert v\Vert_1$.")
-
-# ╔═╡ 03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
-md"""
-**4.** Implement and evaluate suitable bounds $Y$, $Z_1$ and $Z_2$, and use the function `interval_of_existence` from RadiiPolynomial.jl in order to prove the existence of a period 3 orbit for $\mu = 3.9$.
-"""
-
-# ╔═╡ 5b609b75-ae5f-4c79-a405-d0aa568f304a
-ix0 = interval(x0)
-
-# ╔═╡ 6ce92509-0d57-402f-b2d9-57b54df7f313
-iA = interval(A)
-
-# ╔═╡ 4b0624d1-f410-45a9-807c-06ca5a198480
-iμ = I"3.9"
-
-# ╔═╡ 4c78f87b-7191-47f4-8bd7-cd9d13c5b4c6
-Y = norm(iA * F(ix0, iμ), 1)
-
-# ╔═╡ 4ac782db-4d32-4bf8-bddf-cc8f8b5e6217
-Z₁ = opnorm(I - iA * DF(ix0, iμ), 1)
-
-# ╔═╡ a4b2181e-d7dd-4c49-8c45-d6864cf878c6
-r_star = Inf # since DF is linear
-
-# ╔═╡ 2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
-Z₂ = 2 * iμ * opnorm(iA, 1)
-
-# ╔═╡ 5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
-interval_of_existence(Y, Z₁, Z₂, r_star)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
-RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
 PlutoTeachingTools = "~0.3.0"
-RadiiPolynomial = "~0.8.13"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.5"
+julia_version = "1.10.6"
 manifest_format = "2.0"
-project_hash = "8e8963d49545789be8a52e4eef48940789b63020"
+project_hash = "cd1e693ed5c336a13fe635f54c9a0cac09e8115c"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -145,12 +68,6 @@ uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
-
-[[deps.CRlibm_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "e329286945d0cfc04456972ea732551869af1cfc"
-uuid = "4e9b3aee-d8a1-5a3d-ad8b-7d824db253f0"
-version = "1.0.1+0"
 
 [[deps.CodeTracking]]
 deps = ["InteractiveUtils", "UUIDs"]
@@ -218,32 +135,6 @@ version = "0.2.5"
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
-[[deps.IntervalArithmetic]]
-deps = ["CRlibm_jll", "MacroTools", "RoundingEmulator"]
-git-tree-sha1 = "fe30dec78e68f27fc416901629c6e24e9d5f057b"
-uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-version = "0.22.16"
-
-    [deps.IntervalArithmetic.extensions]
-    IntervalArithmeticDiffRulesExt = "DiffRules"
-    IntervalArithmeticForwardDiffExt = "ForwardDiff"
-    IntervalArithmeticIntervalSetsExt = "IntervalSets"
-    IntervalArithmeticLinearAlgebraExt = "LinearAlgebra"
-    IntervalArithmeticRecipesBaseExt = "RecipesBase"
-
-    [deps.IntervalArithmetic.weakdeps]
-    DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
-    ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
-    IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
-    LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-    RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
-
-[[deps.JLLWrappers]]
-deps = ["Artifacts", "Preferences"]
-git-tree-sha1 = "f389674c99bfcde17dc57454011aa44d5a260a40"
-uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
-version = "1.6.0"
-
 [[deps.JSON]]
 deps = ["Dates", "Mmap", "Parsers", "Unicode"]
 git-tree-sha1 = "31e996f0a15c7b280ba9f76636b3ff9e2ae58c9a"
@@ -257,9 +148,9 @@ uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
 version = "0.9.36"
 
 [[deps.LaTeXStrings]]
-git-tree-sha1 = "50901ebc375ed41dbf8058da26f9de442febbbec"
+git-tree-sha1 = "dda21b8cbd6a6c40d9d02a73230f9d70fed6918c"
 uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
-version = "1.3.1"
+version = "1.4.0"
 
 [[deps.Latexify]]
 deps = ["Format", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "OrderedCollections", "Requires"]
@@ -313,9 +204,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.LoweredCodeUtils]]
 deps = ["JuliaInterpreter"]
-git-tree-sha1 = "c2b5e92eaf5101404a58ce9c6083d595472361d6"
+git-tree-sha1 = "260dc274c1bc2cb839e758588c63d9c8b5e639d1"
 uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "3.0.2"
+version = "3.0.5"
 
 [[deps.MIMEs]]
 git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
@@ -413,12 +304,6 @@ uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
-[[deps.RadiiPolynomial]]
-deps = ["IntervalArithmetic", "LinearAlgebra", "Printf", "Reexport", "SparseArrays"]
-git-tree-sha1 = "8442e84088a316034b2b9d8128d6af0ac4ab4fad"
-uuid = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
-version = "0.8.13"
-
 [[deps.Random]]
 deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
@@ -436,14 +321,9 @@ version = "1.3.0"
 
 [[deps.Revise]]
 deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "REPL", "Requires", "UUIDs", "Unicode"]
-git-tree-sha1 = "7b7850bb94f75762d567834d7e9802fc22d62f9c"
+git-tree-sha1 = "7f4228017b83c66bd6aa4fddeb170ce487e53bc7"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.5.18"
-
-[[deps.RoundingEmulator]]
-git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
-uuid = "5eaf0fd0-dfba-4ccb-bf02-d820a40db705"
-version = "0.2.1"
+version = "3.6.2"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -524,27 +404,8 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╠═ce10dbf5-5eab-4e98-bae0-abffc5ee25ba
-# ╠═566da30c-ba51-47e2-89d5-231ae5cdaf31
-# ╟─aff38e1d-416c-472b-81ea-820d7430dded
-# ╟─f283c615-fcde-4752-8d02-fafaa0e73b7d
-# ╠═3b098d28-5fc8-4463-a59b-08bca638d5be
-# ╠═dda38796-c299-4d38-b479-fde4c1496941
-# ╠═8d22a89b-5531-4e0c-9c02-e351578df93e
-# ╠═698891fa-5637-40de-8756-f507551c25d4
-# ╠═5ee47406-c6cc-40d8-adb9-c37146f9db01
-# ╟─7b944744-628c-4ac9-8528-6dc19789ddb0
-# ╠═fdd9fd8b-a3df-455d-bfe8-321723f5c566
-# ╟─8b9a0f39-21f0-4288-bb2b-a594d6712292
-# ╟─3d27e2d3-e5e8-4e95-9294-23e416608b6a
-# ╟─03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
-# ╠═5b609b75-ae5f-4c79-a405-d0aa568f304a
-# ╠═6ce92509-0d57-402f-b2d9-57b54df7f313
-# ╠═4b0624d1-f410-45a9-807c-06ca5a198480
-# ╠═4c78f87b-7191-47f4-8bd7-cd9d13c5b4c6
-# ╠═4ac782db-4d32-4bf8-bddf-cc8f8b5e6217
-# ╠═a4b2181e-d7dd-4c49-8c45-d6864cf878c6
-# ╠═2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
-# ╠═5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
+# ╠═71e175af-407e-4a0e-9930-0e6d208fa625
+# ╟─15be0e8a-408b-4db2-af7e-15261f54238e
+# ╟─4ea373ca-e44b-49cf-9e6c-74a5043dee79
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

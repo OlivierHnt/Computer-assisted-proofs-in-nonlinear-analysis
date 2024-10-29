@@ -1,9 +1,9 @@
 ### A Pluto.jl notebook ###
-# v0.19.46
+# v0.20.1
 
 #> [frontmatter]
 #> chapter = 2
-#> order = 2
+#> order = 3
 #> title = "Square root"
 #> tags = ["lecture", "module2"]
 #> layout = "layout.jlhtml"
@@ -240,18 +240,6 @@ begin
 	plot!(LinRange(-π, π, 101), t -> sqrt(2+cos(t)); label = "theoretical")
 end
 
-# ╔═╡ 05507eeb-df0a-4980-9d2c-083743e3fcd8
-md"## Next steps"
-
-# ╔═╡ ea41caa2-69c8-4b97-8643-90d85bfc3756
-md"""
-What if $v$ is an infinite power series...
-
-Analyticity (weighted $\ell^1$ space)...
-
-Implement the cubic root as an exercise...
-"""
-
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
@@ -271,7 +259,7 @@ RadiiPolynomial = "~0.8.13"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.5"
+julia_version = "1.10.6"
 manifest_format = "2.0"
 project_hash = "a064359e34f654ceb201746cdb4cbc9e20b50f00"
 
@@ -1514,7 +1502,5 @@ version = "1.4.1+1"
 # ╟─63093c7b-66a8-457d-bbdd-75eddc5f74a5
 # ╠═507d49af-d127-41d6-9c34-6d357b6d4a7c
 # ╟─db76f769-0281-4502-8065-e94f701bfa7a
-# ╟─05507eeb-df0a-4980-9d2c-083743e3fcd8
-# ╟─ea41caa2-69c8-4b97-8643-90d85bfc3756
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
