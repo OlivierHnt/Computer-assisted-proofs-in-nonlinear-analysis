@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.1
+# v0.20.3
 
 #> [frontmatter]
 #> chapter = 2
@@ -31,232 +31,202 @@ main {
 TableOfContents(title = "Table of Contents"; indent = true, depth = 4, aside = true)
 
 # ╔═╡ 44fc05a5-a0c1-4428-adee-edb5b8b869e3
-md"## Introduction and setup"
+md"# Motivating example: the inverse function"
 
 # ╔═╡ 9162d799-c8a8-44cd-8921-b6fa4c6f291f
 md"""
-In this lecture we will discuss how to solve an *inverse* problem.
-Namely, given $v(t) = 2 + t$, find the function $u$ such that
+Given $v(t) = 2 + t$, consider the problem of finding the function $u : [-1, 1] \to \mathbb{R}$ such that
 
 ```math
 u(t) v(t) = 1, \qquad t \in [-1, 1].
 ```
 
 This constitutes the first example of infinite-dimensional problems.
-Indeed, we will search for a function $u$ in the following form $u(t) = \sum_{n \ge 0} a_n t^n$, defined for all $t \in [-1, 1]$.
 
-The first step is to discretize the function space as the sequence space
-
-```math
-\ell^1_{\mathbb{N}} \overset{\text{def}}{=} \left\{ a \in \mathbb{R}^\mathbb{N} \, : \, \| a \|_1 \overset{\text{def}}{=} \sum_{n \ge 0} |a_n| < \infty \right\}.
-```
+We will search for a function $u$ in the following form $u(t) = \sum_{n \ge 0} x_n t^n$, defined for all $t \in [-1, 1]$.
+A numerical plot of $u$ is displayed below.
 """
-
-# ╔═╡ 4cc2d0b2-53d5-436e-a2e2-a9a4c4f0e5b8
-md"### Operator norm"
-
-# ╔═╡ 5654a167-0b32-4768-98c1-00dd1ad473c3
-md"""
-Prove that if $A \in B(\ell^1_{\mathbb{N}})$, then $\| A \|_{B(\ell^1_{\mathbb{N}})} \le \max_{j \ge 0} \sum_{i \ge 0} |A_{i,j}|$ (in fact the inequality is an equality).
-"""
-
-# ╔═╡ 526f434e-075f-4207-a481-43b144d7c2f1
-md"#### Computing operator norms"
-
-# ╔═╡ fc023e96-7664-41e6-81f1-06fac19d12eb
-md"""
-Implementing the 1-norm is straightfoward:
-"""
-
-# ╔═╡ 8f61deaf-4c92-4b59-a487-28d4aba2de5d
-sum(abs, [1, 2, 3])
-
-# ╔═╡ d487e3cc-1d16-467b-ba52-cc4c6cdafacb
-md"""
-Similarly, the operator norm is also easily computed via:
-"""
-
-# ╔═╡ 1e00bda3-b2aa-43d1-bad5-1a30f1dfdb89
-maximum(sum(abs, [1 2 ; 3 4]; dims = 1))
-
-# ╔═╡ 19497a0a-5e66-452d-a4a5-39f95b211f22
-md"""
-Yet, it is practical to consider using the RadiiPolynomial library for norms, especially when dealing with more complex norms.
-"""
-
-# ╔═╡ 5894d57b-5d28-4d13-9ff9-965726d84479
-norm(Sequence(Taylor(2), [1, 2, 3]), 1)
-
-# ╔═╡ 85d433ab-3e1d-443c-9256-d386c4c9bf83
-opnorm(LinearOperator(Taylor(1), Taylor(1), [1 2 ; 3 4]), 1)
-
-# ╔═╡ 694758f6-f199-4e82-932f-b99465b72ee8
-md"### Cauchy product"
-
-# ╔═╡ 3cb18cba-18e5-4e6f-8b16-eccd1dcef9fd
-md"""
-Observe that the product of two functions yields a product in $\ell^1_{\mathbb{N}}$.
-
-!!! tip "Lemma"
-	If $u(t) = \sum_{n \ge 0} a_n t^n$ and $v(t) = \sum_{n \ge 0} b_n t^n$, then for their product we have $u(t) v(t) = \sum_{n \ge 0} (a*b)_n t^n$ where
-
-	```math
-	(a*b)_n \overset{\text{def}}{=} \sum_{l=0}^n a_{n-l} b_l, \qquad n \ge 0.
-	```
-"""
-
-# ╔═╡ f737a8eb-0fa4-49e6-ad07-502099edc3e1
-md"""
-Then, the problem of finding the inverse of $v$ corresponds to finding a sequence of coefficients $a \in (\ell^1_{\mathbb{N}}, *)$ such that
-
-```math
-a * b = 1,
-```
-
-where $b \overset{\text{def}}{=} (2, 1, 0, \dots)$.
-Here we slightly abuse notation by identifying the constant $1$ with its sequence of Taylor coefficients $(1, 0, \dots)$.
-To simplify the notation, we also denote $(\ell^1_{\mathbb{N}}, *)$ just by $\ell^1_{\mathbb{N}}$.
-"""
-
-# ╔═╡ 6badcd71-0e20-482e-8858-631b6357add2
-md"#### Computing the Cauchy product"
-
-# ╔═╡ e3f2f668-88b1-461d-886c-1011c9e018bf
-md"""
-We can store the non-trivial components of $b$ in a vector as follows:
-"""
-
-# ╔═╡ dc3e35fb-f266-4d6b-be07-4ea2b151cfb5
-my_b = [2.0, 1.0]
 
 # ╔═╡ 37827087-01ad-4fe7-bcb6-df2239ea0bca
 begin
-	plot(LinRange(-1, 1, 51), t -> my_b[1] + my_b[2] * t; label = "v")
-	plot!(LinRange(-1, 1, 51), t -> inv(my_b[1] + my_b[2] * t); label = "1/v")
+	plot(LinRange(-1, 1, 51), t -> 2 + t; label = "2+t", linewidth = 3)
+	plot!(LinRange(-1, 1, 51), t -> inv(2 + t); label = "1/(2+t)", linewidth = 3)
 	xlims!(-1, 1)
 	xlabel!("t")
 end
 
-# ╔═╡ 5c1bf65b-6130-41d6-98a5-36c6deac1e27
+# ╔═╡ d794367f-d346-416f-b8f1-1f442f876e20
 md"""
-A code implementing the Cauchy product can be done as follows:
+We follow the same approach presented in Module 1, specifically
+1. There is an additional step here in comparison with the previous lecture on finite-dimension problems, which is to find the adequate Banach space.
+2. we will formulate a zero-finding problem $F = 0$
+3. we will compute an approximate zero $\bar{x}$
+4. we will construct an approximate inverse $A$ of $DF(\bar{x})$
+5. we will derive bounds for $Y, Z_1, Z_2$ and verify the radii polynomial inequalities.
 """
 
-# ╔═╡ 7392a928-1b28-401e-9160-9ba30eefd674
-function cauchy_product(a, b, Nc)
-	Na = length(a)-1
-	Nb = length(b)-1
-	CoefType = promote_type(eltype(a), eltype(b))
-	c = zeros(CoefType, Nc+1)
-	for n = 0:Nc
-		for l = max(0, n-Na):min(n, Nb) # since 1 ≤ n-l+1 ≤ Na+1 and 1 ≤ l+1 ≤ Nb+1
-			c[n+1] += a[n-l+1] * b[l+1]
-		end
-	end
-    return c
-end
+# ╔═╡ f6da61f7-64a3-4c33-b9ba-7917ffb67b2a
+md"## Sequence space"
 
-# ╔═╡ c826d3ee-438c-4106-b79b-78ba0b4d50fd
-cauchy_product(my_b, my_b, 2) # (2 + x)^2 = 4 + 4x + x^2
-
-# ╔═╡ bb25cf18-b064-431b-9407-dfa061d78048
+# ╔═╡ 65cebd36-0474-42ee-b983-70c5f9c1614f
 md"""
-In fact, this product is already implemented in the RadiiPolynomial library.
-First we define the sequence of Taylor coefficients:
+The sequence space we are interested in is the one of analytic functions with radius of convergence strictly greater than $1$.
+The first step is to discretize the function space as the sequence space
+
+```math
+\ell^1_{\mathbb{N}} \overset{\text{def}}{=} \left\{ x \in \mathbb{R}^\mathbb{N} \, : \, \| x \|_1 \overset{\text{def}}{=} \sum_{n \ge 0} |x_n| < \infty \right\}.
+```
 """
 
-# ╔═╡ 82c9f85d-f74f-4106-a5b8-35043e2d6119
-b = Sequence(Taylor(1), [2.0, 1.0])
-
-# ╔═╡ 3044f4e8-6975-4169-a1e8-5ae044adb122
+# ╔═╡ 2dc02de6-f250-44db-b347-7d4d65c61d89
 md"""
-At this point, the only difference between `my_b` and `b` is that `my_b` is simply a standard `Vector` (a one-dimensional array of length 2), while `b` is a [composite type](https://docs.julialang.org/en/v1/manual/types/#Composite-Types) which has registered the vector of coefficients but also the space `Taylor(1)` where $1$ corresponds to the order.
-Simply put, `b` is a vector with a special tag attached to it.
-
-The advantage is that the standard function `*` of Julia can pick up on this and perform the Cauchy product:
+!!! lemma "Lemma"
+	If $x \in \ell^1_\mathbb{N}$, then the Taylor series $\sum_{n \ge 0} x_n t^n$ converges uniformly on $[-1, 1]$.
 """
 
-# ╔═╡ 4f900df0-7616-4f17-aec3-c447a58a2a74
-b * b # while `my_b * my_b` errors
-
-# ╔═╡ 00c0ca34-5596-4750-8665-e589ac382cf8
+# ╔═╡ f9d764b9-024a-4845-98ad-c3e79a4a5cd9
 md"""
-One should think of `b` as being an infinite sequence of coefficients whose only non-trivial coefficients are the first 2 coefficients.
-In this regards, adding two `Sequence` of different orders is well defined:
+!!! lemma "Lemma"
+	 $\ell^1_\mathbb{N}$ is a Banach space.
 """
 
-# ╔═╡ 52926eea-8175-43d8-8446-f3750dfc2794
-b + Sequence(Taylor(2), [1, 1, 1]) # while `my_b + [1, 1, 1]` errors
+# ╔═╡ 56bf8063-cc76-47ee-9074-f6a59466ec60
+md"### Cauchy product"
 
-# ╔═╡ 51f0b06b-e7ec-4f0b-a9b2-eccbd95fcba0
+# ╔═╡ 3cb18cba-18e5-4e6f-8b16-eccd1dcef9fd
 md"""
-Moreover, since numbers have a canonical representation as a sequence one can add scalars to sequences:
+!!! lemma "Lemma (Cauchy product)"
+	If $u(t) = \sum_{n \ge 0} x_n t^n$ and $v(t) = \sum_{n \ge 0} y_n t^n$, then for their product we have $u(t) v(t) = \sum_{n \ge 0} (x * y)_n t^n$ where
+
+	```math
+	(x * y)_n \overset{\text{def}}{=} \sum_{l=0}^n x_{n-l} y_l, \qquad n \ge 0.
+	```
 """
 
-# ╔═╡ 62a5750a-cf1f-41e9-8eba-aa4dd80b7d6f
-b + 1 # while `my_b + 1` errors
+# ╔═╡ 7390523a-ecf1-4b7e-a3e6-cce50d43083b
+md"""
+The product and the norm play together nicely: they give the space $\ell^1_\mathbb{N}$ the structure of a Banach algebra, as expressed by the following lemma.
+"""
 
-# ╔═╡ e8b57ef7-6ee3-4982-809f-00890492c396
+# ╔═╡ 2a4448c5-e14a-4791-926f-172f3cb6e1f0
+md"""
+!!! lemma "Lemma (Banach algebra property)"
+	For any $x, y \in \ell^1_\mathbb{N}$ we have $\| x * y \|_1 \le \| x \|_1 \| y \|_1$.
+"""
+
+# ╔═╡ f737a8eb-0fa4-49e6-ad07-502099edc3e1
+md"""
+!!! note "Remark"
+    To simplify the notation, we denote $(\ell^1_\mathbb{N}, *)$ by $\ell^1_\mathbb{N}$.
+"""
+
+# ╔═╡ faec7172-c732-470c-88a0-8de5d92075b0
+md"### Finite dimensional projection"
+
+# ╔═╡ 4290872b-923b-45dc-81b0-3e280a5a77c1
+md"""
+We introduce a projection operator on a finite number of modes ($N+1$ coefficients) $\Pi_N : \ell^1_\mathbb{N} \to \ell^1_\mathbb{N}$ given by
+
+```math
+(\Pi_N x)_n
+\overset{\text{def}}{=}
+\begin{cases}
+x_n, & n \le N, \\
+0, & n > N,
+\end{cases}
+```
+
+together with its complement $\Pi_{> N} \overset{\text{def}}{=} I - \Pi_N$.
+"""
+
+# ╔═╡ 8356c027-ead5-4073-9d0e-b25f41bf9543
+md"""
+###### Why is this so complicated?
+
+The strange looking subscript $> N$ is in fact meant to indicate clearly which index values are involved.
+The projections provide a sleek way to do the algebra that essentially splits the problem into a finite-dimensional part handled by the computer and an infinite-dimensional part (also referred as *tail*) handled entirely by pen-and-paper analysis.
+It avoids writing down infinite matrices or formulas with a lot of indices.
+"""
+
+# ╔═╡ c11ce6e3-4e23-46bc-8bbd-217908d966af
 md"## Zero-finding problem"
+
+# ╔═╡ b6655a7c-32d0-473a-ac1d-ddb96e31de81
+md"""
+Writing $v(t) = \sum_{n \ge 0} y_n t^n$ with $y \overset{\text{def}}{=} (2, 1, 0, \dots) \in \ell^1_\mathbb{N}$, and plugging $u(t) = \sum_{n \ge 0} x_n t^n$ into the algebraic equation gives
+
+```math
+x * y = 1.
+```
+"""
+
+# ╔═╡ 266d8eb2-fc1f-42ca-802e-90a4a358b313
+md"""
+!!! note "Remark"
+    Here we slightly abuse notation by identifying the constant $1$ with its sequence of Taylor coefficients $(1, 0, \dots) \in \ell^1_\mathbb{N}$.
+"""
+
+# ╔═╡ 0ea0128e-480f-4d29-9ef7-f9a11fec5513
+md"""
+Therefore, the problem of finding the inverse of $v$ corresponds to finding a zero of the mapping $F : \ell^1_\mathbb{N} \to \ell^1_\mathbb{N}$ given by
+
+```math
+F(x) \overset{\text{def}}{=} x * y - 1.
+```
+"""
+
+# ╔═╡ 0409bc2e-af44-45fd-a10e-e46f770ea136
+md"""
+We now formalize that the zero-finding problem leads to the inverse function.
+"""
+
+# ╔═╡ 305c0f3f-4d11-4c22-93b1-d6ce45773cbb
+md"""
+!!! lemma "Lemma"
+	If $\tilde{x} \in \ell^1_\mathbb{N}$ is such that $F(\tilde{x}) = 0$, then the corresponding Taylor series $u(t) = \sum_{n \ge 0} x_n t^n$ is the solution to the algebraic equation $u(t) v(t) = 1$ for all $t \in [-1, 1]$.
+"""
+
+# ╔═╡ 4f37b759-371e-4042-82d0-720523718021
+F(x, y) = x * y - 1
+
+# ╔═╡ 17013b31-0c79-4dd0-a6e3-5946528d69f6
+md"## Numerical zero"
 
 # ╔═╡ 151f9f5f-65ab-4ccb-94a6-c530d924962f
 md"""
-Let us now go back to our task of finding the inverse of $b$ with respect to $*$.
-To this end, we consider the zero-finding problem $F : \ell^1_{\mathbb{N}} \to \ell^1_{\mathbb{N}}$ given by
+The map $F$ is affine and satisfies $[DF(x)] x = F(x) + 1$, so Newton's method reduce to solving in $\ell^1_\mathbb{N}$ the linear system
 
 ```math
-F(a) \overset{\text{def}}{=} a*b - 1.
+\mathcal{M}_y x = 1,
 ```
 
-We aim to prove that, for some injective $A \approx DF(\bar{a})^{-1} \in B(\ell^1_{\mathbb{N}})$ yet to be constructed, the fixed-point operator
+where $\mathcal{M}_y = DF(x) \in \mathscr{B}(\ell^1_\mathbb{N})$ is such that
 
 ```math
-T(a) \overset{\text{def}}{=} a - A F(a) = a - A (a * b - 1),
+\mathcal{M}_y h = y * h, \qquad \forall h \in \ell^1_\mathbb{N}.
 ```
 
-is contracting around $\bar{a}$ with $F(\bar{a}) \approx 0$.
+In other words, $\mathcal{M}_y$ is the mutliplication operator associated with $y$.
 
-Observe that
-
-```math
-DF(a) h = b * h,
-```
-
-that is $DF(a)$ is the mutliplication operator $M_b$ associated with $b$.
-
-As a bounded linear operator acting on infinite sequences in $\ell^1_{\mathbb{N}}$, $M_b$ can be visualized as a matrix with an infinite number of rows and columns.
-Specifically, one can check that $M_b$ is a lower triangular operator so that
+As a bounded linear operator acting on infinite sequences in $\ell^1_\mathbb{N}$, $\mathcal{M}_y$ can be visualized as a matrix with an infinite number of rows and columns:
 
 ```math
-M_b =
+\mathcal{M}_y =
 \begin{pmatrix}
-b_0 & 0   & 0 & \cdots \\
-b_1 & b_0 & 0 & \cdots \\
-b_2 & b_1 & b_0 & \ddots \\
+y_0 & 0   & 0 & \cdots \\
+y_1 & y_0 & 0 & \cdots \\
+y_2 & y_1 & y_0 & \ddots \\
 \vdots & \vdots & \vdots & \ddots
 \end{pmatrix}.
 ```
+
+So we seek a numerical approximation $\bar{x}$ of the zero of $F$ in the truncated space $\Pi_N \ell^1_\mathbb{N}$; this can be obtained by solving numerically the finite truncation of the above linear system, formally $\Pi_N \mathcal{M}_b \bar{x} \approx 1$.
+
+In Julia, we simply execute:
 """
 
-# ╔═╡ ee748d75-7e6e-4e4b-95d1-46f2f8dbe538
-md"""
-Given a finite number $N$ of rows and columns, one can implement such multiplication operator as follows:
-"""
-
-# ╔═╡ 8568a1e1-6140-4ef3-90c7-a502b7a2af2e
-function mult_operator(my_b, N)
-	n = length(my_b)
-	M = zeros(N+1, N+1)
-	for i = 1:N+1
-		for j = max(1,i+1-n):min(i) # since 1 ≤ i-j+1 ≤ n
-			M[i,j] = my_b[i-j+1]
-		end
-	end
-    return M
-end
-
-# ╔═╡ 7392d156-4a30-471c-b54d-98bf235c8555
-my_M = mult_operator(my_b, 5)
+# ╔═╡ 82c9f85d-f74f-4106-a5b8-35043e2d6119
+y = Sequence(Taylor(1), [2.0, 1.0])
 
 # ╔═╡ 75b99408-9fed-4c20-8f6f-0513185b0c0f
 md"""
@@ -265,7 +235,7 @@ We can *wrap* the sequence in a `Multiplication` data structure:
 """
 
 # ╔═╡ d19281af-752c-414f-9a81-5b79caacf1e5
-infinite_M = Multiplication(b)
+infinite_M = Multiplication(y)
 
 # ╔═╡ d4735adb-b9b7-40d5-8d3e-e2609abe8088
 md"""
@@ -274,154 +244,199 @@ So for the moment, `infinite_M` is not "materialized" so to say, but it can act 
 """
 
 # ╔═╡ bda1b945-f554-40ff-8085-714202abec88
-infinite_M(b) # infinite_M * b
+infinite_M(y) # y * y
 
 # ╔═╡ 299c15a2-253a-428f-9a23-cd48bd8238c2
 md"""
 In RadiiPolynomial, we can represent the operator as a finite matrix using the `project` function:
 """
 
+# ╔═╡ 1b058c77-7241-41ac-9a6e-84160b8d79da
+N = 3
+
 # ╔═╡ 82143c8d-7009-4537-975f-c832330caa9e
-M = project(Multiplication(b), Taylor(5), Taylor(5))
+M = project(Multiplication(y), Taylor(N), Taylor(N))
 
-# ╔═╡ faec7172-c732-470c-88a0-8de5d92075b0
-md"### Finite dimensional projection"
+# ╔═╡ a3124717-6741-4769-8fb0-2b489f13dc94
+x_bar = M \ Sequence(Taylor(N), [1.0 ; zeros(N)])
 
-# ╔═╡ 4290872b-923b-45dc-81b0-3e280a5a77c1
+# ╔═╡ d2d76ed8-911d-4247-9460-8c7df7669912
+begin
+	plot(LinRange(-1, 1, 101), t -> x_bar(t);
+		color = :royalblue1, linewidth = 3, legend = false)
+	xlims!(-1, 1)
+	xlabel!("t")
+	ylabel!("u")
+end
+
+# ╔═╡ d6087c16-1e9a-48bf-9662-35c0d3c5dceb
 md"""
-We introduce a projection operator on a finite number of modes ($N+1$ coefficients)
-
 ```math
-(\Pi_N a)_n
-\overset{\text{def}}{=}
-\begin{cases}
-a_n, & n \le N, \\
-0, & n > N,
-\end{cases}
+F(\bar{x}) = \bar{x} * y - 1 \approx 0.
 ```
-
-together with its complement $\Pi_{> N} \overset{\text{def}}{=} I - \Pi_N$.
 """
 
+# ╔═╡ 1c61be31-8515-4b32-9d21-9a8910693f5a
+x_bar * y
+
 # ╔═╡ 1d1277bf-2aa3-4c89-b34d-b2a2e5fc6fc5
-md"### Approximate inverse"
+md"## Constructing $A$"
 
 # ╔═╡ 8a4513a5-9049-48df-ae9b-ea8c5d5f1076
 md"""
-For $T$ to be a contraction, we want $A$ to be a "good" approximate inverse of $M_b$.
-So we want the inverse of $b$ with respect to the Cauchy product $*$.
-Let $\bar{a} \in \Pi_N \ell^1_{\mathbb{N}}$ satisfy $\bar{a} * b \approx (1, 0, \dots)$.
-Then,
+For $T$ to be a contraction, we want $A$ to be a good approximate inverse of $\mathcal{M}_y$.
+So we want the inverse of $y$ with respect to the Cauchy product $*$.
+Recall that our numerical zero $\bar{x} \in \Pi_N \ell^1_{\mathbb{N}}$ satisfies $\bar{x} * y \approx (1, 0, \dots)$.
+Thus, we define
 
 ```math
-A \overset{\text{def}}{=} M_{\bar{a}}.
-```
-
-We can numerically solve this linear system for a finite number of modes
-
-```math
-\Pi_N M_b \Pi_N \bar{a} = \Pi_N (1, 0, \dots)
+A \overset{\text{def}}{=} \mathcal{M}_{\bar{x}}.
 ```
 
 Consequently,
 
 ```math
-F(\bar{a}) = \bar{a} * b - 1 \approx 0
-\qquad \text{and} \qquad
-A DF(\bar{a}) = \bar{a} * b \approx 1.
+A [DF(\bar{x})] h = \bar{x} * y * h \approx 1 * h = h.
 ```
 """
 
-# ╔═╡ 1af05657-7b03-4715-9652-77aa5b2f222c
-md"#### Computing the approximate inverse"
-
-# ╔═╡ a3124717-6741-4769-8fb0-2b489f13dc94
-a_bar = interval.( M \ Sequence(Taylor(5), I[1:6,1]) )
-
 # ╔═╡ 7edef822-8f17-4a17-8dc7-f476fd610a29
-md"### Newton-Kantorovich"
+md"## Verifying the contraction"
+
+# ╔═╡ 63e93962-935b-4c4a-8d10-04b43411b609
+md"""
+Now we verify that $T(x) \overset{\text{def}}{=} x - A F(x)$ is a contraction around $\bar{x} \in \Pi_N \ell^1_\mathbb{N}$.
+If successful, we will have obtained the existence of a true zero of $F$ such that
+
+```math
+y^{-1} = \tilde{x} = \bar{x} + h,
+```
+
+where $h \in \ell^1_\mathbb{N}$ is not known but $\| h \|_1 \le r$.
+"""
+
+# ╔═╡ 6d0a1dbf-2904-4066-ad8f-6da4955de009
+Foldable("""Proof""",
+md"""
+See Exercise 1.
+""")
 
 # ╔═╡ 63b48726-18f5-4bab-8675-f90ec50166ac
 md"""
-Observe that $\| M_a \|_{B(\ell^1_{\mathbb{N}})} = \| a \|_1$ for all $a \in \ell^1_{\mathbb{N}}$ (the proof is left as an exercise).
-
-Let us now apply our contraction argument and compute the required bounds:
-
-```math
-\begin{align}
-Y &\ge \| A F(\bar{a}) \|_1 = \| \bar{a} * (\bar{a} * b - 1) \|_1, \\
-Z_1 &\ge \| A DF(\bar{a}) - I \|_{B(\ell^1_{\mathbb{N}})} = \| \bar{a} * b - 1 \|_1 = \| F(\bar{a}) \|_1, \\
-Z_2 &= 0.
-\end{align}
-```
-
-To conclude the proof, note that $Z_1 < 1$ implies that $A DF(\bar{a})$ is invertible, since $A DF(\bar{a}) = M_\bar{a} * M_b = M_b * M_\bar{a} = DF(\bar{a}) A$, this guarantees that $A$ is in fact injective.
-
-Note that all the above quantities are computable since $A F(\bar{a}) \in \Pi_{2N + 1} \ell^1_{\mathbb{N}}$ (recall that $b \in \Pi_1 \ell^1_{\mathbb{N}}, \bar{a} \in \Pi_N \ell^1_{\mathbb{N}}$).
+Let us now apply our contraction argument and compute the required bounds.
+We will need IA.
 """
 
-# ╔═╡ 4f37b759-371e-4042-82d0-720523718021
-F(a, b) = a * b - 1
+# ╔═╡ 5c57ed8e-7bb1-4947-8ebd-f0c59b7ae8d4
+iy = interval(y)
+
+# ╔═╡ bec0f423-5b0a-4dee-bedf-9e3b7fcf5d3d
+ix_bar = interval(x_bar)
+
+# ╔═╡ f1fa7997-684d-443b-a5ed-5377ebcd3aee
+md"##### Computing $Y$"
+
+# ╔═╡ 25df704a-3e01-45aa-a3de-ea2cb3f18504
+md"""
+```math
+\| A F(\bar{x}) \|_1 = \| \bar{x} * (\bar{x} * y - 1) \|_1 \le Y.
+```
+
+The above quantity is computable since $A F(\bar{x}) \in \Pi_{2N + 1} \ell^1_\mathbb{N}$ (recall that $y \in \Pi_1 \ell^1_\mathbb{N}, \bar{x} \in \Pi_N \ell^1_\mathbb{N}$).
+"""
 
 # ╔═╡ d27d66a6-4717-4d6d-895f-cdebd649cebd
-Y = norm(a_bar * F(a_bar, b), 1)
+Y = norm(ix_bar * F(ix_bar, iy), 1)
+
+# ╔═╡ 39ed4568-b971-4cf3-accc-1ad32a44ce3d
+md"##### Computing $Z_1$"
+
+# ╔═╡ d5b89e7d-01bf-433a-a6e0-302951343bcd
+md"""
+!!! lemma "Lemma"
+	For all $x \in \ell^1_\mathbb{N}$ we have that $\| \mathcal{M}_x \|_{\mathscr{B}(\ell^1_\mathbb{N})} = \| x \|_1$.
+"""
+
+# ╔═╡ 5718bc5d-a86f-4907-8d5f-1707c8b51f58
+md"""
+```math
+\| A DF(\bar{x}) - I \|_{\mathscr{B}(\ell^1_\mathbb{N})} = \| \bar{x} * y - 1 \|_1 = \| F(\bar{x}) \|_1 \le Z_1.
+```
+
+The above quantity is computable since $F(\bar{x}) \in \Pi_{N + 1} \ell^1_\mathbb{N}$.
+"""
 
 # ╔═╡ 9d468890-c155-442d-bcbf-6a33bc991f72
-Z₁ = norm(F(a_bar, b), 1)
+Z₁ = norm(F(ix_bar, iy), 1)
+
+# ╔═╡ 3d9b3db1-ac82-434c-8521-ce5ce89f570d
+md"##### Computing $Z_2$"
+
+# ╔═╡ 2d273b10-b485-49aa-9d06-8485ac166dc8
+md"""
+```math
+\|A(DF(x) - DF(\bar{x}))\|_{\mathscr{B}(\ell^1_\mathbb{N})} = 0 = Z_2, \qquad \forall x \in \ell^1_\mathbb{N}.
+```
+
+In particular, we can choose $R = \infty$.
+"""
+
+# ╔═╡ cc5576ac-2894-48ef-a7a9-c4c16b589173
+R = Inf
 
 # ╔═╡ d02c07ee-77f2-4317-9692-558323e37b54
 Z₂ = interval(0)
 
+# ╔═╡ 6b63d5e1-048a-4a34-98a0-960d28a51a0b
+md"##### Finishing the CAP"
+
 # ╔═╡ e87f4cbe-e511-4c78-882b-f86961007932
-interval_of_existence(Y, Z₁, Z₂, Inf)
+ie = interval_of_existence(Y, Z₁, Z₂, R)
+
+# ╔═╡ 7427f6e4-337c-4af8-ad59-dfd296b0a453
+r = inf(ie)
+
+# ╔═╡ c498e384-b1a2-40a5-bd72-edabdcd1fc4d
+md"""
+To conclude the proof, note that $\|I - A DF(\bar{x})\| \le Z_1 < 1$ ensures that $A DF(\bar{x})$ is invertible, which implies that $A$ is surjective.
+Since $A DF(\bar{x}) = \mathcal{M}_\bar{x} * \mathcal{M}_y = \mathcal{M}_y * \mathcal{M}_\bar{x} = DF(\bar{x}) A$, it follows that $A$ must also be injective.
+"""
 
 # ╔═╡ 04417cef-c3d9-4adb-a449-7b26bbe20056
 begin
-	plot(LinRange(-1, 1, 51), t -> mid(a_bar(t)); label = "approx")
-	plot!(LinRange(-1, 1, 51), t -> inv(2+t); label = "theoretical")
+	rigorous_eval(x, r, t) = interval(x(t), r; format = :midpoint)
+
+	ts = LinRange(-1, 1, 101)
+	
+	plot([[interval(ts[i], ts[i+1]), rigorous_eval(ix_bar, r, interval(ts[i], ts[i+1]))] for i = 1:length(ts)-1];
+		label = "", color = :palegreen3)
+
+	plot!(ts, t -> x_bar(t);
+		label = "x_bar", color = :royalblue1, linewidth = 3)
+	
+	plot!(ts, t -> inv(2+t);
+		label = "1/(2+t)", color = :salmon, linewidth = 3)
+
+	xlims!(-1, 1)
+	xlabel!("t")
 end
 
 # ╔═╡ d61da3a0-ac88-41a4-ae50-86a02ea43cbf
 md"""
-```math
-\sup_{t \in [-1,1]} | v(t)^{-1} - \sum_{n=0}^N \bar{a}_n t^n | \le \| b^{-1} - \bar{a} \|_1 \le r
-```
-"""
-
-# ╔═╡ de0fb5e0-ad64-4cb6-a2db-0b30021adf5a
-md"""
-For the sake of completeness, let us compare what the code of the proof would have looked like with our manual implementation:
-"""
-
-# ╔═╡ 28be86e3-a1b2-4562-8d6a-6ebff88a3bb4
-my_F(a_bar, b, N) = cauchy_product(a_bar, b, N) - [1 ; zeros(N)]
-
-# ╔═╡ a31c1107-aa7e-43e5-b4c3-4c3f2b3fbfad
-my_a_bar = interval.( my_M \ I[1:6,1] )
-
-# ╔═╡ 9a4f9f19-2fe8-44ee-aa8f-bdbe811b86dd
-my_Y = sum(abs.(cauchy_product(
-	my_a_bar,
-	my_F(my_a_bar, [my_b ; zeros(max(5-length(my_b), 0))], 6),
-	11)))
-
-# ╔═╡ a980db33-ab3a-4b19-8ccd-7c9922bf6928
-md"""
-One can see that the padding by zeros, explicitly keeping track of the sizes are already making the code less readible for this simple example.
-The RadiiPolynomial library does the bookkeeping for you!
-"""
-
-# ╔═╡ 2d99c89c-c23d-4b6e-a0e2-58d209ffd96b
-md"""
-Lastly, the problem is simple enough that we can compute by hand both the first 5 terms of $(2+t)^{-1}$ and compare with our CAP.
+We have the $C^0$-error bound
 
 ```math
-\frac{1}{2+t} = \frac{1}{2} - \frac{t}{4} + \frac{t^2}{8} - \frac{t^3}{16} + \frac{t^4}{32} - \frac{t^5}{64} + O(t^6).
+\sup_{t \in [-1,1]} | v(t)^{-1} - \sum_{n=0}^N \bar{x}_n t^n | \le \| y^{-1} - \bar{x} \|_1 \le r.
 ```
-"""
 
-# ╔═╡ e40b7fc3-1ce6-4583-9bbe-51525c4c1cb0
-bounds.(coefficients(a_bar))
+Lastly, the problem is simple enough that we can compute by hand both the first 5 terms of $(2+t)^{-1}$
+
+```math
+\frac{1}{2+t} = \frac{1}{2} - \frac{t}{4} + \frac{t^2}{8} - \frac{t^3}{16} + \frac{t^4}{32} - \frac{t^5}{64} + O(t^6),
+```
+
+and compare with our CAP.
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -433,9 +448,9 @@ RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
 Plots = "~1.40.8"
-PlutoTeachingTools = "~0.3.0"
+PlutoTeachingTools = "~0.3.1"
 PlutoUI = "~0.7.60"
-RadiiPolynomial = "~0.8.13"
+RadiiPolynomial = "~0.8.15"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -444,7 +459,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.6"
 manifest_format = "2.0"
-project_hash = "2a778c5d86a1bdd14fe9b7b4da3a6bda20a31af0"
+project_hash = "5a07dd6321408ca2f4b5487b10c94622551c3104"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -469,9 +484,9 @@ version = "0.1.9"
 
 [[deps.Bzip2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "9e2a6b69137e6969bab0152632dcb3bc108c8bdd"
+git-tree-sha1 = "8873e196c2eb87962a2048b3b8e08946535864a1"
 uuid = "6e34b625-4abd-537c-b88f-471c36dfa7a0"
-version = "1.0.8+1"
+version = "1.0.8+2"
 
 [[deps.CRlibm_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -481,9 +496,9 @@ version = "1.0.1+0"
 
 [[deps.Cairo_jll]]
 deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "JLLWrappers", "LZO_jll", "Libdl", "Pixman_jll", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "a2f1c8c668c8e3cb4cca4e57a8efdb09067bb3fd"
+git-tree-sha1 = "009060c9a6168704143100f36ab08f06c2af4642"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
-version = "1.18.0+2"
+version = "1.18.2+1"
 
 [[deps.CodeTracking]]
 deps = ["InteractiveUtils", "UUIDs"]
@@ -499,9 +514,9 @@ version = "0.7.6"
 
 [[deps.ColorSchemes]]
 deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "PrecompileTools", "Random"]
-git-tree-sha1 = "b5278586822443594ff615963b0c09755771b3e0"
+git-tree-sha1 = "13951eb68769ad1cd460cdb2e64e5e95f1bf123d"
 uuid = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
-version = "3.26.0"
+version = "3.27.0"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
@@ -615,9 +630,9 @@ version = "2.6.2+0"
 
 [[deps.FFMPEG]]
 deps = ["FFMPEG_jll"]
-git-tree-sha1 = "b57e3acbe22f8484b4b5ff66a7499717fe1a9cc8"
+git-tree-sha1 = "53ebe7511fa11d33bec688a9178fac4e49eeee00"
 uuid = "c87230d0-a227-11e9-1b43-d7ebe4e7570a"
-version = "0.4.1"
+version = "0.4.2"
 
 [[deps.FFMPEG_jll]]
 deps = ["Artifacts", "Bzip2_jll", "FreeType2_jll", "FriBidi_jll", "JLLWrappers", "LAME_jll", "Libdl", "Ogg_jll", "OpenSSL_jll", "Opus_jll", "PCRE2_jll", "Zlib_jll", "libaom_jll", "libass_jll", "libfdk_aac_jll", "libvorbis_jll", "x264_jll", "x265_jll"]
@@ -665,15 +680,15 @@ version = "3.4.0+1"
 
 [[deps.GR]]
 deps = ["Artifacts", "Base64", "DelimitedFiles", "Downloads", "GR_jll", "HTTP", "JSON", "Libdl", "LinearAlgebra", "Preferences", "Printf", "Qt6Wayland_jll", "Random", "Serialization", "Sockets", "TOML", "Tar", "Test", "p7zip_jll"]
-git-tree-sha1 = "629693584cef594c3f6f99e76e7a7ad17e60e8d5"
+git-tree-sha1 = "ee28ddcd5517d54e417182fec3886e7412d3926f"
 uuid = "28b8d3ca-fb5f-59d9-8090-bfdbd6d07a71"
-version = "0.73.7"
+version = "0.73.8"
 
 [[deps.GR_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Cairo_jll", "FFMPEG_jll", "Fontconfig_jll", "FreeType2_jll", "GLFW_jll", "JLLWrappers", "JpegTurbo_jll", "Libdl", "Libtiff_jll", "Pixman_jll", "Qt6Base_jll", "Zlib_jll", "libpng_jll"]
-git-tree-sha1 = "a8863b69c2a0859f2c2c87ebdc4c6712e88bdf0d"
+git-tree-sha1 = "f31929b9e67066bee48eec8b03c0df47d31a74b3"
 uuid = "d2c73de3-f751-5644-a686-071e5b155ba9"
-version = "0.73.7+0"
+version = "0.73.8+0"
 
 [[deps.Gettext_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "JLLWrappers", "Libdl", "Libiconv_jll", "Pkg", "XML2_jll"]
@@ -683,9 +698,9 @@ version = "0.21.0+0"
 
 [[deps.Glib_jll]]
 deps = ["Artifacts", "Gettext_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Libiconv_jll", "Libmount_jll", "PCRE2_jll", "Zlib_jll"]
-git-tree-sha1 = "7c82e6a6cd34e9d935e9aa4051b66c6ff3af59ba"
+git-tree-sha1 = "674ff0db93fffcd11a3573986e550d66cd4fd71f"
 uuid = "7746bdde-850d-59dc-9ae8-88ece973131d"
-version = "2.80.2+0"
+version = "2.80.5+0"
 
 [[deps.Graphite2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -700,9 +715,9 @@ version = "1.0.2"
 
 [[deps.HTTP]]
 deps = ["Base64", "CodecZlib", "ConcurrentUtilities", "Dates", "ExceptionUnwrapping", "Logging", "LoggingExtras", "MbedTLS", "NetworkOptions", "OpenSSL", "Random", "SimpleBufferStream", "Sockets", "URIs", "UUIDs"]
-git-tree-sha1 = "d1d712be3164d61d1fb98e7ce9bcbc6cc06b45ed"
+git-tree-sha1 = "bc3f416a965ae61968c20d0ad867556367f2817d"
 uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
-version = "1.10.8"
+version = "1.10.9"
 
 [[deps.HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "Graphite2_jll", "JLLWrappers", "Libdl", "Libffi_jll"]
@@ -733,23 +748,21 @@ deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
 
 [[deps.IntervalArithmetic]]
-deps = ["CRlibm_jll", "MacroTools", "RoundingEmulator"]
-git-tree-sha1 = "fe30dec78e68f27fc416901629c6e24e9d5f057b"
+deps = ["CRlibm_jll", "LinearAlgebra", "MacroTools", "RoundingEmulator"]
+git-tree-sha1 = "c59c57c36683aa17c563be6edaac888163f35285"
 uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-version = "0.22.16"
+version = "0.22.18"
 
     [deps.IntervalArithmetic.extensions]
     IntervalArithmeticDiffRulesExt = "DiffRules"
     IntervalArithmeticForwardDiffExt = "ForwardDiff"
     IntervalArithmeticIntervalSetsExt = "IntervalSets"
-    IntervalArithmeticLinearAlgebraExt = "LinearAlgebra"
     IntervalArithmeticRecipesBaseExt = "RecipesBase"
 
     [deps.IntervalArithmetic.weakdeps]
     DiffRules = "b552c78f-8df3-52c6-915a-8e097449b14b"
     ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
     IntervalSets = "8197267c-284f-5f27-9208-e0e47529a953"
-    LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
     RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 
 [[deps.IrrationalConstants]]
@@ -765,9 +778,9 @@ version = "0.1.8"
 
 [[deps.JLLWrappers]]
 deps = ["Artifacts", "Preferences"]
-git-tree-sha1 = "f389674c99bfcde17dc57454011aa44d5a260a40"
+git-tree-sha1 = "be3dc50a92e5a386872a493a10050136d4703f9b"
 uuid = "692b3bcd-3c85-4b1f-b108-f13ce0eb3210"
-version = "1.6.0"
+version = "1.6.1"
 
 [[deps.JSON]]
 deps = ["Dates", "Mmap", "Parsers", "Unicode"]
@@ -777,9 +790,9 @@ version = "0.21.4"
 
 [[deps.JpegTurbo_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "c84a835e1a09b289ffcd2271bf2a337bbdda6637"
+git-tree-sha1 = "25ee0be4d43d0269027024d75a24c24d6c6e590c"
 uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
-version = "3.0.3+0"
+version = "3.0.4+0"
 
 [[deps.JuliaInterpreter]]
 deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
@@ -794,10 +807,10 @@ uuid = "c1c5ebd0-6772-5130-a774-d5fcae4a789d"
 version = "3.100.2+0"
 
 [[deps.LERC_jll]]
-deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "bf36f528eec6634efc60d7ec062008f171071434"
+deps = ["Artifacts", "JLLWrappers", "Libdl"]
+git-tree-sha1 = "36bdbc52f13a7d1dcb0f3cd694e01677a515655b"
 uuid = "88015f11-f218-50d7-93a8-a6af411a945d"
-version = "3.0.0+1"
+version = "4.0.0+0"
 
 [[deps.LLVMOpenMP_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -807,14 +820,14 @@ version = "18.1.7+0"
 
 [[deps.LZO_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "70c5da094887fd2cae843b8db33920bac4b6f07d"
+git-tree-sha1 = "854a9c268c43b77b0a27f22d7fab8d33cdb3a731"
 uuid = "dd4b983a-f0e5-5f8d-a1b7-129d4a5fb1ac"
-version = "2.10.2+0"
+version = "2.10.2+1"
 
 [[deps.LaTeXStrings]]
-git-tree-sha1 = "50901ebc375ed41dbf8058da26f9de442febbbec"
+git-tree-sha1 = "dda21b8cbd6a6c40d9d02a73230f9d70fed6918c"
 uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
-version = "1.3.1"
+version = "1.4.0"
 
 [[deps.Latexify]]
 deps = ["Format", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "OrderedCollections", "Requires"]
@@ -867,9 +880,9 @@ version = "3.2.2+1"
 
 [[deps.Libgcrypt_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libgpg_error_jll"]
-git-tree-sha1 = "9fd170c4bbfd8b935fdc5f8b7aa33532c991a673"
+git-tree-sha1 = "8be878062e0ffa2c3f67bb58a595375eda5de80b"
 uuid = "d4300ac3-e22c-5743-9152-c294e39db1e4"
-version = "1.8.11+0"
+version = "1.11.0+0"
 
 [[deps.Libglvnd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libX11_jll", "Xorg_libXext_jll"]
@@ -879,15 +892,15 @@ version = "1.6.0+0"
 
 [[deps.Libgpg_error_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "fbb1f2bef882392312feb1ede3615ddc1e9b99ed"
+git-tree-sha1 = "c6ce1e19f3aec9b59186bdf06cdf3c4fc5f5f3e6"
 uuid = "7add5ba3-2f88-524e-9cd5-f83b8a55f7b8"
-version = "1.49.0+0"
+version = "1.50.0+0"
 
 [[deps.Libiconv_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "f9557a255370125b405568f9767d6d195822a175"
+git-tree-sha1 = "61dfdba58e585066d8bce214c5a51eaa0539f269"
 uuid = "94ce4f54-9a6c-5748-9c1c-f9c7231a4531"
-version = "1.17.0+0"
+version = "1.17.0+1"
 
 [[deps.Libmount_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -897,9 +910,9 @@ version = "2.40.1+0"
 
 [[deps.Libtiff_jll]]
 deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "LERC_jll", "Libdl", "XZ_jll", "Zlib_jll", "Zstd_jll"]
-git-tree-sha1 = "2da088d113af58221c52828a80378e16be7d037a"
+git-tree-sha1 = "b404131d06f7886402758c9ce2214b636eb4d54a"
 uuid = "89763e89-9b03-5906-acba-b20f662cd828"
-version = "4.5.1+1"
+version = "4.7.0+0"
 
 [[deps.Libuuid_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -932,15 +945,15 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.LoggingExtras]]
 deps = ["Dates", "Logging"]
-git-tree-sha1 = "c1dd6d7978c12545b4179fb6153b9250c96b0075"
+git-tree-sha1 = "f02b56007b064fbfddb4c9cd60161b6dd0f40df3"
 uuid = "e6f89c97-d47a-5376-807f-9c37f3926c36"
-version = "1.0.3"
+version = "1.1.0"
 
 [[deps.LoweredCodeUtils]]
 deps = ["JuliaInterpreter"]
-git-tree-sha1 = "c2b5e92eaf5101404a58ce9c6083d595472361d6"
+git-tree-sha1 = "260dc274c1bc2cb839e758588c63d9c8b5e639d1"
 uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "3.0.2"
+version = "3.0.5"
 
 [[deps.MIMEs]]
 git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
@@ -1020,9 +1033,9 @@ version = "1.4.3"
 
 [[deps.OpenSSL_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "1b35263570443fdd9e76c76b7062116e2f374ab8"
+git-tree-sha1 = "7493f61f55a6cce7325f197443aa80d32554ba10"
 uuid = "458c3c95-2e84-50aa-8efc-19380b2a3a95"
-version = "3.0.15+0"
+version = "3.0.15+1"
 
 [[deps.Opus_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1075,10 +1088,10 @@ uuid = "ccf2f8ad-2431-5c83-bf29-c5338b663b6a"
 version = "3.2.0"
 
 [[deps.PlotUtils]]
-deps = ["ColorSchemes", "Colors", "Dates", "PrecompileTools", "Printf", "Random", "Reexport", "Statistics"]
-git-tree-sha1 = "7b1a9df27f072ac4c9c7cbe5efb198489258d1f5"
+deps = ["ColorSchemes", "Colors", "Dates", "PrecompileTools", "Printf", "Random", "Reexport", "StableRNGs", "Statistics"]
+git-tree-sha1 = "650a022b2ce86c7dcfbdecf00f78afeeb20e5655"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
-version = "1.4.1"
+version = "1.4.2"
 
 [[deps.Plots]]
 deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "JLFzf", "JSON", "LaTeXStrings", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "PrecompileTools", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "RelocatableFolders", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "TOML", "UUIDs", "UnicodeFun", "UnitfulLatexify", "Unzip"]
@@ -1114,9 +1127,9 @@ version = "0.1.6"
 
 [[deps.PlutoTeachingTools]]
 deps = ["Downloads", "HypertextLiteral", "Latexify", "Markdown", "PlutoLinks", "PlutoUI"]
-git-tree-sha1 = "e2593782a6b53dc5176058d27e20387a0576a59e"
+git-tree-sha1 = "8252b5de1f81dc103eb0293523ddf917695adea1"
 uuid = "661c6b06-c737-4d37-b85c-46df65de6f69"
-version = "0.3.0"
+version = "0.3.1"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
@@ -1170,9 +1183,9 @@ uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
 
 [[deps.RadiiPolynomial]]
 deps = ["IntervalArithmetic", "LinearAlgebra", "Printf", "Reexport", "SparseArrays"]
-git-tree-sha1 = "8442e84088a316034b2b9d8128d6af0ac4ab4fad"
+git-tree-sha1 = "891c7a0c4355fdef85cfe09abcd8c7b0d896b0e6"
 uuid = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
-version = "0.8.13"
+version = "0.8.15"
 
 [[deps.Random]]
 deps = ["SHA"]
@@ -1209,9 +1222,9 @@ version = "1.3.0"
 
 [[deps.Revise]]
 deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "REPL", "Requires", "UUIDs", "Unicode"]
-git-tree-sha1 = "7b7850bb94f75762d567834d7e9802fc22d62f9c"
+git-tree-sha1 = "7f4228017b83c66bd6aa4fddeb170ce487e53bc7"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.5.18"
+version = "3.6.2"
 
 [[deps.RoundingEmulator]]
 git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
@@ -1256,6 +1269,12 @@ deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 version = "1.10.0"
 
+[[deps.StableRNGs]]
+deps = ["Random"]
+git-tree-sha1 = "83e6cce8324d49dfaf9ef059227f91ed4441a8e5"
+uuid = "860ef19b-820b-49d6-a774-d7a799459cd3"
+version = "1.0.2"
+
 [[deps.Statistics]]
 deps = ["LinearAlgebra", "SparseArrays"]
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
@@ -1299,9 +1318,9 @@ deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [[deps.TranscodingStreams]]
-git-tree-sha1 = "e84b3a11b9bece70d14cce63406bbc79ed3464d2"
+git-tree-sha1 = "0c45878dcfdcfa8480052b6ab162cdd138781742"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
-version = "0.11.2"
+version = "0.11.3"
 
 [[deps.Tricks]]
 git-tree-sha1 = "7822b97e99a1672bfb1b49b668a6d46d58d8cbcb"
@@ -1371,9 +1390,9 @@ version = "1.31.0+0"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Zlib_jll"]
-git-tree-sha1 = "1165b0443d0eca63ac1e32b8c0eb69ed2f4f8127"
+git-tree-sha1 = "6a451c6f33a176150f315726eba8b92fbfdb9ae7"
 uuid = "02c8fc9c-b97f-50b9-bbe4-9be30ff0a78a"
-version = "2.13.3+0"
+version = "2.13.4+0"
 
 [[deps.XSLT_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libgcrypt_jll", "Libgpg_error_jll", "Libiconv_jll", "XML2_jll", "Zlib_jll"]
@@ -1383,9 +1402,9 @@ version = "1.1.41+0"
 
 [[deps.XZ_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "ac88fb95ae6447c8dda6a5503f3bafd496ae8632"
+git-tree-sha1 = "15e637a697345f6743674f1322beefbc5dcd5cfc"
 uuid = "ffd25f8a-64ca-5728-b0f7-c24cf3aae800"
-version = "5.4.6+0"
+version = "5.6.3+0"
 
 [[deps.Xorg_libICE_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1538,9 +1557,9 @@ version = "1.2.13+1"
 
 [[deps.Zstd_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "e678132f07ddb5bfa46857f0d7620fb9be675d3b"
+git-tree-sha1 = "555d1076590a6cc2fdee2ef1469451f872d8b41b"
 uuid = "3161d3a3-bdf6-5164-811a-617609db77b4"
-version = "1.5.6+0"
+version = "1.5.6+1"
 
 [[deps.eudev_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "gperf_jll"]
@@ -1603,9 +1622,9 @@ version = "1.18.0+0"
 
 [[deps.libpng_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Zlib_jll"]
-git-tree-sha1 = "d7015d2e18a5fd9a4f47de711837e980519781a4"
+git-tree-sha1 = "b70c870239dc3d7bc094eb2d6be9b73d27bef280"
 uuid = "b53b4c65-9356-5827-b1ea-8c7a1a84506f"
-version = "1.6.43+1"
+version = "1.6.44+0"
 
 [[deps.libvorbis_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Ogg_jll", "Pkg"]
@@ -1655,66 +1674,65 @@ version = "1.4.1+1"
 # ╟─11810156-e8c9-4145-af2a-93e0757a8cc9
 # ╟─44fc05a5-a0c1-4428-adee-edb5b8b869e3
 # ╟─9162d799-c8a8-44cd-8921-b6fa4c6f291f
-# ╟─4cc2d0b2-53d5-436e-a2e2-a9a4c4f0e5b8
-# ╟─5654a167-0b32-4768-98c1-00dd1ad473c3
-# ╟─526f434e-075f-4207-a481-43b144d7c2f1
-# ╟─fc023e96-7664-41e6-81f1-06fac19d12eb
-# ╠═8f61deaf-4c92-4b59-a487-28d4aba2de5d
-# ╟─d487e3cc-1d16-467b-ba52-cc4c6cdafacb
-# ╠═1e00bda3-b2aa-43d1-bad5-1a30f1dfdb89
-# ╟─19497a0a-5e66-452d-a4a5-39f95b211f22
-# ╠═5894d57b-5d28-4d13-9ff9-965726d84479
-# ╠═85d433ab-3e1d-443c-9256-d386c4c9bf83
-# ╟─694758f6-f199-4e82-932f-b99465b72ee8
-# ╟─3cb18cba-18e5-4e6f-8b16-eccd1dcef9fd
-# ╟─f737a8eb-0fa4-49e6-ad07-502099edc3e1
-# ╟─6badcd71-0e20-482e-8858-631b6357add2
-# ╟─e3f2f668-88b1-461d-886c-1011c9e018bf
-# ╠═dc3e35fb-f266-4d6b-be07-4ea2b151cfb5
 # ╟─37827087-01ad-4fe7-bcb6-df2239ea0bca
-# ╟─5c1bf65b-6130-41d6-98a5-36c6deac1e27
-# ╠═7392a928-1b28-401e-9160-9ba30eefd674
-# ╠═c826d3ee-438c-4106-b79b-78ba0b4d50fd
-# ╟─bb25cf18-b064-431b-9407-dfa061d78048
-# ╠═82c9f85d-f74f-4106-a5b8-35043e2d6119
-# ╟─3044f4e8-6975-4169-a1e8-5ae044adb122
-# ╠═4f900df0-7616-4f17-aec3-c447a58a2a74
-# ╟─00c0ca34-5596-4750-8665-e589ac382cf8
-# ╠═52926eea-8175-43d8-8446-f3750dfc2794
-# ╟─51f0b06b-e7ec-4f0b-a9b2-eccbd95fcba0
-# ╠═62a5750a-cf1f-41e9-8eba-aa4dd80b7d6f
-# ╟─e8b57ef7-6ee3-4982-809f-00890492c396
+# ╟─d794367f-d346-416f-b8f1-1f442f876e20
+# ╟─f6da61f7-64a3-4c33-b9ba-7917ffb67b2a
+# ╟─65cebd36-0474-42ee-b983-70c5f9c1614f
+# ╟─2dc02de6-f250-44db-b347-7d4d65c61d89
+# ╟─f9d764b9-024a-4845-98ad-c3e79a4a5cd9
+# ╟─56bf8063-cc76-47ee-9074-f6a59466ec60
+# ╟─3cb18cba-18e5-4e6f-8b16-eccd1dcef9fd
+# ╟─7390523a-ecf1-4b7e-a3e6-cce50d43083b
+# ╟─2a4448c5-e14a-4791-926f-172f3cb6e1f0
+# ╟─f737a8eb-0fa4-49e6-ad07-502099edc3e1
+# ╟─faec7172-c732-470c-88a0-8de5d92075b0
+# ╟─4290872b-923b-45dc-81b0-3e280a5a77c1
+# ╟─8356c027-ead5-4073-9d0e-b25f41bf9543
+# ╟─c11ce6e3-4e23-46bc-8bbd-217908d966af
+# ╟─b6655a7c-32d0-473a-ac1d-ddb96e31de81
+# ╟─266d8eb2-fc1f-42ca-802e-90a4a358b313
+# ╟─0ea0128e-480f-4d29-9ef7-f9a11fec5513
+# ╟─0409bc2e-af44-45fd-a10e-e46f770ea136
+# ╟─305c0f3f-4d11-4c22-93b1-d6ce45773cbb
+# ╠═4f37b759-371e-4042-82d0-720523718021
+# ╟─17013b31-0c79-4dd0-a6e3-5946528d69f6
 # ╟─151f9f5f-65ab-4ccb-94a6-c530d924962f
-# ╟─ee748d75-7e6e-4e4b-95d1-46f2f8dbe538
-# ╠═8568a1e1-6140-4ef3-90c7-a502b7a2af2e
-# ╠═7392d156-4a30-471c-b54d-98bf235c8555
+# ╠═82c9f85d-f74f-4106-a5b8-35043e2d6119
 # ╟─75b99408-9fed-4c20-8f6f-0513185b0c0f
 # ╠═d19281af-752c-414f-9a81-5b79caacf1e5
 # ╟─d4735adb-b9b7-40d5-8d3e-e2609abe8088
 # ╠═bda1b945-f554-40ff-8085-714202abec88
 # ╟─299c15a2-253a-428f-9a23-cd48bd8238c2
+# ╠═1b058c77-7241-41ac-9a6e-84160b8d79da
 # ╠═82143c8d-7009-4537-975f-c832330caa9e
-# ╟─faec7172-c732-470c-88a0-8de5d92075b0
-# ╟─4290872b-923b-45dc-81b0-3e280a5a77c1
+# ╠═a3124717-6741-4769-8fb0-2b489f13dc94
+# ╟─d2d76ed8-911d-4247-9460-8c7df7669912
+# ╟─d6087c16-1e9a-48bf-9662-35c0d3c5dceb
+# ╠═1c61be31-8515-4b32-9d21-9a8910693f5a
 # ╟─1d1277bf-2aa3-4c89-b34d-b2a2e5fc6fc5
 # ╟─8a4513a5-9049-48df-ae9b-ea8c5d5f1076
-# ╟─1af05657-7b03-4715-9652-77aa5b2f222c
-# ╠═a3124717-6741-4769-8fb0-2b489f13dc94
 # ╟─7edef822-8f17-4a17-8dc7-f476fd610a29
+# ╟─63e93962-935b-4c4a-8d10-04b43411b609
+# ╟─6d0a1dbf-2904-4066-ad8f-6da4955de009
 # ╟─63b48726-18f5-4bab-8675-f90ec50166ac
-# ╠═4f37b759-371e-4042-82d0-720523718021
+# ╠═5c57ed8e-7bb1-4947-8ebd-f0c59b7ae8d4
+# ╠═bec0f423-5b0a-4dee-bedf-9e3b7fcf5d3d
+# ╟─f1fa7997-684d-443b-a5ed-5377ebcd3aee
+# ╟─25df704a-3e01-45aa-a3de-ea2cb3f18504
 # ╠═d27d66a6-4717-4d6d-895f-cdebd649cebd
+# ╟─39ed4568-b971-4cf3-accc-1ad32a44ce3d
+# ╟─d5b89e7d-01bf-433a-a6e0-302951343bcd
+# ╟─5718bc5d-a86f-4907-8d5f-1707c8b51f58
 # ╠═9d468890-c155-442d-bcbf-6a33bc991f72
+# ╟─3d9b3db1-ac82-434c-8521-ce5ce89f570d
+# ╟─2d273b10-b485-49aa-9d06-8485ac166dc8
+# ╠═cc5576ac-2894-48ef-a7a9-c4c16b589173
 # ╠═d02c07ee-77f2-4317-9692-558323e37b54
+# ╟─6b63d5e1-048a-4a34-98a0-960d28a51a0b
 # ╠═e87f4cbe-e511-4c78-882b-f86961007932
+# ╠═7427f6e4-337c-4af8-ad59-dfd296b0a453
+# ╟─c498e384-b1a2-40a5-bd72-edabdcd1fc4d
 # ╟─04417cef-c3d9-4adb-a449-7b26bbe20056
 # ╟─d61da3a0-ac88-41a4-ae50-86a02ea43cbf
-# ╟─de0fb5e0-ad64-4cb6-a2db-0b30021adf5a
-# ╠═28be86e3-a1b2-4562-8d6a-6ebff88a3bb4
-# ╠═a31c1107-aa7e-43e5-b4c3-4c3f2b3fbfad
-# ╠═9a4f9f19-2fe8-44ee-aa8f-bdbe811b86dd
-# ╟─a980db33-ab3a-4b19-8ccd-7c9922bf6928
-# ╟─2d99c89c-c23d-4b6e-a0e2-58d209ffd96b
-# ╠═e40b7fc3-1ce6-4583-9bbe-51525c4c1cb0
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

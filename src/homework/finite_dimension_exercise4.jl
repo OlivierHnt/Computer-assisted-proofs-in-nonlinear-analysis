@@ -4,14 +4,14 @@
 #> [frontmatter]
 #> homework_number = 4
 #> order = 4
-#> title = "Rigorous inverse of a matrix"
+#> title = "Rigorous control of the entire spectrum"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
+# ╔═╡ 9099f41e-6239-4f7f-a3ec-82e7d4787f8f
 using PlutoTeachingTools # package for the notebook
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
@@ -26,37 +26,49 @@ main {
 </style>
 """
 
-# ╔═╡ 81ed6d83-622f-46ac-b0c3-0fae0c8ef378
+# ╔═╡ 45e10c91-f161-43a5-9c9e-5b4dca6a8e53
 md"""
-In this exercise, we consider a matrix $M$, and a numerically computed approximate inverse $\bar{X}$ of $M$.
-Our goal will be to guarantee a posteriori that $M$ is indeed invertible, and to provide a computable error bound between $M^{-1}$ and $\bar{X}$, for any submultiplicative matrix norm (i.e. $\| A B \| \le \| A \| \| B \|$).
+Exercise 3 can be used to enclose eigenvalues of a given matrix one by one.
+We now present an alternate strategy to enclose the entire spectrum at once (but not the corresponding eigenvectors), which can sometimes also be adapted in infinite dimension.
+This strategy relies on the [Gershgorin circle theorem](https://en.wikipedia.org/wiki/Gershgorin_circle_theorem), which we recall below.
 """
 
-# ╔═╡ 6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
+# ╔═╡ 916f5d37-2bde-4a35-923a-2ff9e606371d
 md"""
-**1.** Denoting $\delta = \Vert I - M \bar{X} \|$, and assuming $\delta < 1$, show that $M$ is invertible and
+!!! theorem "Theorem (Gershgorin)"
+	For any matrix $M = \left(M_{i,j}\right)_{1 \le i, j \le d}$, its spectrum $\sigma(M)$ satisfies
 
-```math
-\| M^{-1} - \bar{X} \| \le \frac{\delta}{1-\delta} \| \bar{X} \|.
-```
+	```math
+	\begin{align}
+	\sigma(M) \subset \bigcup_{i=1}^d D\left( M_{i,i},\, \sum_{j \ne i} | M_{i,j} | \right),
+	\end{align}
+	```
+
+	where $D(z,r)$ denotes the closed disk of center $z$ and radius $r$ in the complex plane.
+	Moreover, if $\mathscr{J} \subset \{1, \dots, d\}$ is such that $\bigcup_{i \in \mathscr{J}} D\left(M_{i,i},\, \sum_{j \ne i} | M_{i,j} |\right)$ is disjoint from $\bigcup_{i \notin \mathscr{J}} D\left(M_{i,i},\, \sum_{j \ne i} | M_{i,j} |\right)$, then $\bigcup_{i \in \mathscr{J}} D\left(M_{i,i},\, \sum_{j \ne i} | M_{i,j} |\right)$ contains exactly $| \mathscr{J} |$ eigenvalues.
 """
 
-# ╔═╡ 05ad3f54-e92c-4ab5-b276-aa7763ba36b3
+# ╔═╡ d01c5817-c4b6-4502-81f6-51ae5715117b
+md"""
+**1.** Using the Gershgorin circle theorem, get as tight as possible rigorous enclosures of all eigenvalues of $W_{3}$ (defined in Exercise 3).
+"""
+
+# ╔═╡ 02939955-c9aa-4152-8e08-f31e1e0c0e9c
 Foldable("Hint",
 md"""
-Write $\left(M\bar{X}\right)^{-1}$ as $\left(I + M\bar{X} - I\right)^{-1}$ and mutliply to the left by $\bar{X}$ in order to get a power series expansion of $M^{-1}$.
+You may first compute numerically a matrix $P$ of approximate eigenvectors of $W_3$, then rigorously compute $\tilde W_{3} = P^{-1}W_3 P$, and finally apply the Gershgoring circle theorem to $\tilde W_{3}$.
 """
 )
 
-# ╔═╡ 82a5527f-0661-4a32-b758-5708bb184968
+# ╔═╡ bc052916-db0e-43a2-bbb0-76b917d6f638
 md"""
-**2.** Try to obtain a similar estimate using an appropriate zero-finding problem and the Newton-Kantorovich approach.
+**2.** Prove that $W_{1000}$ has exactly one eigenvalue with negative real part.
 """
 
-# ╔═╡ e34560b8-93af-4f5b-8e4f-f5c48ef29d3c
+# ╔═╡ 3686e5b2-daac-470d-b9e3-4bd5706e5894
 Foldable("Hint",
 md"""
-You may consider $F(X) = MX-I$ (or $F(X) = XM-I$).
+You do not need to numerically diagonalize all of $W_{1000}$: for most rows, the corresponding Gershgorin disk already lies in the left half of the complex plane.
 """)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -427,11 +439,12 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
-# ╟─81ed6d83-622f-46ac-b0c3-0fae0c8ef378
-# ╟─6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
-# ╟─05ad3f54-e92c-4ab5-b276-aa7763ba36b3
-# ╟─82a5527f-0661-4a32-b758-5708bb184968
-# ╟─e34560b8-93af-4f5b-8e4f-f5c48ef29d3c
+# ╠═9099f41e-6239-4f7f-a3ec-82e7d4787f8f
+# ╟─45e10c91-f161-43a5-9c9e-5b4dca6a8e53
+# ╟─916f5d37-2bde-4a35-923a-2ff9e606371d
+# ╟─d01c5817-c4b6-4502-81f6-51ae5715117b
+# ╟─02939955-c9aa-4152-8e08-f31e1e0c0e9c
+# ╟─bc052916-db0e-43a2-bbb0-76b917d6f638
+# ╟─3686e5b2-daac-470d-b9e3-4bd5706e5894
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

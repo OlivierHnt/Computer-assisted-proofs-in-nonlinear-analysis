@@ -26,15 +26,22 @@ main {
 </style>
 """
 
-# ╔═╡ 15be0e8a-408b-4db2-af7e-15261f54238e
+# ╔═╡ f88bd126-8272-4c63-ac31-ce6ba72700e5
 md"""
-Find the inverse of $v(t) = e^t$ as a Taylor series for all $t \in [-1, 1]$.
+**1.** Let $v(t) = \sum_{n \ge 0} b_n t^n$ such that $\Pi_N b$ is known, while its tail satifies the estimate $\| (I - \Pi_N) b \|_1 \le \epsilon$.
+Derive the bounds $Y, Z_1, Z_2$ for the zero-finding problem $F(a) \overset{\text{def}}{=} a * b - 1$ explicitly in terms of $\Pi_N b$ and $\epsilon$.
+"""
+
+# ╔═╡ 800c404b-d415-4a93-a5c4-e2296068a534
+md"""
+**2.** Find the inverse of $v(t) = e^t$ as a Taylor series for all $t \in [-1, 1]$.
 """
 
 # ╔═╡ d874d58b-3124-427e-b45a-6926173622fc
 Foldable("Hint",
 md"""
-Write the Taylor series of $v(t) = \sum_{n \ge 0} c_n t^n$, and refer to Exercise 4 from Module 1 to bound $\|c^{-1} - \bar{a} \|_1$ for some approximate inverse $\bar{a}$.
+Recall that $v(t) = e^t = \sum_{n \ge 0} b_n t^n$ where $b_n = 1/n!$.
+Using the Taylor remainder, obtain a bound for $\| (I - \Pi_N) b \|_1$.
 """)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -406,7 +413,8 @@ version = "17.4.0+2"
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
 # ╠═71e175af-407e-4a0e-9930-0e6d208fa625
-# ╟─15be0e8a-408b-4db2-af7e-15261f54238e
+# ╟─f88bd126-8272-4c63-ac31-ce6ba72700e5
+# ╟─800c404b-d415-4a93-a5c4-e2296068a534
 # ╟─d874d58b-3124-427e-b45a-6926173622fc
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

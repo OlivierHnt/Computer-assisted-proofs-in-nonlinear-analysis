@@ -4,18 +4,15 @@
 #> [frontmatter]
 #> homework_number = 3
 #> order = 3
-#> title = "Rigorous computation of an eigenpair"
+#> title = "Rigorous inverse of a matrix"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 70740a99-ec98-45c8-ba8f-06d63dd396b0
-using PlutoTeachingTools # package for the notebook
-
 # ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using LinearAlgebra
+using PlutoTeachingTools # package for the notebook
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""
@@ -29,79 +26,42 @@ main {
 </style>
 """
 
-# ╔═╡ c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
+# ╔═╡ 81ed6d83-622f-46ac-b0c3-0fae0c8ef378
 md"""
-**1.** Consider a matrix $M$, and an approximate eigenpair $(\bar{\lambda}, \bar{v})$ of $M$.
-The goal of this exercise is to validate $(\bar{\lambda}, \bar{v})$, i.e. to prove that there exists an exact eigenpair $(\tilde{\lambda}, \tilde{v})$ nearby.
-Assuming that the corresponding exact eigenvalue $\tilde{\lambda}$ is simple, define a suitable $F = 0$ problem, and derive the bounds needed to apply the Newton-Kantorovich theorem in that context.
+In this exercise, we consider a matrix $M$, and a numerically computed approximate inverse $\bar{X}$ of $M$.
+Our goal will be to guarantee a posteriori that $M$ is indeed invertible, and to provide a computable error bound between $M^{-1}$ and $\bar{X}$, for any submultiplicative matrix norm (i.e. $\| A B \| \le \| A \| \| B \|$).
 """
 
-# ╔═╡ 7748e568-afc9-43cc-b2bd-5a231d86f455
-Foldable("Hint",
+# ╔═╡ 6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
 md"""
-The "natural" zero-finding problem is $G(\lambda, v) \overset{\text{def}}{=} (M - \lambda I)v$, but it has one too many unknowns.
-This is consistent with the fact that zeros of $G$ are not isolated (one can always rescale the eigenvector).
-Therefore, a suitable zero-finding problem needs to incorporate a normalization condition, for instance:
+**1.** Denoting $\delta = \Vert I - M \bar{X} \|$, and assuming $\delta < 1$, show that $M$ is invertible and
 
 ```math
-F(\lambda, v) \overset{\text{def}}{=}
-\begin{pmatrix}
-\langle v, \bar{v} \rangle - 1 \\
-(M - \lambda I)v
-\end{pmatrix}.
+\| M^{-1} - \bar{X} \| \le \frac{\delta}{1-\delta} \| \bar{X} \|.
 ```
+"""
+
+# ╔═╡ 05ad3f54-e92c-4ab5-b276-aa7763ba36b3
+Foldable("Hint",
+md"""
+Write $\left(M\bar{X}\right)^{-1}$ as $\left(I + M\bar{X} - I\right)^{-1}$ and mutliply to the left by $\bar{X}$ in order to get a power series expansion of $M^{-1}$.
 """
 )
 
-# ╔═╡ cab728f1-9ff5-4bdd-8101-5c39718c4d53
+# ╔═╡ 82a5527f-0661-4a32-b758-5708bb184968
 md"""
-**2.** For any positive integer $N$, the Wilkinson matrix $W_{N}$ is the following $(2N+1)\times(2N+1)$ tridiagonal matrix:
-
-```math
-W_{N} =
-\begin{pmatrix}
-N & 1 & & & & & \\
-1 & N-1 & 1 & & & & \\
- & 1 & \ddots & \ddots & & & \\
- & & \ddots & 0 & \ddots & & \\
- & & & \ddots & \ddots & 1 & \\
- & & & & 1 & N-1 & 1 \\
- & & & & & 1 & N
-\end{pmatrix}
-```
-
-We provide below approximate eigenvalues and eigenvectors of $W_3$.
-Rigorously enclose all eigenpairs of $W_3$.
+**2.** Try to obtain a similar estimate using an appropriate zero-finding problem and the Newton-Kantorovich approach.
 """
 
-# ╔═╡ d61514c3-3b0e-4658-8b31-de9f9514a9c3
-function wilkinson(N)
-	M = zeros(2N+1, 2N+1)
-	for i = 1:2N+1
-		M[i,i] = abs(N - i + 1)
-		if i+1 ≤ 2N+1
-			M[i,i+1] = 1
-		end
-		if i-1 ≥ 1
-			M[i,i-1] = 1
-		end
-	end
-	return M
-end
-
-# ╔═╡ 1bba510b-be86-44b0-a3c9-419b3b6ada37
-N = 3
-
-# ╔═╡ fe0054f0-4fd5-489f-9fcb-3af086876699
-W = wilkinson(N)
-
-# ╔═╡ 3509fe96-4a83-461f-8fed-23343d74dc8c
-eigenvalues, eigenvectors = eigen(W)
+# ╔═╡ e34560b8-93af-4f5b-8e4f-f5c48ef29d3c
+Foldable("Hint",
+md"""
+You may consider $F(X) = MX-I$ (or $F(X) = XM-I$).
+""")
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
 
 [compat]
@@ -114,7 +74,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.6"
 manifest_format = "2.0"
-project_hash = "c92e9176b4b4905ecf65fbdea3395a3777b89a7e"
+project_hash = "b873fd5571111b4c454c95ca5fa58b75bfb4ab46"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -467,14 +427,11 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╠═70740a99-ec98-45c8-ba8f-06d63dd396b0
-# ╟─c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
-# ╟─7748e568-afc9-43cc-b2bd-5a231d86f455
-# ╟─cab728f1-9ff5-4bdd-8101-5c39718c4d53
-# ╠═d61514c3-3b0e-4658-8b31-de9f9514a9c3
-# ╠═1bba510b-be86-44b0-a3c9-419b3b6ada37
-# ╠═fe0054f0-4fd5-489f-9fcb-3af086876699
 # ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
-# ╠═3509fe96-4a83-461f-8fed-23343d74dc8c
+# ╟─81ed6d83-622f-46ac-b0c3-0fae0c8ef378
+# ╟─6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
+# ╟─05ad3f54-e92c-4ab5-b276-aa7763ba36b3
+# ╟─82a5527f-0661-4a32-b758-5708bb184968
+# ╟─e34560b8-93af-4f5b-8e4f-f5c48ef29d3c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
