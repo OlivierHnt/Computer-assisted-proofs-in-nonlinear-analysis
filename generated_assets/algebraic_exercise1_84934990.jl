@@ -2,16 +2,16 @@
 # v0.20.1
 
 #> [frontmatter]
-#> homework_number = 5
-#> order = 5
-#> title = "Rigorous control of the entire spectrum"
-#> tags = ["module1", "homeworks"]
+#> homework_number = 1
+#> order = 1
+#> title = "Inverse for infinite sequences"
+#> tags = ["module2", "homeworks"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 9099f41e-6239-4f7f-a3ec-82e7d4787f8f
+# ╔═╡ 71e175af-407e-4a0e-9930-0e6d208fa625
 using PlutoTeachingTools # package for the notebook
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
@@ -26,49 +26,22 @@ main {
 </style>
 """
 
-# ╔═╡ 45e10c91-f161-43a5-9c9e-5b4dca6a8e53
+# ╔═╡ f88bd126-8272-4c63-ac31-ce6ba72700e5
 md"""
-Exercise 3 can be used to enclose eigenvalues of a given matrix one by one.
-We now present an alternate strategy to enclose the entire spectrum at once (but not the corresponding eigenvectors), which can sometimes also be adapted in infinite dimension.
-This strategy relies on the [Gershgorin circle theorem](https://en.wikipedia.org/wiki/Gershgorin_circle_theorem), which we recall below.
+**1.** Let $v(t) = \sum_{n \ge 0} b_n t^n$ such that $\Pi_N b$ is known, while its tail satifies the estimate $\| (I - \Pi_N) b \|_1 \le \epsilon$.
+Derive the bounds $Y, Z_1, Z_2$ for the zero-finding problem $F(a) \overset{\text{def}}{=} a * b - 1$ explicitly in terms of $\Pi_N b$ and $\epsilon$.
 """
 
-# ╔═╡ 916f5d37-2bde-4a35-923a-2ff9e606371d
+# ╔═╡ 800c404b-d415-4a93-a5c4-e2296068a534
 md"""
-!!! theorem "Theorem (Gershgorin)"
-	For any matrix $M = \left(M_{i,j}\right)_{1 \le i, j \le d}$, its spectrum $\sigma(M)$ satisfies
-	
-	```math
-	\begin{align}
-	\sigma(M) \subset \bigcup_{i=1}^d D\left( M_{i,i},\, \sum_{j \ne i} | M_{i,j} | \right),
-	\end{align}
-	```
-	
-	where $D(z,r)$ denotes the closed disk of center $z$ and radius $r$ in the complex plane.
-	Moreover, if $\mathscr{J} \subset \{1, \dots, d\}$ is such that $\bigcup_{i \in \mathscr{J}} D\left(M_{i,i},\, \sum_{j \ne i} | M_{i,j} |\right)$ is disjoint from $\bigcup_{i \notin \mathscr{J}} D\left(M_{i,i},\, \sum_{j \ne i} | M_{i,j} |\right)$, then $\bigcup_{i \in \mathscr{J}} D\left(M_{i,i},\, \sum_{j \ne i} | M_{i,j} |\right)$ contains exactly $| \mathscr{J} |$ eigenvalues.
+**2.** Find the inverse of $v(t) = e^t$ as a Taylor series for all $t \in [-1, 1]$.
 """
 
-# ╔═╡ d01c5817-c4b6-4502-81f6-51ae5715117b
-md"""
-**1.** Using the Gershgorin circle theorem, get as tight as possible rigorous enclosures of all eigenvalues of $W_{3}$ (defined in Exercise 3).
-"""
-
-# ╔═╡ 02939955-c9aa-4152-8e08-f31e1e0c0e9c
+# ╔═╡ d874d58b-3124-427e-b45a-6926173622fc
 Foldable("Hint",
 md"""
-You may first compute numerically a matrix $P$ of approximate eigenvectors of $W_3$, then rigorously compute $\tilde W_{3} = P^{-1}W_3 P$, and finally apply the Gershgoring circle theorem to $\tilde W_{3}$.
-"""
-)
-
-# ╔═╡ bc052916-db0e-43a2-bbb0-76b917d6f638
-md"""
-**2.** Prove that $W_{1000}$ has exactly one eigenvalue with negative real part.
-"""
-
-# ╔═╡ 3686e5b2-daac-470d-b9e3-4bd5706e5894
-Foldable("Hint",
-md"""
-You do not need to numerically diagonalize all of $W_{1000}$: for most rows, the corresponding Gershgorin disk already lies in the left half of the complex plane.
+Recall that $v(t) = e^t = \sum_{n \ge 0} b_n t^n$ where $b_n = 1/n!$.
+Using the Taylor remainder, obtain a bound for $\| (I - \Pi_N) b \|_1$.
 """)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -77,7 +50,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
 
 [compat]
-PlutoTeachingTools = "~0.2.15"
+PlutoTeachingTools = "~0.3.0"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -86,7 +59,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.6"
 manifest_format = "2.0"
-project_hash = "b873fd5571111b4c454c95ca5fa58b75bfb4ab46"
+project_hash = "cd1e693ed5c336a13fe635f54c9a0cac09e8115c"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -183,9 +156,9 @@ uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
 version = "0.9.36"
 
 [[deps.LaTeXStrings]]
-git-tree-sha1 = "50901ebc375ed41dbf8058da26f9de442febbbec"
+git-tree-sha1 = "dda21b8cbd6a6c40d9d02a73230f9d70fed6918c"
 uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
-version = "1.3.1"
+version = "1.4.0"
 
 [[deps.Latexify]]
 deps = ["Format", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "OrderedCollections", "Requires"]
@@ -239,9 +212,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.LoweredCodeUtils]]
 deps = ["JuliaInterpreter"]
-git-tree-sha1 = "c2b5e92eaf5101404a58ce9c6083d595472361d6"
+git-tree-sha1 = "260dc274c1bc2cb839e758588c63d9c8b5e639d1"
 uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "3.0.2"
+version = "3.0.5"
 
 [[deps.MIMEs]]
 git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
@@ -308,10 +281,10 @@ uuid = "0ff47ea0-7a50-410d-8455-4348d5de0420"
 version = "0.1.6"
 
 [[deps.PlutoTeachingTools]]
-deps = ["Downloads", "HypertextLiteral", "LaTeXStrings", "Latexify", "Markdown", "PlutoLinks", "PlutoUI", "Random"]
-git-tree-sha1 = "5d9ab1a4faf25a62bb9d07ef0003396ac258ef1c"
+deps = ["Downloads", "HypertextLiteral", "Latexify", "Markdown", "PlutoLinks", "PlutoUI"]
+git-tree-sha1 = "e2593782a6b53dc5176058d27e20387a0576a59e"
 uuid = "661c6b06-c737-4d37-b85c-46df65de6f69"
-version = "0.2.15"
+version = "0.3.0"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
@@ -356,9 +329,9 @@ version = "1.3.0"
 
 [[deps.Revise]]
 deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "REPL", "Requires", "UUIDs", "Unicode"]
-git-tree-sha1 = "7b7850bb94f75762d567834d7e9802fc22d62f9c"
+git-tree-sha1 = "7f4228017b83c66bd6aa4fddeb170ce487e53bc7"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.5.18"
+version = "3.6.2"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -439,12 +412,9 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╠═9099f41e-6239-4f7f-a3ec-82e7d4787f8f
-# ╟─45e10c91-f161-43a5-9c9e-5b4dca6a8e53
-# ╟─916f5d37-2bde-4a35-923a-2ff9e606371d
-# ╟─d01c5817-c4b6-4502-81f6-51ae5715117b
-# ╟─02939955-c9aa-4152-8e08-f31e1e0c0e9c
-# ╟─bc052916-db0e-43a2-bbb0-76b917d6f638
-# ╟─3686e5b2-daac-470d-b9e3-4bd5706e5894
+# ╠═71e175af-407e-4a0e-9930-0e6d208fa625
+# ╟─f88bd126-8272-4c63-ac31-ce6ba72700e5
+# ╟─800c404b-d415-4a93-a5c4-e2296068a534
+# ╟─d874d58b-3124-427e-b45a-6926173622fc
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

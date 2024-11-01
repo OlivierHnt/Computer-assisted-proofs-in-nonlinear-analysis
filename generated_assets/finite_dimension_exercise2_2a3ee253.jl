@@ -2,17 +2,20 @@
 # v0.20.1
 
 #> [frontmatter]
-#> homework_number = 1
-#> order = 1
-#> title = "Inverse for infinite sequences"
-#> tags = ["module2", "homeworks"]
+#> homework_number = 2
+#> order = 2
+#> title = "Rigorous computation of an eigenpair"
+#> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 71e175af-407e-4a0e-9930-0e6d208fa625
+# ╔═╡ 70740a99-ec98-45c8-ba8f-06d63dd396b0
 using PlutoTeachingTools # package for the notebook
+
+# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
+using LinearAlgebra
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""
@@ -26,24 +29,83 @@ main {
 </style>
 """
 
-# ╔═╡ 15be0e8a-408b-4db2-af7e-15261f54238e
+# ╔═╡ c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
 md"""
-Find the inverse of $v(t) = e^t$ as a Taylor series for all $t \in [-1, 1]$.
+**1.** Consider a matrix $M$, and an approximate eigenpair $(\bar{\lambda}, \bar{v})$ of $M$.
+The goal of this exercise is to validate $(\bar{\lambda}, \bar{v})$, i.e. to prove that there exists an exact eigenpair $(\tilde{\lambda}, \tilde{v})$ nearby.
+Assuming that the corresponding exact eigenvalue $\tilde{\lambda}$ is simple, define a suitable $F = 0$ problem, and derive the bounds needed to apply the Newton-Kantorovich theorem in that context.
 """
 
-# ╔═╡ d874d58b-3124-427e-b45a-6926173622fc
+# ╔═╡ 7748e568-afc9-43cc-b2bd-5a231d86f455
 Foldable("Hint",
 md"""
-Write the Taylor series of $v(t) = \sum_{n \ge 0} c_n t^n$, and refer to Exercise 4 from Module 1 to bound $\|c^{-1} - \bar{a} \|_1$ for some approximate inverse $\bar{a}$.
-""")
+The "natural" zero-finding problem is $G(\lambda, v) \overset{\text{def}}{=} (M - \lambda I)v$, but it has one too many unknowns.
+This is consistent with the fact that zeros of $G$ are not isolated (one can always rescale the eigenvector).
+Therefore, a suitable zero-finding problem needs to incorporate a normalization condition, for instance:
+
+```math
+F(\lambda, v) \overset{\text{def}}{=}
+\begin{pmatrix}
+\langle v, \bar{v} \rangle - 1 \\
+(M - \lambda I)v
+\end{pmatrix}.
+```
+"""
+)
+
+# ╔═╡ cab728f1-9ff5-4bdd-8101-5c39718c4d53
+md"""
+**2.** For any positive integer $N$, the Wilkinson matrix $W_{N}$ is the following $(2N+1)\times(2N+1)$ tridiagonal matrix:
+
+```math
+W_{N} =
+\begin{pmatrix}
+N & 1 & & & & & \\
+1 & N-1 & 1 & & & & \\
+ & 1 & \ddots & \ddots & & & \\
+ & & \ddots & 0 & \ddots & & \\
+ & & & \ddots & \ddots & 1 & \\
+ & & & & 1 & N-1 & 1 \\
+ & & & & & 1 & N
+\end{pmatrix}
+```
+
+We provide below approximate eigenvalues and eigenvectors of $W_3$.
+Rigorously enclose all eigenpairs of $W_3$.
+"""
+
+# ╔═╡ d61514c3-3b0e-4658-8b31-de9f9514a9c3
+function wilkinson(N)
+	M = zeros(2N+1, 2N+1)
+	for i = 1:2N+1
+		M[i,i] = abs(N - i + 1)
+		if i+1 ≤ 2N+1
+			M[i,i+1] = 1
+		end
+		if i-1 ≥ 1
+			M[i,i-1] = 1
+		end
+	end
+	return M
+end
+
+# ╔═╡ 1bba510b-be86-44b0-a3c9-419b3b6ada37
+N = 3
+
+# ╔═╡ fe0054f0-4fd5-489f-9fcb-3af086876699
+W = wilkinson(N)
+
+# ╔═╡ 3509fe96-4a83-461f-8fed-23343d74dc8c
+eigenvalues, eigenvectors = eigen(W)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
 
 [compat]
-PlutoTeachingTools = "~0.3.0"
+PlutoTeachingTools = "~0.2.15"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -52,7 +114,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.6"
 manifest_format = "2.0"
-project_hash = "cd1e693ed5c336a13fe635f54c9a0cac09e8115c"
+project_hash = "c92e9176b4b4905ecf65fbdea3395a3777b89a7e"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -149,9 +211,9 @@ uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
 version = "0.9.36"
 
 [[deps.LaTeXStrings]]
-git-tree-sha1 = "dda21b8cbd6a6c40d9d02a73230f9d70fed6918c"
+git-tree-sha1 = "50901ebc375ed41dbf8058da26f9de442febbbec"
 uuid = "b964fa9f-0449-5b57-a5c2-d3ea65f4040f"
-version = "1.4.0"
+version = "1.3.1"
 
 [[deps.Latexify]]
 deps = ["Format", "InteractiveUtils", "LaTeXStrings", "MacroTools", "Markdown", "OrderedCollections", "Requires"]
@@ -205,9 +267,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.LoweredCodeUtils]]
 deps = ["JuliaInterpreter"]
-git-tree-sha1 = "260dc274c1bc2cb839e758588c63d9c8b5e639d1"
+git-tree-sha1 = "c2b5e92eaf5101404a58ce9c6083d595472361d6"
 uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "3.0.5"
+version = "3.0.2"
 
 [[deps.MIMEs]]
 git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
@@ -274,10 +336,10 @@ uuid = "0ff47ea0-7a50-410d-8455-4348d5de0420"
 version = "0.1.6"
 
 [[deps.PlutoTeachingTools]]
-deps = ["Downloads", "HypertextLiteral", "Latexify", "Markdown", "PlutoLinks", "PlutoUI"]
-git-tree-sha1 = "e2593782a6b53dc5176058d27e20387a0576a59e"
+deps = ["Downloads", "HypertextLiteral", "LaTeXStrings", "Latexify", "Markdown", "PlutoLinks", "PlutoUI", "Random"]
+git-tree-sha1 = "5d9ab1a4faf25a62bb9d07ef0003396ac258ef1c"
 uuid = "661c6b06-c737-4d37-b85c-46df65de6f69"
-version = "0.3.0"
+version = "0.2.15"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
@@ -322,9 +384,9 @@ version = "1.3.0"
 
 [[deps.Revise]]
 deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "REPL", "Requires", "UUIDs", "Unicode"]
-git-tree-sha1 = "7f4228017b83c66bd6aa4fddeb170ce487e53bc7"
+git-tree-sha1 = "7b7850bb94f75762d567834d7e9802fc22d62f9c"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.6.2"
+version = "3.5.18"
 
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
@@ -405,8 +467,14 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╠═71e175af-407e-4a0e-9930-0e6d208fa625
-# ╟─15be0e8a-408b-4db2-af7e-15261f54238e
-# ╟─d874d58b-3124-427e-b45a-6926173622fc
+# ╠═70740a99-ec98-45c8-ba8f-06d63dd396b0
+# ╟─c0a3bcb6-33b5-40a9-9696-7e37a2c9c432
+# ╟─7748e568-afc9-43cc-b2bd-5a231d86f455
+# ╟─cab728f1-9ff5-4bdd-8101-5c39718c4d53
+# ╠═d61514c3-3b0e-4658-8b31-de9f9514a9c3
+# ╠═1bba510b-be86-44b0-a3c9-419b3b6ada37
+# ╠═fe0054f0-4fd5-489f-9fcb-3af086876699
+# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
+# ╠═3509fe96-4a83-461f-8fed-23343d74dc8c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

@@ -2,8 +2,8 @@
 # v0.20.1
 
 #> [frontmatter]
-#> homework_number = 6
-#> order = 6
+#> homework_number = 5
+#> order = 5
 #> title = "Toward rigorous continuation"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"

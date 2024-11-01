@@ -2,16 +2,16 @@
 # v0.20.1
 
 #> [frontmatter]
-#> homework_number = 2
-#> order = 2
-#> title = "Back to period 3 implies chaos"
+#> homework_number = 3
+#> order = 3
+#> title = "Rigorous inverse of a matrix"
 #> tags = ["module1", "homeworks"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 1658541d-29b1-417e-9895-88fbbd37d312
+# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
 using PlutoTeachingTools # package for the notebook
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
@@ -26,95 +26,38 @@ main {
 </style>
 """
 
-# ╔═╡ aff38e1d-416c-472b-81ea-820d7430dded
+# ╔═╡ 81ed6d83-622f-46ac-b0c3-0fae0c8ef378
 md"""
-To study period-3 orbits of the dynamical system $x_{n+1} = \mu x_n (1-x_n)$, we consider the map
-
-$\begin{align}
-F : \ \left\{
-\begin{aligned}
-\mathbb{R}^3 &\to \mathbb{R}^3, \\
-\begin{pmatrix} x_0 \\ x_1 \\ x_2 \end{pmatrix}  &\mapsto
-\begin{pmatrix} \mu x_0(1-x_0) - x_1 \\ \mu x_1(1-x_1) - x_2 \\ \mu x_2(1-x_2) - x_0 \end{pmatrix}.
-\end{aligned} \right.
-\end{align}$
+In this exercise, we consider a matrix $M$, and a numerically computed approximate inverse $\bar{X}$ of $M$.
+Our goal will be to guarantee a posteriori that $M$ is indeed invertible, and to provide a computable error bound between $M^{-1}$ and $\bar{X}$, for any submultiplicative matrix norm (i.e. $\| A B \| \le \| A \| \| B \|$).
 """
 
-# ╔═╡ f283c615-fcde-4752-8d02-fafaa0e73b7d
+# ╔═╡ 6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
 md"""
-**1.** Using the implementation of $F$ and $DF$ provided in the following cells, and the function `newton` from the RadiiPolynomial library, find an approximate period-3 orbit $\bar{x}$ for $\mu = 3.9$.
+**1.** Denoting $\delta = \Vert I - M \bar{X} \|$, and assuming $\delta < 1$, show that $M$ is invertible and
+
+```math
+\| M^{-1} - \bar{X} \| \le \frac{\delta}{1-\delta} \| \bar{X} \|.
+```
 """
 
-# ╔═╡ 3b098d28-5fc8-4463-a59b-08bca638d5be
-function F(x, μ)
-	x₀, x₁, x₂ = x
-	return [μ * x₀ * (1 - x₀) - x₁,
-		    μ * x₁ * (1 - x₁) - x₂,
-		    μ * x₂ * (1 - x₂) - x₀]
-end
-
-# ╔═╡ dda38796-c299-4d38-b479-fde4c1496941
-function DF(x, μ)
-	x₀, x₁, x₂ = x
-	return [ μ * (1 - 2x₀) -1              0
-		     0              μ * (1 - 2x₁) -1
-		    -1              0              μ * (1 - 2x₂)]
-end
-
-# ╔═╡ 2b4ebcc2-e58c-49d3-a298-cecfd666b6ea
-μ = 3.9
-
-# ╔═╡ 698891fa-5637-40de-8756-f507551c25d4
-# x_init = ...
-
-# ╔═╡ 5ee47406-c6cc-40d8-adb9-c37146f9db01
-# x_bar, success = newton(x -> (F(x, μ), DF(x, μ)), x_init)
-
-# ╔═╡ 7b944744-628c-4ac9-8528-6dc19789ddb0
-md"""
-**2.** Define a suitable $A$ to be used later in the Newton-Kantorovich argument.
-"""
-
-# ╔═╡ fdd9fd8b-a3df-455d-bfe8-321723f5c566
-# A = ... # you can call the `inv` function to invert a linear operator
-
-# ╔═╡ 8b9a0f39-21f0-4288-bb2b-a594d6712292
-md"""
-**3.** Using the $1$-norm on $\mathbb{R}^3$, show that the constant $Z_2 = 2 \mu \| A \|_1$ satisfies the assumption of the Newton-Kantorovich theorem.
-"""
-
-# ╔═╡ 3d27e2d3-e5e8-4e95-9294-23e416608b6a
+# ╔═╡ 05ad3f54-e92c-4ab5-b276-aa7763ba36b3
 Foldable("Hint",
 md"""
-For this example, one can easily compute $\| DF(x) - DF(\bar{x}) \|_1$.
-""")
+Write $\left(M\bar{X}\right)^{-1}$ as $\left(I + M\bar{X} - I\right)^{-1}$ and mutliply to the left by $\bar{X}$ in order to get a power series expansion of $M^{-1}$.
+"""
+)
 
-# ╔═╡ 03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
+# ╔═╡ 82a5527f-0661-4a32-b758-5708bb184968
 md"""
-**4.** Implement and compute the bounds $Y$, $Z_1$ and $Z_2$.
-Use the function `interval_of_existence` from the RadiiPolynomial library in order to prove the existence of a period-3 orbit for $\mu = 3.9$.
+**2.** Try to obtain a similar estimate using an appropriate zero-finding problem and the Newton-Kantorovich approach.
 """
 
-# ╔═╡ 311ca566-451d-41e0-8420-7ed57b0cc08f
+# ╔═╡ e34560b8-93af-4f5b-8e4f-f5c48ef29d3c
 Foldable("Hint",
 md"""
- $3.9$ is not exactly representable as a floating-point number.
+You may consider $F(X) = MX-I$ (or $F(X) = XM-I$).
 """)
-
-# ╔═╡ 4c78f87b-7191-47f4-8bd7-cd9d13c5b4c6
-# Y = ...
-
-# ╔═╡ 4ac782db-4d32-4bf8-bddf-cc8f8b5e6217
-# Z₁ = ... # `Z₁` can be typed by `Z\_1<tab>`
-
-# ╔═╡ a4b2181e-d7dd-4c49-8c45-d6864cf878c6
-# R = ...
-
-# ╔═╡ 2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
-# Z₂ = ... # `Z₂` can be typed by `Z\_2<tab>`
-
-# ╔═╡ 5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
-# interval_of_existence(Y, Z₁, Z₂, R)
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -122,7 +65,7 @@ PLUTO_PROJECT_TOML_CONTENTS = """
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
 
 [compat]
-PlutoTeachingTools = "~0.3.0"
+PlutoTeachingTools = "~0.2.15"
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000002
@@ -131,7 +74,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.10.6"
 manifest_format = "2.0"
-project_hash = "cd1e693ed5c336a13fe635f54c9a0cac09e8115c"
+project_hash = "b873fd5571111b4c454c95ca5fa58b75bfb4ab46"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -353,10 +296,10 @@ uuid = "0ff47ea0-7a50-410d-8455-4348d5de0420"
 version = "0.1.6"
 
 [[deps.PlutoTeachingTools]]
-deps = ["Downloads", "HypertextLiteral", "Latexify", "Markdown", "PlutoLinks", "PlutoUI"]
-git-tree-sha1 = "e2593782a6b53dc5176058d27e20387a0576a59e"
+deps = ["Downloads", "HypertextLiteral", "LaTeXStrings", "Latexify", "Markdown", "PlutoLinks", "PlutoUI", "Random"]
+git-tree-sha1 = "5d9ab1a4faf25a62bb9d07ef0003396ac258ef1c"
 uuid = "661c6b06-c737-4d37-b85c-46df65de6f69"
-version = "0.3.0"
+version = "0.2.15"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
@@ -484,24 +427,11 @@ version = "17.4.0+2"
 
 # ╔═╡ Cell order:
 # ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╠═1658541d-29b1-417e-9895-88fbbd37d312
-# ╟─aff38e1d-416c-472b-81ea-820d7430dded
-# ╟─f283c615-fcde-4752-8d02-fafaa0e73b7d
-# ╠═3b098d28-5fc8-4463-a59b-08bca638d5be
-# ╠═dda38796-c299-4d38-b479-fde4c1496941
-# ╠═2b4ebcc2-e58c-49d3-a298-cecfd666b6ea
-# ╠═698891fa-5637-40de-8756-f507551c25d4
-# ╠═5ee47406-c6cc-40d8-adb9-c37146f9db01
-# ╟─7b944744-628c-4ac9-8528-6dc19789ddb0
-# ╠═fdd9fd8b-a3df-455d-bfe8-321723f5c566
-# ╟─8b9a0f39-21f0-4288-bb2b-a594d6712292
-# ╟─3d27e2d3-e5e8-4e95-9294-23e416608b6a
-# ╟─03aaf602-8a1a-4cb1-9819-f6fa9a310bb1
-# ╟─311ca566-451d-41e0-8420-7ed57b0cc08f
-# ╠═4c78f87b-7191-47f4-8bd7-cd9d13c5b4c6
-# ╠═4ac782db-4d32-4bf8-bddf-cc8f8b5e6217
-# ╠═a4b2181e-d7dd-4c49-8c45-d6864cf878c6
-# ╠═2ab867d1-b2b2-4a25-bddf-f2f72a3d7ad5
-# ╠═5c9b59ba-a59d-4bf6-a8a0-1db292c8d688
+# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
+# ╟─81ed6d83-622f-46ac-b0c3-0fae0c8ef378
+# ╟─6ad9d1f6-b2b3-49f7-b117-f2db2b7228fd
+# ╟─05ad3f54-e92c-4ab5-b276-aa7763ba36b3
+# ╟─82a5527f-0661-4a32-b758-5708bb184968
+# ╟─e34560b8-93af-4f5b-8e4f-f5c48ef29d3c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
