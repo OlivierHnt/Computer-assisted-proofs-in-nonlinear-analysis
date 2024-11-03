@@ -3,7 +3,8 @@
 
 #> [frontmatter]
 #> chapter = 5
-#> order = 1
+#> section = 1
+#> order = 0.5
 #> title = "Parameterization method"
 #> tags = ["lecture", "module5"]
 #> layout = "layout.jlhtml"

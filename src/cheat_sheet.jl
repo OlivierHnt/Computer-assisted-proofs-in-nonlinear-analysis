@@ -2,517 +2,143 @@
 # v0.20.3
 
 #> [frontmatter]
-#> chapter = 1
-#> order = 0.5
-#> title = "Finite-dimensional problems"
-#> tags = ["lecture", "module1"]
+#> order = 2
+#> title = "Cheat sheet"
+#> tags = ["welcome"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ d0e623ee-b096-4a27-977d-dc32567d6020
-using PlutoTeachingTools, PlutoUI # packages for the notebook
-
-# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
+# ╔═╡ a517be42-d53a-470f-93d6-7a7723eb6ef1
 using Plots
 
-# ╔═╡ 249bc3fc-3e7a-4dde-b526-06ddd77093aa
-using IntervalArithmetic # not necessary if you did `using RadiiPolynomial`
+# ╔═╡ 727d1133-f88b-4713-a254-a61e0b6c8f79
+using LinearAlgebra
 
-# ╔═╡ 2698cfa7-5b3c-4f5a-9be4-b2c811e7a4ce
+# ╔═╡ 3f133258-e5b8-4303-a481-e9f4f74614e3
 using RadiiPolynomial
 
-# ╔═╡ a5169b4b-f0d4-4f66-8198-0aec5f8e135a
+# ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""
 <style>
 main {
+    max-width: 1000px;
+    margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
 </style>
 """
 
-# ╔═╡ b3845641-1537-4a27-8550-1eff30900a6b
-TableOfContents(title = "Table of Contents"; indent = true, depth = 4, aside = true)
-
-# ╔═╡ ed6f44f4-3696-494a-b8e3-b30184f5bb06
-md"# Motivating example: a chaotic dynamical system"
-
-# ╔═╡ c33dc650-3f94-11ef-398a-8bbc4a2b69b8
-md"""
-Consider the sequence defined by
-
-$\begin{align}
-x_{n+1} = \mu x_n (1-x_n),
-\end{align}$
-
-where $\mu$ is a parameter in $[0,4]$ and the initial condition $x_1$ is in $[0,1]$.
-
-The slider below can be used to vary the value of $\mu$.
-"""
-
-# ╔═╡ 05df1902-b4b8-4fd7-ab91-ad01f4fa413e
-# ╠═╡ disabled = true
-#=╠═╡
-@bind μ Slider(0:0.1:4; default = 3.9)
-  ╠═╡ =#
-
-# ╔═╡ 1d9286fa-647a-4743-806f-9cea5aab6be1
-md"""
-As $\mu$ increases, the dynamics become progressively more complex.
-This behaviour arises from a cascade of [period doubling bifurcations](https://en.wikipedia.org/wiki/Period-doubling_bifurcation), ultimately leading to [chaos](https://en.wikipedia.org/wiki/Chaos_theory).
-A well-known result for discrete dynamical systems states that the existence of a period-3 orbit implies chaos.
-"""
-
-# ╔═╡ 1e56532e-9886-4a41-9ba0-1a619a85e014
-md"""
-!!! theorem "Theorem"
-	Let $f : [0,1] \to [0,1]$ be continuous, and consider the dynamical system defined by $x_{n+1} = f(x_n)$.
-	If there exists an orbit of period-3, i.e. $x_1 \in [0,1]$ such that $x_1 \ne x_2 \ne x_3$ and $x_4 = x_1$, then the system is chaotic.
-	In particular, there exist orbits of any period.[^Sha64][^LY75]
-"""
-
-# ╔═╡ 8d6c631f-832a-48a9-891f-650f53a0ac6c
-md"""
-Let us fix a value of $\mu$ for which the dynamics seem complicated, say $\mu = 3.9$.
-Our goal is to demonstrate the existence of a period-3 orbit.
-We will begin by numerically approximating such an orbit and then rigorously establish the existence of a true period-3 orbit nearby.
-
-While there are various methods to prove the existence of a period-3 orbit (both with and without computer assistance), the approach we present will extend naturally to more challenging infinite-dimensional problems.
-"""
-
-# ╔═╡ 429e5261-d7d0-47a3-94b5-8e7905a5bd53
-md"# Contraction mapping and the Newton-Kantorovich theorem"
-
-# ╔═╡ a27b45ca-77d1-408e-98e9-6b5248aca85e
-md"""
-Given a problem and an approximate solution $\bar{x}$, our goal is to define a fixed-point operator $T$ such that
-- the solutions to our problem are in one-to-one correspondence with fixed-points of $T$,
--  $T$ is a contraction on a small neighborhood of $\bar{x}$.
-
-The specific form of $T$ may vary depending on the nature of the problem, but we can outline a general strategy for constructing such an operator.
-First, we provide sufficient conditions that can be verified in practice to demonstrate that an operator $T$ is contracting on a small neighborhood of $\bar{x}$.
-Although this first module focuses on finite-dimentional problems, we state these conditions in the more general setting of a [Banach space](https://en.wikipedia.org/wiki/Banach_space), as they will play an important role in the next modules.
-"""
-
-# ╔═╡ a801e2c7-c907-40d2-9976-bba19c590b2b
-md"""
-!!! theorem "Theorem (Contraction mapping)"
-	Let $\mathcal{X}$ be a Banach space, $\bar{x} \in \mathcal{X}$, and $T : \mathcal{X} \to \mathcal{X}$ a continuously differentiable map.
-	Assume that there exist a constant $Y$ and a non-decreasing map $Z : [0, \infty) \to [0, \infty)$ such that
-
-	```math
-	\begin{align}
-	\| T(\bar{x}) - \bar{x} \| &\le Y, \\
-	\| DT(x) \| &\le Z(\| x-\bar{x} \|), \qquad \forall x \in \mathcal{X}.
-	\end{align}
-	```
-
-	If there exists $r > 0$ such that
-
-	```math
-	\begin{align}
-	Y + \int_0^r Z(s) \, ds &\le r, \\
-	Z(r) &< 1,
-	\end{align}
-	```
-
-	then $T$ has a unique fixed point $\tilde{x}$ such that $\| \tilde{x} - \bar{x} \| \le r$.
-"""
-
-# ╔═╡ 6caaf267-3015-4a66-975f-ec1c3a6f86f8
-md"""
-!!! note "Remark"
-	- The bound $Z$ is actually only needed locally, i.e. we only need $Z(s)$ for $s \le r$.
-	  Therefore, one can fix a priori some $R > 0$, and weaken the assumption by only asking for $Z$ to be defined on $[0, R]$ and to satisfy $\| DT(x) \| \le Z(\| x-\bar{x} \|)$ for all $x \in \mathcal{X}$ such that $\| x-\bar{x} \| \le R$.
-	  Of course, we are then only allowed to consider $r \in (0, R]$.
-	- In practice, studying carefully how $\| DT(x) \|$ depends on $\| x-\bar{x} \|$ helps us to get better bounds.
-	  However, we can sometimes get away with coarser estimates.
-	  Specifically, we derive a constant $Z_*$ such that $\| DT(x) \| \le Z_*$ for all $x \in \mathcal{X}$ such that $\| x-\bar{x} \| \le R$, and then use $Z(s) = Z_*$ for all $s \in [0, R]$.
-	  The conditions on $r$ then simplify, and, if $Z_* < 1$, we can take any $r \ge \frac{Y}{1-Z_*}$.
-"""
-
-# ╔═╡ 77380230-67f2-4794-bb51-39ceeac7bef1
-md"""
-For a dynamical system $x_{n+1} = f(x_n)$, a natural fixed-point operator for period-3 orbits is given by $T(x) \overset{\text{def}}{=} f^3(x)$, which represents $f$ composed with itself three times.
-However, in general such a $T$ has no reason to be contracting.
-
-To develop a more general procedure for constructing a fixed-point problem, one can start by finding a map $F$ whose isolated zeros are solutions to our problem.
-For this example, we consider the mapping $F : \mathbb{R}^3 \to \mathbb{R}^3$ given by
-
-```math
-F(x_1, x_2, x_3) \overset{\text{def}}{=}
-\begin{pmatrix}
-f(x_1) - x_2 \\
-f(x_2) - x_3 \\
-f(x_3) - x_1
-\end{pmatrix}.
-```
-
-Given an approximate solution $\bar{x}$, one can consider the Newton-like operator $T(x) \overset{\text{def}}{=} x - DF(\bar{x})^{-1} F(x)$.
-This operator should be contracting in a neighborhood of $\bar{x}$, as $DT(\bar{x}) = 0$.
-
-For finite-dimensional problems of moderate size, computing the inverse of $DF(\bar{x})$ is possible.
-However, in infinite-dimensional problems, working with $DF(\bar{x})^{-1}$ can be challenging.
-To address this, we often consider an approximate inverse $A \approx DF(\bar{x})^{-1}$ and define the fixed-point operator $T(x) \overset{\text{def}}{=} x - AF(x)$.
-In the following results, we will operate under this framework, where $A$ is not specified and could be $DF(\bar{x})^{-1}$ or another suitable approximation.
-"""
-
-# ╔═╡ 08dab1b4-c78d-4e85-89b6-cf9b485030e0
-md"""
-!!! corollary "Corollary (Newton-Kantorovich)"
-	Let $\mathcal{X}$ and $\mathcal{Y}$ be two Banach spaces, $\bar{x} \in \mathcal{X}$, $F : \mathcal{X} \to \mathcal{Y}$ a continuously differentiable map, $A : \mathcal{Y} \to \mathcal{X}$ am injective linear map, and $R > 0$.
-	Assume that there exist constants $Y$, $Z_1$ and $Z_2$ such that
-
-	```math
-	\begin{align}
-	\| AF(\bar{x}) \| &\le Y, \\
-	\| I-ADF(\bar{x}) \| &\le Z_1, \\
-	\| A(DF(x)-DF(\bar{x})) \| &\le Z_2 \| x-\bar{x} \|, \qquad \forall x \in \mathcal{X} \text{ such that } \| x-\bar{x} \| \le R.
-	\end{align}
-	```
-
-	If there exists $r \in (0,R]$ such that
-
-	```math
-	\begin{align}
-	Y + Z_1 r + \frac{1}{2} Z_2 r^2 &\le r, \\
-	Z_1 + Z_2 r &< 1,
-	\end{align}
-	```
-
-	then $F$ has a unique zero $\tilde{x}$ such that $\| \tilde{x} - \bar{x} \| \le r$.
-"""
-
-# ╔═╡ 3dc209e6-d7c0-464b-a477-0c46ede9483e
-md"""
-This corollary is a simplified version of the [Newton-Kantorovich Theorem](https://en.wikipedia.org/wiki/Kantorovich_theorem) [^Ort68].
-Variations of this result can be found throughout the literature and are commonly used in computer-assisted proofs (CAPs) (see e.g. [^BL15] [^NPW19] and the references therein).
-"""
-
-# ╔═╡ f0d6ab5b-13cf-4408-aaae-93f959ce29c4
-md"# Interval arithmetic"
-
-# ╔═╡ 24ddc2c5-7976-4c67-8525-f6bb5d2e04a5
-md"""
-When we want to apply the contraction mapping theorem with $\bar{x}$ as an approximate solution obtained using the computer, we also need to compute values for the bounds $Y$ and $Z$.
-However, these calculations typically rely on floating-point arithmetic, which introduces rounding errors.
-For instance, if we execute `Y = norm(A * F(x̄), 1)` on the computer, we cannot be certain that $Y$ is an upper bound for $\|A F(\bar{x})\|_1$.
-
-[Interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic) provides a robust method to control rounding errors and ensuring guaranteed results from computer calculations.
-In this section, we offer a brief description of interval arithmetic; for more detailed discussions, please refer to [^Moo79] and [^Tuc11].
-"""
-
-# ╔═╡ 3b123092-1241-4a2a-bb61-36c7f68a0b35
-md"## Overview"
-
-# ╔═╡ 66ca51ad-0f2e-4f3c-8dd0-e66649b224d9
-md"""
-The central concept of interval arithmetic is to represent any real number by an interval, whose endpoints are floating-point numbers.
-More precisely, for $a \in \mathbb{R}$, we define the interval $[\underline{a}, \overline{a}]$ where $\underline{a}, \overline{a}$ are floating-point numbers satisfying $\underline{a} \le a \le \overline{a}$.
-While we give up the hope of representing numbers exactly, we recover guaranteed information: the real number $a$ is contained within the interval stored in the computer.
-
-The rules of interval arithmetic ensure that this containment property is preserved for arithmetic operations.
-For instance, consider two intervals $[a]$ and $[b]$ of the form $[\underline{a}, \overline{a}]$ and $[\underline{b}, \overline{b}]$, which enclose the reals numbers $a$ and $b$ respectively.
-When we perform the operation $[c] = [a] + [b]$, the resulting interval $[c] = [\underline{c}, \overline{c}]$ is computed as follows:
-- for $\underline{c}$, we take $\underline{a} + \underline{b}$ **rounded downward**, and
-- for $\overline{c}$, we take $\overline{a}+\overline{b}$ **rounded upward**.
-In particular, the real number $c = a + b$ is contained within the interval $[c]$.
-
-Similarly, if $[c]$ is an interval $[\underline{c}, \overline{c}]$ and we compute $[d] = e^{[c]}$, the resulting interval $[d]$ contains $e^c$.
-
-In this course, we use the Julia library [IntervalArithmetic](https://github.com/JuliaIntervals/IntervalArithmetic.jl), though many other interval arithmetic libraries are available in different programming languages.
-Note that IntervalArithmetic is automatically included when using [RadiiPolynomial](https://github.com/OlivierHnt/RadiiPolynomial.jl).
-This library provides standard arithmetic operations as well as implementations of elementary functions (such as `exp`, `log`, `cos`, etc.) that comply with the rules of interval arithmetic.
-"""
-
-# ╔═╡ f8eab26f-c893-4d2e-b4e8-6b59f33cbc9c
-a = interval(2, 4)
-
-# ╔═╡ 556163e0-80d2-4f4e-b198-b8e0922438db
-cos(exp(sqrt(a)))
-
-# ╔═╡ 97fadca1-fcf9-46b8-aa07-c615ca0deb7f
-md"""
-!!! note "Remark"
-	Even when doing computer-assisted proofs, it’s not necessary to use interval arithmetic for every computation.
-	For finding an approximate solution $\bar{x}$, floating-point calculations are perfectly fine.
-	It’s only when computing the bounds for the contraction theorem, and verifying the radii polynomial inequalities, that interval arithmetic must be used.
-"""
-
-# ╔═╡ 0bf1cce8-6caf-40d5-93a6-b495b764d943
-md"## Beware of typed-in floating-point numbers"
-
-# ╔═╡ c09b05d4-0325-486a-a433-6b32fbb7dfc7
-md"""
-When you execute a command like `x = 0.1` in Julia, the variable `x` is assigned the closest floating-point number approximating $1/10$.
-Since $1/10$ cannot be represented exactly in base 2, the value stored in `x` is not precisely equal to the typed-in number `0.1`.
-In fact, it turns out to be slightly larger than $1/10$, but it could just as easily have been smaller (as seen with `x = 0.3`).
-For more information on this topic, you can refer to this [webpage](https://0.30000000000000004.com).
-"""
-
-# ╔═╡ 2d68d26d-6e10-407f-8227-515ddadd9599
-x = 0.1
-
-# ╔═╡ 78f17262-7ffc-4d74-835c-f17863817b9a
-x > 1//10
-
-# ╔═╡ c44fd902-7655-43b5-82cc-53c2ecc4f77b
-ix = interval(1)/interval(10)
-
-# ╔═╡ 4c15bb79-2591-4f2a-9243-ff811de70df7
-in_interval(1//10, ix)
-
-# ╔═╡ 68243410-d2df-4606-82a5-53d515403e40
-md"# Back to period-3 implies chaos"
-
-# ╔═╡ 9a0e21bd-da27-48e6-9a08-b20b3cb805bd
-md"""
-Let’s recap what we have covered so far:
-- Proving the existence of a period-3 orbit is sufficient to establish chaotic dynamics.
-- We reformulated the task of finding a period-3 orbit as solving an equation $F = 0$.
-- We derived sufficient conditions, in terms of bound estimates $Y, Z_1, Z_2$, to determine the radius of a ball, centered at a numerical approximation $\bar{x}$, that contains a (locally unique) true zero $\tilde{x}$ of $F$.
-- We introduced interval arithmetic to rigorously estimate the bounds $Y$, $Z_1$, and $Z_2$ with computer assistance.
-
-Now, we walk through the implementation of a computer-assisted proof to demonstrate a period-3 orbit for $\mu = 3.9$.
-
-We start by defining the logistic map in Julia:
-"""
-
-# ╔═╡ b3121e23-03c4-46f2-89b7-c6b39f8efdad
-f(x, μ) = μ * x * (1 - x) # logistic map
-
-# ╔═╡ aeda376d-b1d1-4613-9964-05c24daf4b9a
-md"""
-and the zero-finding problem:
-"""
-
-# ╔═╡ c31f9913-0f16-4e74-b395-97038706be3c
-function F(x, μ)
-    v = zeros(eltype(x), 3)
-    v[1] = f(x[1], μ) - x[2]
-	v[2] = f(x[2], μ) - x[3]
-	v[3] = f(x[3], μ) - x[1]
-	return v
-end
-
-# ╔═╡ 129c8b50-1ba3-427e-a306-5be57c9755a3
-md"""
-To apply the Newton-Kantorovich theorem we also need the first derivate:
-"""
-
-# ╔═╡ d2f64f7e-2acb-4bf6-a961-3e2d8a87c409
-Df(x, μ) = μ * (1 - 2x) # derivative of the logistic map w.r.t. x
-
-# ╔═╡ 8591da5a-0b9a-4bff-8adc-fe1d3d9fca09
-function DF(x, μ) # derivative of the zero-finding problem w.r.t. x
-	M = zeros(eltype(x), 3, 3)
-	M[1,1] = Df(x[1], μ)
-	M[1,2] = -1
-	M[2,2] = Df(x[2], μ)
-	M[2,3] = -1
-	M[3,1] = -1
-	M[3,3] = Df(x[3], μ)
-	return M
-end
-
-# ╔═╡ fa0be782-c09e-45b7-9cbb-d0b3161c3317
-md"## Numerical zero"
-
-# ╔═╡ cf53d067-ec00-4c06-b4ae-65ed7aa19d34
-md"""
-We apply [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method) to $F$ using the `newton` function provided in the RadiiPolynomial library.
-"""
-
-# ╔═╡ 80d73a01-4588-4db3-8090-1891f4c7a3ca
-μ = 3.9 # typed by `\mu<tab>`
-
-# ╔═╡ da0cd646-614e-436f-9596-853fb3bca36b
-μ
-
-# ╔═╡ 730eeed9-a736-48df-a853-94f45dedd836
-begin
-	x1 = 0.4
-	maxiter = 50
-	xs = zeros(maxiter+1)
-	xs[1] = x1
-	for n = 1:maxiter
-		xs[n+1] = μ*xs[n]*(1-xs[n])
-	end
-	plot(1:maxiter+1, xs; marker = (:circle, 5), legend = false)
-	xlabel!("n")
-	ylims!(-0.1, 1.1)
-end
-
-# ╔═╡ ef6afc18-f779-4370-8ccc-0a9494341166
-initial_data = [-1.0, 1.0, 1.0]
-
-# ╔═╡ a71e7ddf-e4d7-4200-abfb-b248883200e1
-F_DF(x) = (F(x, μ), DF(x, μ)) # returns `F` and `DF` at `μ = 3.9`
-
-# ╔═╡ b1ff2f19-31b7-4064-9ac0-e600ccd937d9
-x_bar, success = newton(F_DF, initial_data)
-
-# ╔═╡ 8cc5d9d9-6630-43eb-85b7-2e658da6ec03
-md"""
-The `newton` function returns two outputs: the result of the iterations and a value indicating whether the method converged -- `true` if it did (as it does here) and `false` otherwise.
-"""
-
-# ╔═╡ 81d97321-ff79-42d6-adc6-3d66f91c438b
-md"""
-###### Initializing Newton's method
-
-Finding a good starting point for Newton's method is not always easy.
-Here we were a bit lucky that a simple guess worked well.
-For other parameter values, however, we may need to take a closer look at the iterations of the map $f$.
-"""
-
-# ╔═╡ a2c9c052-1628-4ccd-8ac6-e2b16e0fc687
-md"## Constructing $A$"
-
-# ╔═╡ 32b5d274-3d0f-41aa-b1cf-85dfe40d0f76
-md"""
-As mentioned earlier, $A$ doesn’t need to be exactly $DF(\bar{x})^{-1}$; it only needs to be a reasonably close approximation.
-For finite-dimensional problems, this inverse can be efficiently computed using built-in numerical algorithms.
-"""
-
-# ╔═╡ 16ec745d-0353-471f-b177-c25c5440e860
-A = inv(DF(x_bar, μ))
-
-# ╔═╡ 8ba3efdb-bff7-4211-bcd0-1537ae0420ed
-md"## Verifying the contraction"
-
-# ╔═╡ d9117644-f54f-42ce-94df-5933e57d765c
-md"""
-We now verify that $T(x) \overset{\text{def}}{=} x - A F(x)$ is a contraction around $\bar{x} \in \mathbb{R}^3$.
-To rigorously compute the bounds $Y, Z_1, Z_2$, we enclose all relevant data into intervals.
-"""
-
-# ╔═╡ 787a3624-7a81-4f9f-9bca-f28e914a8f07
-# since 39/10 is not representable as a floating-point number
-iμ = interval(39)/interval(10)
-
-# ╔═╡ a182a2c2-2e20-44f5-92ba-e85805050170
-ix_bar = interval(x_bar)
-
-# ╔═╡ f6759116-c48c-4a54-b073-8c2a0adc97cf
-iA = interval(A)
-
-# ╔═╡ 761a7427-6561-4754-8815-b1bf491a17da
-md"##### Computing $Y$"
-
-# ╔═╡ 7a037025-57ef-4b62-a880-8a2538096a9e
-Y = norm(iA * F(ix_bar, iμ), 1)
-
-# ╔═╡ 7a451708-9427-425a-93e0-0e66cad2c80b
-md"##### Computing $Z_1$"
-
-# ╔═╡ b7d36207-5f2c-41de-b142-7e8ee8700f79
-Z₁ = opnorm(I - iA * DF(ix_bar, iμ), 1)
-
-# ╔═╡ 7c1876f9-ccb7-4084-841f-316b1c1f6308
-md"##### Computing $Z_2$"
-
-# ╔═╡ 1a196987-95f2-48e0-9648-66373dce0ed5
-md"""
-```math
-\|A(DF(x) - DF(\bar{x}))\|_1 \le \|A\|_1 \|DF(x) - DF(\bar{x})\|_1 = 2 \mu \|A\|_1 \| x - \bar{x} \|_1, \qquad \forall x \in \mathbb{R}^3.
-```
-
-So $Z_2 \ge 2 \mu \|A\|_1$ is a constant.
-In other words, we have a Lipschitz control for $DF$ on the whole space $\mathbb{R}^3$, and we can freely choose $R = \infty$.
-"""
-
-# ╔═╡ 0b1f112c-d8b0-4903-966c-8ac6f4be69dc
-R = Inf
-
-# ╔═╡ 6f38f2e6-170c-4fea-b260-e55ca3fc3849
-Z₂ = interval(2) * iμ * opnorm(iA, 1)
-
-# ╔═╡ f7db0f90-473b-4265-8918-1b7acb08ebd2
-md"##### Finishing the CAP"
-
-# ╔═╡ afadd46e-458b-4975-925c-2add34ec75af
-md"""
-To determine the values of $r$ that satisfy the radii polynomial inequalities, we use the `interval_of_existence` function from RadiiPolynomial.
-This function returns an interval of existence, within which all contained values satisfy the contraction conditions.
-"""
-
-# ╔═╡ 980ecce4-f02d-4976-b953-587b31009adb
-ie = interval_of_existence(Y, Z₁, Z₂, R)
-
-# ╔═╡ 958265d4-f604-47a4-8195-64ba21275f6d
-md"""
-The largest value in the interval represents the maximum radius of the ball centered at $\bar{x}$ within which the true zero $\tilde{x}$ of $F$ is proven to be unique.
-On the other hand, the smallest value provides the sharpest error bound.
-"""
-
-# ╔═╡ 9eb669e1-f191-46cf-a3cb-b441b7d7f9e5
-r = inf(ie)
-
-# ╔═╡ c1a3ff98-5846-4601-87f7-b94b4f1fdf17
-md"""
-In fact, we cannot yet conclude that $\tilde{x}$ is a zero of $F$ since we did not check that $A$ was injective.
-This property actually comes as a by-product of the contraction argument.
-Indeed, $\|I - A DF(\bar{x})\| \le Z_1 < 1$ ensures that $A DF(\bar{x})$ is invertible, which implies that $A$ is surjective.
-Since $A$ is a square matrix, it follows that $A$ must also be injective.
-
-Finally, we verify that the true zero $\tilde{x}$ of $F$ is a period-3 orbit, that is $\tilde{x}_1 \ne \tilde{x}_2 \ne \tilde{x}_3$.
-Since we have found $r$ such that $\| \tilde{x} - \bar{x} \|_1 \le r$, it follows that $\tilde{x}_j \in [\bar{x}_j - r, \bar{x}_j + r]$ for $j = 1, 2, 3$.
-We then confirm that the three intervals $[\bar{x}_j - r, \bar{x}_j + r]$, for $j = 1, 2, 3$, are mutually disjoint:
-"""
-
-# ╔═╡ 611dc902-dd8d-4ec8-a2c0-1e9ac949a128
-enclosure_x_tilde_1 = interval(ix_bar[1], r; format = :midpoint)
-
-# ╔═╡ 61e71daf-8a6d-4c27-bccd-91f5e4db992c
-enclosure_x_tilde_2 = interval(ix_bar[2], r; format = :midpoint)
-
-# ╔═╡ 5f7e039e-b1a7-40a2-a076-ee56215da40c
-enclosure_x_tilde_3 = interval(ix_bar[3], r; format = :midpoint)
-
-# ╔═╡ 0f3d6fcf-2794-4d09-ae35-9dc5db3d0fa8
-isdisjoint_interval(enclosure_x_tilde_1, enclosure_x_tilde_2, enclosure_x_tilde_3)
-
-# ╔═╡ 1a9d9d5b-22bd-4fea-b480-817d80c63f8e
-md"""
-###### A final note on interval arithmetic
-
-In the code provided in this notebook we used the Julia interval arithmetic library [IntervalArithmetic.jl](https://juliaintervals.github.io/IntervalArithmetic.jl/stable/). We took a bit of liberty by taking advantage of automatic conversion of floats and integers to intervals, when variables of these types are combined in elementary operations. The interval arithmetic library is not entirely happy about this:
-"""
-
-# ╔═╡ 26a665d6-77c1-4bb4-b2df-04e05a80ee80
-isguaranteed(Y), isguaranteed(Z₁), isguaranteed(Z₂)
-
-# ╔═╡ 0a2208b6-f90c-4587-978f-33643fd4bdba
-md"# References"
-
-# ╔═╡ b8d56ba6-01da-4604-8dad-3e63ec203fd4
-md"""
-[^BL15]: J. B. van den Berg and J.-P. Lessard. Rigorous numerics in dynamics. *Notices Of The American Mathematical Society*, 62(9), 2015.
-[^LY75]: T.-Y. Li and J. A. Yorke. Period three implies chaos. *The American Mathematical Monthly*, 82(10):985--992, 1975.
-[^Moo79]: R. E. Moore. *Methods and applications of interval analysis*. SIAM, 1979
-[^Ort68]: J. M. Ortega. The Newton-Kantorovich theorem. *The American Mathematical Monthly*, 75(6):658--660, 1968.
-[^NPW19]: M. T. Nakao, M. Plum, and Y. Watanabe. *Numerical Verification Methods and Computer-Assisted Proofs for Partial Differential Equations*. Springer Singapore, 2019.
-[^Sha64]: A. N. Sharkowskii. Co-existence of the cycles of a continuous mapping of the line into itself. *Ukrainian Mathematical Journal*, 16(1), 1964.
-[^Tuc11]: W. Tucker. *Validated numerics: a short introduction to rigorous computations*. Princeton University Press, 2011.
-"""
+# ╔═╡ 800c404b-d415-4a93-a5c4-e2296068a534
+md"### Julia"
+
+# ╔═╡ 35f3b473-cfa8-4a89-bb98-e6cdfa7b58fe
+β = 2.0 # typed by `\beta<tab>`
+
+# ╔═╡ 2cc0471a-2fb6-44a3-bf3a-91ccbd7b30a9
+v₂⁵ = 1.0 # typed by `v\_2<tab>\^5<tab>`
+
+# ╔═╡ f5f84a05-f4a2-4af9-815b-b77739f0fa2d
+[1.0 ; 2.0]
+
+# ╔═╡ 876d8811-24ca-45cb-b4a2-4fbca624d851
+[1.0 ; [2.0, 3.0]]
+
+# ╔═╡ 8e8d5bca-caf5-4595-88f2-4362acd46340
+zeros(2)
+
+# ╔═╡ b9e52603-8407-44ba-adba-750a6356ecef
+zeros(2, 2)
+
+# ╔═╡ 11447066-650e-421d-b31d-8abd3be68b75
+zeros(Complex{Float64}, 2, 2)
+
+# ╔═╡ d9290871-6a83-4832-81e2-f277cd948dd3
+[1.0 2.0 ; 3.0 4.0]
+
+# ╔═╡ ca2a7bbc-cbba-4c67-a739-121e436f0103
+inv([1.0 2.0 ; 3.0 4.0])
+
+# ╔═╡ 3a1ce528-fefc-4489-86ee-3358d69123cd
+md"### LinearAlgebra"
+
+# ╔═╡ 848982e9-d97f-4859-b8b0-8f53e9187380
+norm([1.0 ; 2.0], 1)
+
+# ╔═╡ 4868fa5c-bbdf-4cd8-8751-3d87281438d4
+opnorm([1.0 0.0 ; 2.0 2.0], 1)
+
+# ╔═╡ ef9684a1-e6ad-4d99-94ec-19f0d44d1ba7
+norm(interval([1.0, 2.0]), 1)
+
+# ╔═╡ 6f11b2b7-c58c-4796-b9f5-f438b0c86e42
+I
+
+# ╔═╡ c3b0849a-f58b-40e5-b3ec-97566eadb27f
+I + zeros(2, 2)
+
+# ╔═╡ 9ce060ea-53a4-4854-a53c-b58d29cb4f2b
+I + zeros(3, 3)
+
+# ╔═╡ 55933fb6-6db8-4fad-9753-c317916660e4
+md"### IntervalArithmetic"
+
+# ╔═╡ 24ba79d7-b92c-4f42-a940-24907321104e
+interval([1.0, 2.0])
+
+# ╔═╡ 3744963a-1f6b-4dbc-b796-83dad65e87f5
+interval([1.0 2.0 ; 3.0 4.0])
+
+# ╔═╡ 1672e4dd-5f52-4be5-8d5f-2b7a77a6af99
+md"### RadiiPolynomial"
+
+# ╔═╡ 86b71145-bf35-4310-9914-78925141a5d1
+x = Sequence(Taylor(1), [1.0, 1.0]) # 1 + t
+
+# ╔═╡ 960765e6-2c84-4e91-ace1-191126fc6589
+x*x # (1 + t)^2 = 1 + 2t + t^2
+
+# ╔═╡ f2acf06e-4be5-4a30-b036-e554c0d2ffa4
+Derivative(1)
+
+# ╔═╡ 822cc3b2-dcec-46c8-a5c6-726de36f90e7
+Derivative(1) * x
+
+# ╔═╡ a9bf21bb-1a92-4942-b76a-aef1ffc98887
+Multiplication(x)
+
+# ╔═╡ 0cdf0577-d1b3-4c42-8090-6b3bc198b044
+project(Multiplication(x), Taylor(5), Taylor(5))
+
+# ╔═╡ 1547e260-583c-41ca-bbbe-29b79707708f
+y = Sequence(Fourier(1, 1.0), [im*0.5, 0.0, -im*0.5]) # sin(t)
+
+# ╔═╡ bf2d955d-9d9c-4ad3-85d5-d36696699b9b
+plot(LinRange(-π, π, 101), t -> real(y(t)))
+
+# ╔═╡ 6c89b8af-6c6c-46da-a441-52f75930b377
+interval(x)
+
+# ╔═╡ cdb5640a-2778-4285-a0cc-6c669bed839f
+norm(x, 1)
+
+# ╔═╡ 2583c7b4-f78d-47c8-a925-99cbe8ed6103
+ν = interval(1.1)
+
+# ╔═╡ 57a51438-53d3-4669-b410-c6338165043c
+norm(interval(x), Ell1(GeometricWeight(ν)))
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-IntervalArithmetic = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
-PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
-IntervalArithmetic = "~0.22.18"
 Plots = "~1.40.8"
-PlutoTeachingTools = "~0.2.15"
-PlutoUI = "~0.7.60"
 RadiiPolynomial = "~0.8.15"
 """
 
@@ -522,13 +148,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "793b9658854d250ee95f39ee62c84a30d8d3b1c0"
-
-[[deps.AbstractPlutoDingetjes]]
-deps = ["Pkg"]
-git-tree-sha1 = "6e1d2a35f2f90a4bc7c2ed98079b2ba09c35b83a"
-uuid = "6e696c72-6542-2067-7265-42206c756150"
-version = "1.3.2"
+project_hash = "6a569534f7f07512612e25ed17cea1956be8d3f5"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -565,12 +185,6 @@ git-tree-sha1 = "009060c9a6168704143100f36ab08f06c2af4642"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.18.2+1"
 
-[[deps.CodeTracking]]
-deps = ["InteractiveUtils", "UUIDs"]
-git-tree-sha1 = "7eee164f122511d3e4e1ebadb7956939ea7e1c77"
-uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
-version = "1.3.6"
-
 [[deps.CodecZlib]]
 deps = ["TranscodingStreams", "Zlib_jll"]
 git-tree-sha1 = "bce6804e5e6044c6daab27bb533d1295e4a2e759"
@@ -603,9 +217,9 @@ version = "0.10.0"
 
 [[deps.Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
-git-tree-sha1 = "64e15186f0aa277e174aa81798f7eb8598e0157e"
+git-tree-sha1 = "362a287c3aa50601b0bc359053d5c2468f0e7ce0"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
-version = "0.13.0"
+version = "0.12.11"
 
 [[deps.Compat]]
 deps = ["TOML", "UUIDs"]
@@ -660,11 +274,6 @@ deps = ["Mmap"]
 git-tree-sha1 = "9e2f36d3c96a820c678f2f1f1782582fcf685bae"
 uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 version = "1.9.1"
-
-[[deps.Distributed]]
-deps = ["Random", "Serialization", "Sockets"]
-uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
-version = "1.11.0"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -793,24 +402,6 @@ git-tree-sha1 = "401e4f3f30f43af2c8478fc008da50096ea5240f"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
 version = "8.3.1+0"
 
-[[deps.Hyperscript]]
-deps = ["Test"]
-git-tree-sha1 = "179267cfa5e712760cd43dcae385d7ea90cc25a4"
-uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
-version = "0.0.5"
-
-[[deps.HypertextLiteral]]
-deps = ["Tricks"]
-git-tree-sha1 = "7134810b1afce04bbc1045ca1985fbe81ce17653"
-uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
-version = "0.9.5"
-
-[[deps.IOCapture]]
-deps = ["Logging", "Random"]
-git-tree-sha1 = "b6d6bfdd7ce25b0f9b2f6b3dd56b2673a66c8770"
-uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
-version = "0.2.5"
-
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
@@ -862,12 +453,6 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "25ee0be4d43d0269027024d75a24c24d6c6e590c"
 uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
 version = "3.0.4+0"
-
-[[deps.JuliaInterpreter]]
-deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "2984284a8abcfcc4784d95a9e2ea4e352dd8ede7"
-uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.9.36"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -1022,17 +607,6 @@ git-tree-sha1 = "f02b56007b064fbfddb4c9cd60161b6dd0f40df3"
 uuid = "e6f89c97-d47a-5376-807f-9c37f3926c36"
 version = "1.1.0"
 
-[[deps.LoweredCodeUtils]]
-deps = ["JuliaInterpreter"]
-git-tree-sha1 = "260dc274c1bc2cb839e758588c63d9c8b5e639d1"
-uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "3.0.5"
-
-[[deps.MIMEs]]
-git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
-uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
-version = "0.1.4"
-
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
 git-tree-sha1 = "2fa9ee3e63fd3a4f7a9a4f4744a52f4856de82df"
@@ -1168,9 +742,9 @@ version = "3.3.0"
 
 [[deps.PlotUtils]]
 deps = ["ColorSchemes", "Colors", "Dates", "PrecompileTools", "Printf", "Random", "Reexport", "StableRNGs", "Statistics"]
-git-tree-sha1 = "3ca9a356cd2e113c420f2c13bea19f8d3fb1cb18"
+git-tree-sha1 = "650a022b2ce86c7dcfbdecf00f78afeeb20e5655"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
-version = "1.4.3"
+version = "1.4.2"
 
 [[deps.Plots]]
 deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "JLFzf", "JSON", "LaTeXStrings", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "PrecompileTools", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "RelocatableFolders", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "TOML", "UUIDs", "UnicodeFun", "UnitfulLatexify", "Unzip"]
@@ -1191,30 +765,6 @@ version = "1.40.8"
     IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
     ImageInTerminal = "d8c32880-2388-543b-8c61-d9f865259254"
     Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
-
-[[deps.PlutoHooks]]
-deps = ["InteractiveUtils", "Markdown", "UUIDs"]
-git-tree-sha1 = "072cdf20c9b0507fdd977d7d246d90030609674b"
-uuid = "0ff47ea0-7a50-410d-8455-4348d5de0774"
-version = "0.0.5"
-
-[[deps.PlutoLinks]]
-deps = ["FileWatching", "InteractiveUtils", "Markdown", "PlutoHooks", "Revise", "UUIDs"]
-git-tree-sha1 = "8f5fa7056e6dcfb23ac5211de38e6c03f6367794"
-uuid = "0ff47ea0-7a50-410d-8455-4348d5de0420"
-version = "0.1.6"
-
-[[deps.PlutoTeachingTools]]
-deps = ["Downloads", "HypertextLiteral", "LaTeXStrings", "Latexify", "Markdown", "PlutoLinks", "PlutoUI", "Random"]
-git-tree-sha1 = "5d9ab1a4faf25a62bb9d07ef0003396ac258ef1c"
-uuid = "661c6b06-c737-4d37-b85c-46df65de6f69"
-version = "0.2.15"
-
-[[deps.PlutoUI]]
-deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
-git-tree-sha1 = "eba4810d5e6a01f612b948c9fa94f905b49087b0"
-uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
-version = "0.7.60"
 
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
@@ -1301,12 +851,6 @@ deps = ["UUIDs"]
 git-tree-sha1 = "838a3a4188e2ded87a4f9f184b4b0d78a1e91cb7"
 uuid = "ae029012-a4dd-5104-9daa-d747884805df"
 version = "1.3.0"
-
-[[deps.Revise]]
-deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "REPL", "Requires", "UUIDs", "Unicode"]
-git-tree-sha1 = "7f4228017b83c66bd6aa4fddeb170ce487e53bc7"
-uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.6.2"
 
 [[deps.RoundingEmulator]]
 git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
@@ -1415,11 +959,6 @@ version = "1.11.0"
 git-tree-sha1 = "0c45878dcfdcfa8480052b6ab162cdd138781742"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.11.3"
-
-[[deps.Tricks]]
-git-tree-sha1 = "7822b97e99a1672bfb1b49b668a6d46d58d8cbcb"
-uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
-version = "0.1.9"
 
 [[deps.URIs]]
 git-tree-sha1 = "67db6cc7b3821e19ebe75791a9dd19c9b1188f2b"
@@ -1764,85 +1303,42 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╟─a5169b4b-f0d4-4f66-8198-0aec5f8e135a
-# ╠═d0e623ee-b096-4a27-977d-dc32567d6020
-# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
-# ╟─b3845641-1537-4a27-8550-1eff30900a6b
-# ╟─ed6f44f4-3696-494a-b8e3-b30184f5bb06
-# ╟─c33dc650-3f94-11ef-398a-8bbc4a2b69b8
-# ╟─05df1902-b4b8-4fd7-ab91-ad01f4fa413e
-# ╟─da0cd646-614e-436f-9596-853fb3bca36b
-# ╟─730eeed9-a736-48df-a853-94f45dedd836
-# ╟─1d9286fa-647a-4743-806f-9cea5aab6be1
-# ╟─1e56532e-9886-4a41-9ba0-1a619a85e014
-# ╟─8d6c631f-832a-48a9-891f-650f53a0ac6c
-# ╟─429e5261-d7d0-47a3-94b5-8e7905a5bd53
-# ╟─a27b45ca-77d1-408e-98e9-6b5248aca85e
-# ╟─a801e2c7-c907-40d2-9976-bba19c590b2b
-# ╟─6caaf267-3015-4a66-975f-ec1c3a6f86f8
-# ╟─77380230-67f2-4794-bb51-39ceeac7bef1
-# ╟─08dab1b4-c78d-4e85-89b6-cf9b485030e0
-# ╟─3dc209e6-d7c0-464b-a477-0c46ede9483e
-# ╟─f0d6ab5b-13cf-4408-aaae-93f959ce29c4
-# ╟─24ddc2c5-7976-4c67-8525-f6bb5d2e04a5
-# ╟─3b123092-1241-4a2a-bb61-36c7f68a0b35
-# ╟─66ca51ad-0f2e-4f3c-8dd0-e66649b224d9
-# ╠═249bc3fc-3e7a-4dde-b526-06ddd77093aa
-# ╠═f8eab26f-c893-4d2e-b4e8-6b59f33cbc9c
-# ╠═556163e0-80d2-4f4e-b198-b8e0922438db
-# ╟─97fadca1-fcf9-46b8-aa07-c615ca0deb7f
-# ╟─0bf1cce8-6caf-40d5-93a6-b495b764d943
-# ╟─c09b05d4-0325-486a-a433-6b32fbb7dfc7
-# ╠═2d68d26d-6e10-407f-8227-515ddadd9599
-# ╠═78f17262-7ffc-4d74-835c-f17863817b9a
-# ╠═c44fd902-7655-43b5-82cc-53c2ecc4f77b
-# ╠═4c15bb79-2591-4f2a-9243-ff811de70df7
-# ╟─68243410-d2df-4606-82a5-53d515403e40
-# ╠═2698cfa7-5b3c-4f5a-9be4-b2c811e7a4ce
-# ╟─9a0e21bd-da27-48e6-9a08-b20b3cb805bd
-# ╠═b3121e23-03c4-46f2-89b7-c6b39f8efdad
-# ╟─aeda376d-b1d1-4613-9964-05c24daf4b9a
-# ╠═c31f9913-0f16-4e74-b395-97038706be3c
-# ╟─129c8b50-1ba3-427e-a306-5be57c9755a3
-# ╠═d2f64f7e-2acb-4bf6-a961-3e2d8a87c409
-# ╠═8591da5a-0b9a-4bff-8adc-fe1d3d9fca09
-# ╟─fa0be782-c09e-45b7-9cbb-d0b3161c3317
-# ╟─cf53d067-ec00-4c06-b4ae-65ed7aa19d34
-# ╠═80d73a01-4588-4db3-8090-1891f4c7a3ca
-# ╠═ef6afc18-f779-4370-8ccc-0a9494341166
-# ╠═a71e7ddf-e4d7-4200-abfb-b248883200e1
-# ╠═b1ff2f19-31b7-4064-9ac0-e600ccd937d9
-# ╟─8cc5d9d9-6630-43eb-85b7-2e658da6ec03
-# ╟─81d97321-ff79-42d6-adc6-3d66f91c438b
-# ╟─a2c9c052-1628-4ccd-8ac6-e2b16e0fc687
-# ╟─32b5d274-3d0f-41aa-b1cf-85dfe40d0f76
-# ╠═16ec745d-0353-471f-b177-c25c5440e860
-# ╟─8ba3efdb-bff7-4211-bcd0-1537ae0420ed
-# ╟─d9117644-f54f-42ce-94df-5933e57d765c
-# ╠═787a3624-7a81-4f9f-9bca-f28e914a8f07
-# ╠═a182a2c2-2e20-44f5-92ba-e85805050170
-# ╠═f6759116-c48c-4a54-b073-8c2a0adc97cf
-# ╟─761a7427-6561-4754-8815-b1bf491a17da
-# ╠═7a037025-57ef-4b62-a880-8a2538096a9e
-# ╟─7a451708-9427-425a-93e0-0e66cad2c80b
-# ╠═b7d36207-5f2c-41de-b142-7e8ee8700f79
-# ╟─7c1876f9-ccb7-4084-841f-316b1c1f6308
-# ╟─1a196987-95f2-48e0-9648-66373dce0ed5
-# ╠═0b1f112c-d8b0-4903-966c-8ac6f4be69dc
-# ╠═6f38f2e6-170c-4fea-b260-e55ca3fc3849
-# ╟─f7db0f90-473b-4265-8918-1b7acb08ebd2
-# ╟─afadd46e-458b-4975-925c-2add34ec75af
-# ╠═980ecce4-f02d-4976-b953-587b31009adb
-# ╟─958265d4-f604-47a4-8195-64ba21275f6d
-# ╠═9eb669e1-f191-46cf-a3cb-b441b7d7f9e5
-# ╟─c1a3ff98-5846-4601-87f7-b94b4f1fdf17
-# ╠═611dc902-dd8d-4ec8-a2c0-1e9ac949a128
-# ╠═61e71daf-8a6d-4c27-bccd-91f5e4db992c
-# ╠═5f7e039e-b1a7-40a2-a076-ee56215da40c
-# ╠═0f3d6fcf-2794-4d09-ae35-9dc5db3d0fa8
-# ╟─1a9d9d5b-22bd-4fea-b480-817d80c63f8e
-# ╠═26a665d6-77c1-4bb4-b2df-04e05a80ee80
-# ╟─0a2208b6-f90c-4587-978f-33643fd4bdba
-# ╟─b8d56ba6-01da-4604-8dad-3e63ec203fd4
+# ╟─7fc40507-eda3-474d-a454-04e9173a7adb
+# ╠═a517be42-d53a-470f-93d6-7a7723eb6ef1
+# ╟─800c404b-d415-4a93-a5c4-e2296068a534
+# ╠═35f3b473-cfa8-4a89-bb98-e6cdfa7b58fe
+# ╠═2cc0471a-2fb6-44a3-bf3a-91ccbd7b30a9
+# ╠═f5f84a05-f4a2-4af9-815b-b77739f0fa2d
+# ╠═876d8811-24ca-45cb-b4a2-4fbca624d851
+# ╠═8e8d5bca-caf5-4595-88f2-4362acd46340
+# ╠═b9e52603-8407-44ba-adba-750a6356ecef
+# ╠═11447066-650e-421d-b31d-8abd3be68b75
+# ╠═d9290871-6a83-4832-81e2-f277cd948dd3
+# ╠═ca2a7bbc-cbba-4c67-a739-121e436f0103
+# ╟─3a1ce528-fefc-4489-86ee-3358d69123cd
+# ╠═727d1133-f88b-4713-a254-a61e0b6c8f79
+# ╠═848982e9-d97f-4859-b8b0-8f53e9187380
+# ╠═4868fa5c-bbdf-4cd8-8751-3d87281438d4
+# ╠═ef9684a1-e6ad-4d99-94ec-19f0d44d1ba7
+# ╠═6f11b2b7-c58c-4796-b9f5-f438b0c86e42
+# ╠═c3b0849a-f58b-40e5-b3ec-97566eadb27f
+# ╠═9ce060ea-53a4-4854-a53c-b58d29cb4f2b
+# ╟─55933fb6-6db8-4fad-9753-c317916660e4
+# ╠═24ba79d7-b92c-4f42-a940-24907321104e
+# ╠═3744963a-1f6b-4dbc-b796-83dad65e87f5
+# ╟─1672e4dd-5f52-4be5-8d5f-2b7a77a6af99
+# ╠═3f133258-e5b8-4303-a481-e9f4f74614e3
+# ╠═86b71145-bf35-4310-9914-78925141a5d1
+# ╠═960765e6-2c84-4e91-ace1-191126fc6589
+# ╠═f2acf06e-4be5-4a30-b036-e554c0d2ffa4
+# ╠═822cc3b2-dcec-46c8-a5c6-726de36f90e7
+# ╠═a9bf21bb-1a92-4942-b76a-aef1ffc98887
+# ╠═0cdf0577-d1b3-4c42-8090-6b3bc198b044
+# ╠═1547e260-583c-41ca-bbbe-29b79707708f
+# ╠═bf2d955d-9d9c-4ad3-85d5-d36696699b9b
+# ╠═6c89b8af-6c6c-46da-a441-52f75930b377
+# ╠═cdb5640a-2778-4285-a0cc-6c669bed839f
+# ╠═2583c7b4-f78d-47c8-a925-99cbe8ed6103
+# ╠═57a51438-53d3-4669-b410-c6338165043c
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

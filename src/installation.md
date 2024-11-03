@@ -1,7 +1,7 @@
 ---
 title: "Software installation"
 tags: ["welcome"]
-order: 2
+order: 1
 layout: "md.jlmd"
 ---
 

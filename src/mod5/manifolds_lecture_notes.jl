@@ -3,7 +3,8 @@
 
 #> [frontmatter]
 #> chapter = 5
-#> order = 2
+#> section = 2
+#> order = 0.6
 #> title = "Lorenz system"
 #> tags = ["lecture", "module5"]
 #> layout = "layout.jlhtml"

@@ -43,8 +43,8 @@ u(t) v(t) = 1, \qquad t \in [-1, 1].
 
 This constitutes the first example of infinite-dimensional problems.
 
-We will search for a function $u$ in the following form $u(t) = \sum_{n \ge 0} x_n t^n$, defined for all $t \in [-1, 1]$.
-A numerical plot of $u$ is displayed below.
+We will search for a function $u$ as a power series $u(t) = \sum_{n \ge 0} x_n t^n$, defined for all $t \in [-1, 1]$.
+A numerical plot of $(2+t)^{-1}$ is displayed below.
 """
 
 # ╔═╡ 37827087-01ad-4fe7-bcb6-df2239ea0bca
@@ -57,12 +57,12 @@ end
 
 # ╔═╡ d794367f-d346-416f-b8f1-1f442f876e20
 md"""
-We follow the same approach presented in Module 1, specifically
-1. There is an additional step here in comparison with the previous lecture on finite-dimension problems, which is to find the adequate Banach space.
-2. we will formulate a zero-finding problem $F = 0$
-3. we will compute an approximate zero $\bar{x}$
-4. we will construct an approximate inverse $A$ of $DF(\bar{x})$
-5. we will derive bounds for $Y, Z_1, Z_2$ and verify the radii polynomial inequalities.
+We follow the same strategy outlined in Module 1, with some key adaptations:
+1. Identify a appropriate Banach space (an additional step compared to the previous module on finite-dimensional problems).
+2. Reformulate the problem as a zero-finding problem $F(x) = 0$.
+3. Compute an approximate zero $\bar{x}$.
+4. Construct an approximate inverse $A$ of $DF(\bar{x})$.
+5. Derive computable formulas for the bounds $Y, Z_1, Z_2$, and verify the radii polynomial inequalities.
 """
 
 # ╔═╡ f6da61f7-64a3-4c33-b9ba-7917ffb67b2a
@@ -71,17 +71,17 @@ md"## Sequence space"
 # ╔═╡ 65cebd36-0474-42ee-b983-70c5f9c1614f
 md"""
 The sequence space we are interested in is the one of analytic functions with radius of convergence strictly greater than $1$.
-The first step is to discretize the function space as the sequence space
+The first step is to discretize this space as the sequence space
 
 ```math
-\ell^1_{\mathbb{N}} \overset{\text{def}}{=} \left\{ x \in \mathbb{R}^\mathbb{N} \, : \, \| x \|_1 \overset{\text{def}}{=} \sum_{n \ge 0} |x_n| < \infty \right\}.
+\ell^1_\mathbb{N} \overset{\text{def}}{=} \left\{ x \in \mathbb{R}^\mathbb{N} \, : \, \| x \|_1 \overset{\text{def}}{=} \sum_{n \ge 0} |x_n| < \infty \right\}.
 ```
 """
 
 # ╔═╡ 2dc02de6-f250-44db-b347-7d4d65c61d89
 md"""
 !!! lemma "Lemma"
-	If $x \in \ell^1_\mathbb{N}$, then the Taylor series $\sum_{n \ge 0} x_n t^n$ converges uniformly on $[-1, 1]$.
+	 $x \in \ell^1_\mathbb{N}$ if and only if $\sum_{n \ge 0} x_n t^n$ converges uniformly on $[-1, 1]$.
 """
 
 # ╔═╡ f9d764b9-024a-4845-98ad-c3e79a4a5cd9
@@ -96,7 +96,7 @@ md"### Cauchy product"
 # ╔═╡ 3cb18cba-18e5-4e6f-8b16-eccd1dcef9fd
 md"""
 !!! lemma "Lemma (Cauchy product)"
-	If $u(t) = \sum_{n \ge 0} x_n t^n$ and $v(t) = \sum_{n \ge 0} y_n t^n$, then for their product we have $u(t) v(t) = \sum_{n \ge 0} (x * y)_n t^n$ where
+	If $u(t) = \sum_{n \ge 0} x_n t^n$ and $v(t) = \sum_{n \ge 0} y_n t^n$, then $u(t) v(t) = \sum_{n \ge 0} (x * y)_n t^n$ where
 
 	```math
 	(x * y)_n \overset{\text{def}}{=} \sum_{l=0}^n x_{n-l} y_l, \qquad n \ge 0.
@@ -112,12 +112,6 @@ The product and the norm play together nicely: they give the space $\ell^1_\math
 md"""
 !!! lemma "Lemma (Banach algebra property)"
 	For any $x, y \in \ell^1_\mathbb{N}$ we have $\| x * y \|_1 \le \| x \|_1 \| y \|_1$.
-"""
-
-# ╔═╡ f737a8eb-0fa4-49e6-ad07-502099edc3e1
-md"""
-!!! note "Remark"
-    To simplify the notation, we denote $(\ell^1_\mathbb{N}, *)$ by $\ell^1_\mathbb{N}$.
 """
 
 # ╔═╡ faec7172-c732-470c-88a0-8de5d92075b0
@@ -137,6 +131,8 @@ x_n, & n \le N, \\
 ```
 
 together with its complement $\Pi_{> N} \overset{\text{def}}{=} I - \Pi_N$.
+
+The projections let us  break down the problem into two parts: a finite-dimensional part, handled by the computer, and an infinite-dimensional part (often called the *tail*), handled entirely by pen-and-paper analysis.
 """
 
 # ╔═╡ 8356c027-ead5-4073-9d0e-b25f41bf9543
@@ -144,7 +140,6 @@ md"""
 ###### Why is this so complicated?
 
 The strange looking subscript $> N$ is in fact meant to indicate clearly which index values are involved.
-The projections provide a sleek way to do the algebra that essentially splits the problem into a finite-dimensional part handled by the computer and an infinite-dimensional part (also referred as *tail*) handled entirely by pen-and-paper analysis.
 It avoids writing down infinite matrices or formulas with a lot of indices.
 """
 
@@ -153,21 +148,12 @@ md"## Zero-finding problem"
 
 # ╔═╡ b6655a7c-32d0-473a-ac1d-ddb96e31de81
 md"""
-Writing $v(t) = \sum_{n \ge 0} y_n t^n$ with $y \overset{\text{def}}{=} (2, 1, 0, \dots) \in \ell^1_\mathbb{N}$, and plugging $u(t) = \sum_{n \ge 0} x_n t^n$ into the algebraic equation gives
+Writing $v(t) = \sum_{n \ge 0} y_n t^n$ with $y \overset{\text{def}}{=} (2, 1, 0, \dots) \in \ell^1_\mathbb{N}$, and substituting $u(t) = \sum_{n \ge 0} x_n t^n$ into the algebraic equation leads to  the infinite set of equations
 
 ```math
-x * y = 1.
+(x * y)_0 = 1, \qquad (x * y)_n = 0, \quad n \ge 1.
 ```
-"""
 
-# ╔═╡ 266d8eb2-fc1f-42ca-802e-90a4a358b313
-md"""
-!!! note "Remark"
-    Here we slightly abuse notation by identifying the constant $1$ with its sequence of Taylor coefficients $(1, 0, \dots) \in \ell^1_\mathbb{N}$.
-"""
-
-# ╔═╡ 0ea0128e-480f-4d29-9ef7-f9a11fec5513
-md"""
 Therefore, the problem of finding the inverse of $v$ corresponds to finding a zero of the mapping $F : \ell^1_\mathbb{N} \to \ell^1_\mathbb{N}$ given by
 
 ```math
@@ -175,15 +161,16 @@ F(x) \overset{\text{def}}{=} x * y - 1.
 ```
 """
 
-# ╔═╡ 0409bc2e-af44-45fd-a10e-e46f770ea136
+# ╔═╡ 266d8eb2-fc1f-42ca-802e-90a4a358b313
 md"""
-We now formalize that the zero-finding problem leads to the inverse function.
+!!! note "Remark"
+    Here we slightly abuse notation by identifying the constant $1$ with its sequence of Taylor coefficients $(1, 0, \dots) \in \ell^1_\mathbb{N}$.
+    This is consistent with the convention that $1$ denotes the identity element of the algebra $(\ell^1_\mathbb{N}, 1)$.
 """
 
-# ╔═╡ 305c0f3f-4d11-4c22-93b1-d6ce45773cbb
+# ╔═╡ 0dab4ba7-4ad0-4ea8-a4c9-5892427969e7
 md"""
-!!! lemma "Lemma"
-	If $\tilde{x} \in \ell^1_\mathbb{N}$ is such that $F(\tilde{x}) = 0$, then the corresponding Taylor series $u(t) = \sum_{n \ge 0} x_n t^n$ is the solution to the algebraic equation $u(t) v(t) = 1$ for all $t \in [-1, 1]$.
+An implementation, using the RadiiPolynomial library, of the zero-finding problem $F$ is given below.
 """
 
 # ╔═╡ 4f37b759-371e-4042-82d0-720523718021
@@ -194,7 +181,7 @@ md"## Numerical zero"
 
 # ╔═╡ 151f9f5f-65ab-4ccb-94a6-c530d924962f
 md"""
-The map $F$ is affine and satisfies $[DF(x)] x = F(x) + 1$, so Newton's method reduce to solving in $\ell^1_\mathbb{N}$ the linear system
+The map $F$ is affine and satisfies $[DF(x)] x = F(x) + 1$, so Newton's method reduces to solving, in $\ell^1_\mathbb{N}$, the linear system
 
 ```math
 \mathcal{M}_y x = 1,
@@ -220,36 +207,13 @@ y_2 & y_1 & y_0 & \ddots \\
 \end{pmatrix}.
 ```
 
-So we seek a numerical approximation $\bar{x}$ of the zero of $F$ in the truncated space $\Pi_N \ell^1_\mathbb{N}$; this can be obtained by solving numerically the finite truncation of the above linear system, formally $\Pi_N \mathcal{M}_b \bar{x} \approx 1$.
-
-In Julia, we simply execute:
+Our goal is to find a numerical approximation $\bar{x}$ of the zero of $F$ as an element of the truncated space $\Pi_N \ell^1_\mathbb{N}$.
+We can obtain this approximation by numerically solving the linear system above for a finite number of rows: $\Pi_N \mathcal{M}_b \bar{x} \approx 1$.
+If the truncation dimension $N$ is large enough we may hope that also $\Pi_{> N} F (\bar{x}) \approx 0$, since we expect the coefficients of $\bar{x}$ to decrease for moderately large $n$.
 """
 
 # ╔═╡ 82c9f85d-f74f-4106-a5b8-35043e2d6119
 y = Sequence(Taylor(1), [2.0, 1.0])
-
-# ╔═╡ 75b99408-9fed-4c20-8f6f-0513185b0c0f
-md"""
-Again, this is already implemented in the library.
-We can *wrap* the sequence in a `Multiplication` data structure:
-"""
-
-# ╔═╡ d19281af-752c-414f-9a81-5b79caacf1e5
-infinite_M = Multiplication(y)
-
-# ╔═╡ d4735adb-b9b7-40d5-8d3e-e2609abe8088
-md"""
-Of course since (even if $b$ has a finite number of non-zero elements) $M_b$ remains an infinite matrix with non-zero elements on each row and column.
-So for the moment, `infinite_M` is not "materialized" so to say, but it can act on a `Sequence`:
-"""
-
-# ╔═╡ bda1b945-f554-40ff-8085-714202abec88
-infinite_M(y) # y * y
-
-# ╔═╡ 299c15a2-253a-428f-9a23-cd48bd8238c2
-md"""
-In RadiiPolynomial, we can represent the operator as a finite matrix using the `project` function:
-"""
 
 # ╔═╡ 1b058c77-7241-41ac-9a6e-84160b8d79da
 N = 3
@@ -263,21 +227,23 @@ x_bar = M \ Sequence(Taylor(N), [1.0 ; zeros(N)])
 # ╔═╡ d2d76ed8-911d-4247-9460-8c7df7669912
 begin
 	plot(LinRange(-1, 1, 101), t -> x_bar(t);
-		color = :royalblue1, linewidth = 3, legend = false)
+		color = :royalblue1, linewidth = 3, label = "x_bar")
 	xlims!(-1, 1)
 	xlabel!("t")
-	ylabel!("u")
 end
 
-# ╔═╡ d6087c16-1e9a-48bf-9662-35c0d3c5dceb
+# ╔═╡ 2346fe00-da58-4854-b476-6e3570941da2
 md"""
-```math
-F(\bar{x}) = \bar{x} * y - 1 \approx 0.
-```
+We can see how close $F(\bar{x})$ is to zero.
 """
 
 # ╔═╡ 1c61be31-8515-4b32-9d21-9a8910693f5a
-x_bar * y
+F(x_bar, y)
+
+# ╔═╡ 16e5b184-8d8c-43b9-a226-cdad95830b4f
+md"""
+Of course, in this example, we chose very few Taylor coefficients, so the residue is not as small as one would ideally aim for.
+"""
 
 # ╔═╡ 1d1277bf-2aa3-4c89-b34d-b2a2e5fc6fc5
 md"## Constructing $A$"
@@ -286,7 +252,7 @@ md"## Constructing $A$"
 md"""
 For $T$ to be a contraction, we want $A$ to be a good approximate inverse of $\mathcal{M}_y$.
 So we want the inverse of $y$ with respect to the Cauchy product $*$.
-Recall that our numerical zero $\bar{x} \in \Pi_N \ell^1_{\mathbb{N}}$ satisfies $\bar{x} * y \approx (1, 0, \dots)$.
+Recall that our numerical zero $\bar{x} \in \Pi_N \ell^1_{\mathbb{N}}$ satisfies $\bar{x} * y \approx 1$.
 Thus, we define
 
 ```math
@@ -305,26 +271,8 @@ md"## Verifying the contraction"
 
 # ╔═╡ 63e93962-935b-4c4a-8d10-04b43411b609
 md"""
-Now we verify that $T(x) \overset{\text{def}}{=} x - A F(x)$ is a contraction around $\bar{x} \in \Pi_N \ell^1_\mathbb{N}$.
-If successful, we will have obtained the existence of a true zero of $F$ such that
-
-```math
-y^{-1} = \tilde{x} = \bar{x} + h,
-```
-
-where $h \in \ell^1_\mathbb{N}$ is not known but $\| h \|_1 \le r$.
-"""
-
-# ╔═╡ 6d0a1dbf-2904-4066-ad8f-6da4955de009
-Foldable("""Proof""",
-md"""
-See Exercise 1.
-""")
-
-# ╔═╡ 63b48726-18f5-4bab-8675-f90ec50166ac
-md"""
-Let us now apply our contraction argument and compute the required bounds.
-We will need IA.
+We now verify that $T(x) \overset{\text{def}}{=} x - A F(x)$ is a contraction around $\bar{x} \in \Pi_N \ell^1_\mathbb{N}$.
+To rigorously compute the bounds $Y, Z_1, Z_2$, we enclose all relevant data into intervals.
 """
 
 # ╔═╡ 5c57ed8e-7bb1-4947-8ebd-f0c59b7ae8d4
@@ -336,13 +284,19 @@ ix_bar = interval(x_bar)
 # ╔═╡ f1fa7997-684d-443b-a5ed-5377ebcd3aee
 md"##### Computing $Y$"
 
+# ╔═╡ e1dd0737-2db8-4cf3-9cec-bea25648201b
+md"""
+!!! lemma "Lemma"
+	If $x \in \Pi_N \ell^1_\mathbb{N}$ and $y \in \Pi_{N'} \ell^1_\mathbb{N}$, then $x * y \in \Pi_{N+N'} \ell^1_\mathbb{N}$.
+"""
+
 # ╔═╡ 25df704a-3e01-45aa-a3de-ea2cb3f18504
 md"""
 ```math
 \| A F(\bar{x}) \|_1 = \| \bar{x} * (\bar{x} * y - 1) \|_1 \le Y.
 ```
 
-The above quantity is computable since $A F(\bar{x}) \in \Pi_{2N + 1} \ell^1_\mathbb{N}$ (recall that $y \in \Pi_1 \ell^1_\mathbb{N}, \bar{x} \in \Pi_N \ell^1_\mathbb{N}$).
+Since $y \in \Pi_1 \ell^1_\mathbb{N}, \bar{x} \in \Pi_N \ell^1_\mathbb{N}$, we have that $A F(\bar{x}) \in \Pi_{2N + 1} \ell^1_\mathbb{N}$ and the above quantity is computable.
 """
 
 # ╔═╡ d27d66a6-4717-4d6d-895f-cdebd649cebd
@@ -375,10 +329,11 @@ md"##### Computing $Z_2$"
 # ╔═╡ 2d273b10-b485-49aa-9d06-8485ac166dc8
 md"""
 ```math
-\|A(DF(x) - DF(\bar{x}))\|_{\mathscr{B}(\ell^1_\mathbb{N})} = 0 = Z_2, \qquad \forall x \in \ell^1_\mathbb{N}.
+\|A(DF(x) - DF(\bar{x}))\|_{\mathscr{B}(\ell^1_\mathbb{N})} = 0, \qquad \forall x \in \ell^1_\mathbb{N}.
 ```
 
-In particular, we can choose $R = \infty$.
+So $Z_2 = 0$ is a constant.
+In other words, we have a Lipschitz control for $DF$ on the whole space $\mathbb{R}^3$, and we can freely choose $R = \infty$.
 """
 
 # ╔═╡ cc5576ac-2894-48ef-a7a9-c4c16b589173
@@ -390,6 +345,12 @@ Z₂ = interval(0)
 # ╔═╡ 6b63d5e1-048a-4a34-98a0-960d28a51a0b
 md"##### Finishing the CAP"
 
+# ╔═╡ 17cc5d87-c680-4ccd-a63d-dd354059bdc5
+md"""
+To determine the values of $r$ that satisfy the radii polynomial inequalities, we use the `interval_of_existence` function from RadiiPolynomial.
+This function returns an interval of existence, within which all contained values satisfy the contraction conditions.
+"""
+
 # ╔═╡ e87f4cbe-e511-4c78-882b-f86961007932
 ie = interval_of_existence(Y, Z₁, Z₂, R)
 
@@ -398,8 +359,29 @@ r = inf(ie)
 
 # ╔═╡ c498e384-b1a2-40a5-bd72-edabdcd1fc4d
 md"""
-To conclude the proof, note that $\|I - A DF(\bar{x})\| \le Z_1 < 1$ ensures that $A DF(\bar{x})$ is invertible, which implies that $A$ is surjective.
-Since $A DF(\bar{x}) = \mathcal{M}_\bar{x} * \mathcal{M}_y = \mathcal{M}_y * \mathcal{M}_\bar{x} = DF(\bar{x}) A$, it follows that $A$ must also be injective.
+To guarantee that the fixed-point of $T$ is a zero of $F$, we must check that $A$ is injective.
+This property comes as a by-product of the contraction argument.
+Indeed, $\|I - A DF(\bar{x})\| \le Z_1 < 1$ ensures that $A DF(\bar{x})$ is invertible, which implies that $A$ is surjective.
+Since $A DF(\bar{x}) h = \bar{x} * y * h = y * \bar{x} * h = DF(\bar{x}) A$, for all $h \in \ell^1_\mathbb{N}$, it follows that $A$ must also be injective.
+
+Therefore, we have proved the existence of a zero $\tilde{x}$ of $F$ such that
+
+```math
+\tilde{x} = \bar{x} + \gamma,
+```
+
+where $\gamma \in \ell^1_\mathbb{N}$ is not known explicitly, but satisfies $\| \gamma \|_1 \le r$.
+Our choice of norm also gives us a $C^0$-error bound for the function
+
+```math
+\begin{aligned}
+\sup_{t \in [-1,1]} | v(t)^{-1} - \sum_{n=0}^N \bar{x}_n t^n |
+&= \sup_{t \in [-1,1]} | \left(\sum_{n \ge 0} y_n t^n \right)^{-1} - \sum_{n=0}^N \bar{x}_n t^n | \\
+&= \sup_{t \in [-1,1]} | \sum_{n \ge 0} (\tilde{x}_n - \bar{x}_n) t^n | \\
+&\le \| \tilde{x} - \bar{x} \|_1 \\
+&\le r.
+\end{aligned}
+```
 """
 
 # ╔═╡ 04417cef-c3d9-4adb-a449-7b26bbe20056
@@ -423,19 +405,13 @@ end
 
 # ╔═╡ d61da3a0-ac88-41a4-ae50-86a02ea43cbf
 md"""
-We have the $C^0$-error bound
-
-```math
-\sup_{t \in [-1,1]} | v(t)^{-1} - \sum_{n=0}^N \bar{x}_n t^n | \le \| y^{-1} - \bar{x} \|_1 \le r.
-```
-
-Lastly, the problem is simple enough that we can compute by hand both the first 5 terms of $(2+t)^{-1}$
+Lastly, this example is simple enough that we can compute by hand both the first 5 terms of $(2+t)^{-1}$
 
 ```math
 \frac{1}{2+t} = \frac{1}{2} - \frac{t}{4} + \frac{t^2}{8} - \frac{t^3}{16} + \frac{t^4}{32} - \frac{t^5}{64} + O(t^6),
 ```
 
-and compare with our CAP.
+and compare with the result of our CAP.
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -457,9 +433,9 @@ RadiiPolynomial = "~0.8.15"
 PLUTO_MANIFEST_TOML_CONTENTS = """
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.6"
+julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "5a07dd6321408ca2f4b5487b10c94622551c3104"
+project_hash = "50ac00f186507245d93fbdb4571657e0e99c4371"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -469,13 +445,15 @@ version = "1.3.2"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
-version = "1.1.1"
+version = "1.1.2"
 
 [[deps.Artifacts]]
 uuid = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
+version = "1.11.0"
 
 [[deps.Base64]]
 uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+version = "1.11.0"
 
 [[deps.BitFlags]]
 git-tree-sha1 = "0691e34b3bb8be9307330f88d1a3c3f25466c24d"
@@ -538,9 +516,9 @@ version = "0.10.0"
 
 [[deps.Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
-git-tree-sha1 = "362a287c3aa50601b0bc359053d5c2468f0e7ce0"
+git-tree-sha1 = "64e15186f0aa277e174aa81798f7eb8598e0157e"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
-version = "0.12.11"
+version = "0.13.0"
 
 [[deps.Compat]]
 deps = ["TOML", "UUIDs"]
@@ -582,6 +560,7 @@ version = "0.18.20"
 [[deps.Dates]]
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
+version = "1.11.0"
 
 [[deps.Dbus_jll]]
 deps = ["Artifacts", "Expat_jll", "JLLWrappers", "Libdl"]
@@ -598,6 +577,7 @@ version = "1.9.1"
 [[deps.Distributed]]
 deps = ["Random", "Serialization", "Sockets"]
 uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+version = "1.11.0"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -642,6 +622,7 @@ version = "4.4.4+1"
 
 [[deps.FileWatching]]
 uuid = "7b1f6079-737a-58dc-b8bc-7a2ca5c1b5ee"
+version = "1.11.0"
 
 [[deps.FixedPointNumbers]]
 deps = ["Statistics"]
@@ -746,6 +727,7 @@ version = "0.2.5"
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+version = "1.11.0"
 
 [[deps.IntervalArithmetic]]
 deps = ["CRlibm_jll", "LinearAlgebra", "MacroTools", "RoundingEmulator"]
@@ -853,16 +835,17 @@ version = "0.6.4"
 [[deps.LibCURL_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll", "Zlib_jll", "nghttp2_jll"]
 uuid = "deac9b47-8bc7-5906-a0fe-35ac56dc84c0"
-version = "8.4.0+0"
+version = "8.6.0+0"
 
 [[deps.LibGit2]]
 deps = ["Base64", "LibGit2_jll", "NetworkOptions", "Printf", "SHA"]
 uuid = "76f85450-5226-5b5a-8eaa-529ad045b433"
+version = "1.11.0"
 
 [[deps.LibGit2_jll]]
 deps = ["Artifacts", "LibSSH2_jll", "Libdl", "MbedTLS_jll"]
 uuid = "e37daf67-58a4-590a-8e99-b0245dd2ffc5"
-version = "1.6.4+0"
+version = "1.7.2+0"
 
 [[deps.LibSSH2_jll]]
 deps = ["Artifacts", "Libdl", "MbedTLS_jll"]
@@ -871,6 +854,7 @@ version = "1.11.0+1"
 
 [[deps.Libdl]]
 uuid = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+version = "1.11.0"
 
 [[deps.Libffi_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -923,6 +907,7 @@ version = "2.40.1+0"
 [[deps.LinearAlgebra]]
 deps = ["Libdl", "OpenBLAS_jll", "libblastrampoline_jll"]
 uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+version = "1.11.0"
 
 [[deps.LogExpFunctions]]
 deps = ["DocStringExtensions", "IrrationalConstants", "LinearAlgebra"]
@@ -942,6 +927,7 @@ version = "0.3.28"
 
 [[deps.Logging]]
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
+version = "1.11.0"
 
 [[deps.LoggingExtras]]
 deps = ["Dates", "Logging"]
@@ -969,6 +955,7 @@ version = "0.5.13"
 [[deps.Markdown]]
 deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
+version = "1.11.0"
 
 [[deps.MbedTLS]]
 deps = ["Dates", "MbedTLS_jll", "MozillaCACerts_jll", "NetworkOptions", "Random", "Sockets"]
@@ -979,7 +966,7 @@ version = "1.1.9"
 [[deps.MbedTLS_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
-version = "2.28.2+1"
+version = "2.28.6+0"
 
 [[deps.Measures]]
 git-tree-sha1 = "c13304c81eec1ed3af7fc20e75fb6b26092a1102"
@@ -994,10 +981,11 @@ version = "1.2.0"
 
 [[deps.Mmap]]
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
+version = "1.11.0"
 
 [[deps.MozillaCACerts_jll]]
 uuid = "14a3606d-f60d-562e-9121-12d972cd8159"
-version = "2023.1.10"
+version = "2023.12.12"
 
 [[deps.NaNMath]]
 deps = ["OpenLibm_jll"]
@@ -1018,7 +1006,7 @@ version = "1.3.5+1"
 [[deps.OpenBLAS_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Libdl"]
 uuid = "4536629a-c528-5b80-bd46-f80d51c5b363"
-version = "0.3.23+4"
+version = "0.3.27+1"
 
 [[deps.OpenLibm_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1077,21 +1065,25 @@ uuid = "30392449-352a-5448-841d-b1acce4e97dc"
 version = "0.43.4+0"
 
 [[deps.Pkg]]
-deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "REPL", "Random", "SHA", "Serialization", "TOML", "Tar", "UUIDs", "p7zip_jll"]
+deps = ["Artifacts", "Dates", "Downloads", "FileWatching", "LibGit2", "Libdl", "Logging", "Markdown", "Printf", "Random", "SHA", "TOML", "Tar", "UUIDs", "p7zip_jll"]
 uuid = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-version = "1.10.0"
+version = "1.11.0"
+weakdeps = ["REPL"]
+
+    [deps.Pkg.extensions]
+    REPLExt = "REPL"
 
 [[deps.PlotThemes]]
 deps = ["PlotUtils", "Statistics"]
-git-tree-sha1 = "6e55c6841ce3411ccb3457ee52fc48cb698d6fb0"
+git-tree-sha1 = "41031ef3a1be6f5bbbf3e8073f210556daeae5ca"
 uuid = "ccf2f8ad-2431-5c83-bf29-c5338b663b6a"
-version = "3.2.0"
+version = "3.3.0"
 
 [[deps.PlotUtils]]
 deps = ["ColorSchemes", "Colors", "Dates", "PrecompileTools", "Printf", "Random", "Reexport", "StableRNGs", "Statistics"]
-git-tree-sha1 = "650a022b2ce86c7dcfbdecf00f78afeeb20e5655"
+git-tree-sha1 = "3ca9a356cd2e113c420f2c13bea19f8d3fb1cb18"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
-version = "1.4.2"
+version = "1.4.3"
 
 [[deps.Plots]]
 deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "JLFzf", "JSON", "LaTeXStrings", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "PrecompileTools", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "RelocatableFolders", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "TOML", "UUIDs", "UnicodeFun", "UnitfulLatexify", "Unzip"]
@@ -1152,6 +1144,7 @@ version = "1.4.3"
 [[deps.Printf]]
 deps = ["Unicode"]
 uuid = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+version = "1.11.0"
 
 [[deps.Qt6Base_jll]]
 deps = ["Artifacts", "CompilerSupportLibraries_jll", "Fontconfig_jll", "Glib_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "OpenSSL_jll", "Vulkan_Loader_jll", "Xorg_libSM_jll", "Xorg_libXext_jll", "Xorg_libXrender_jll", "Xorg_libxcb_jll", "Xorg_xcb_util_cursor_jll", "Xorg_xcb_util_image_jll", "Xorg_xcb_util_keysyms_jll", "Xorg_xcb_util_renderutil_jll", "Xorg_xcb_util_wm_jll", "Zlib_jll", "libinput_jll", "xkbcommon_jll"]
@@ -1178,8 +1171,9 @@ uuid = "e99dba38-086e-5de3-a5b1-6e4c66e897c3"
 version = "6.7.1+1"
 
 [[deps.REPL]]
-deps = ["InteractiveUtils", "Markdown", "Sockets", "Unicode"]
+deps = ["InteractiveUtils", "Markdown", "Sockets", "StyledStrings", "Unicode"]
 uuid = "3fa0cd96-eef1-5676-8a61-b3b8758bbffb"
+version = "1.11.0"
 
 [[deps.RadiiPolynomial]]
 deps = ["IntervalArithmetic", "LinearAlgebra", "Printf", "Reexport", "SparseArrays"]
@@ -1190,6 +1184,7 @@ version = "0.8.15"
 [[deps.Random]]
 deps = ["SHA"]
 uuid = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+version = "1.11.0"
 
 [[deps.RecipesBase]]
 deps = ["PrecompileTools"]
@@ -1243,6 +1238,7 @@ version = "1.2.1"
 
 [[deps.Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
+version = "1.11.0"
 
 [[deps.Showoff]]
 deps = ["Dates", "Grisu"]
@@ -1257,6 +1253,7 @@ version = "1.2.0"
 
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
+version = "1.11.0"
 
 [[deps.SortingAlgorithms]]
 deps = ["DataStructures"]
@@ -1267,7 +1264,7 @@ version = "1.2.1"
 [[deps.SparseArrays]]
 deps = ["Libdl", "LinearAlgebra", "Random", "Serialization", "SuiteSparse_jll"]
 uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-version = "1.10.0"
+version = "1.11.0"
 
 [[deps.StableRNGs]]
 deps = ["Random"]
@@ -1276,9 +1273,14 @@ uuid = "860ef19b-820b-49d6-a774-d7a799459cd3"
 version = "1.0.2"
 
 [[deps.Statistics]]
-deps = ["LinearAlgebra", "SparseArrays"]
+deps = ["LinearAlgebra"]
+git-tree-sha1 = "ae3bb1eb3bba077cd276bc5cfc337cc65c3075c0"
 uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
-version = "1.10.0"
+version = "1.11.1"
+weakdeps = ["SparseArrays"]
+
+    [deps.Statistics.extensions]
+    SparseArraysExt = ["SparseArrays"]
 
 [[deps.StatsAPI]]
 deps = ["LinearAlgebra"]
@@ -1292,10 +1294,14 @@ git-tree-sha1 = "5cf7606d6cef84b543b483848d4ae08ad9832b21"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 version = "0.34.3"
 
+[[deps.StyledStrings]]
+uuid = "f489334b-da3d-4c2e-b8f0-e476e12c162b"
+version = "1.11.0"
+
 [[deps.SuiteSparse_jll]]
 deps = ["Artifacts", "Libdl", "libblastrampoline_jll"]
 uuid = "bea87d4a-7f5b-5778-9afe-8cc45184846c"
-version = "7.2.1+1"
+version = "7.7.0+0"
 
 [[deps.TOML]]
 deps = ["Dates"]
@@ -1316,6 +1322,7 @@ version = "0.1.1"
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
 uuid = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+version = "1.11.0"
 
 [[deps.TranscodingStreams]]
 git-tree-sha1 = "0c45878dcfdcfa8480052b6ab162cdd138781742"
@@ -1335,9 +1342,11 @@ version = "1.5.1"
 [[deps.UUIDs]]
 deps = ["Random", "SHA"]
 uuid = "cf7118a7-6976-5b1a-9a39-7adc72f591a4"
+version = "1.11.0"
 
 [[deps.Unicode]]
 uuid = "4ec0a83e-493e-50e2-b9ac-8f72acf5a8f5"
+version = "1.11.0"
 
 [[deps.UnicodeFun]]
 deps = ["REPL"]
@@ -1641,7 +1650,7 @@ version = "1.1.6+0"
 [[deps.nghttp2_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850ede-7688-5339-a07c-302acd2aaf8d"
-version = "1.52.0+1"
+version = "1.59.0+0"
 
 [[deps.p7zip_jll]]
 deps = ["Artifacts", "Libdl"]
@@ -1684,40 +1693,32 @@ version = "1.4.1+1"
 # ╟─3cb18cba-18e5-4e6f-8b16-eccd1dcef9fd
 # ╟─7390523a-ecf1-4b7e-a3e6-cce50d43083b
 # ╟─2a4448c5-e14a-4791-926f-172f3cb6e1f0
-# ╟─f737a8eb-0fa4-49e6-ad07-502099edc3e1
 # ╟─faec7172-c732-470c-88a0-8de5d92075b0
 # ╟─4290872b-923b-45dc-81b0-3e280a5a77c1
 # ╟─8356c027-ead5-4073-9d0e-b25f41bf9543
 # ╟─c11ce6e3-4e23-46bc-8bbd-217908d966af
 # ╟─b6655a7c-32d0-473a-ac1d-ddb96e31de81
 # ╟─266d8eb2-fc1f-42ca-802e-90a4a358b313
-# ╟─0ea0128e-480f-4d29-9ef7-f9a11fec5513
-# ╟─0409bc2e-af44-45fd-a10e-e46f770ea136
-# ╟─305c0f3f-4d11-4c22-93b1-d6ce45773cbb
+# ╟─0dab4ba7-4ad0-4ea8-a4c9-5892427969e7
 # ╠═4f37b759-371e-4042-82d0-720523718021
 # ╟─17013b31-0c79-4dd0-a6e3-5946528d69f6
 # ╟─151f9f5f-65ab-4ccb-94a6-c530d924962f
 # ╠═82c9f85d-f74f-4106-a5b8-35043e2d6119
-# ╟─75b99408-9fed-4c20-8f6f-0513185b0c0f
-# ╠═d19281af-752c-414f-9a81-5b79caacf1e5
-# ╟─d4735adb-b9b7-40d5-8d3e-e2609abe8088
-# ╠═bda1b945-f554-40ff-8085-714202abec88
-# ╟─299c15a2-253a-428f-9a23-cd48bd8238c2
 # ╠═1b058c77-7241-41ac-9a6e-84160b8d79da
 # ╠═82143c8d-7009-4537-975f-c832330caa9e
 # ╠═a3124717-6741-4769-8fb0-2b489f13dc94
 # ╟─d2d76ed8-911d-4247-9460-8c7df7669912
-# ╟─d6087c16-1e9a-48bf-9662-35c0d3c5dceb
+# ╟─2346fe00-da58-4854-b476-6e3570941da2
 # ╠═1c61be31-8515-4b32-9d21-9a8910693f5a
+# ╟─16e5b184-8d8c-43b9-a226-cdad95830b4f
 # ╟─1d1277bf-2aa3-4c89-b34d-b2a2e5fc6fc5
 # ╟─8a4513a5-9049-48df-ae9b-ea8c5d5f1076
 # ╟─7edef822-8f17-4a17-8dc7-f476fd610a29
 # ╟─63e93962-935b-4c4a-8d10-04b43411b609
-# ╟─6d0a1dbf-2904-4066-ad8f-6da4955de009
-# ╟─63b48726-18f5-4bab-8675-f90ec50166ac
 # ╠═5c57ed8e-7bb1-4947-8ebd-f0c59b7ae8d4
 # ╠═bec0f423-5b0a-4dee-bedf-9e3b7fcf5d3d
 # ╟─f1fa7997-684d-443b-a5ed-5377ebcd3aee
+# ╟─e1dd0737-2db8-4cf3-9cec-bea25648201b
 # ╟─25df704a-3e01-45aa-a3de-ea2cb3f18504
 # ╠═d27d66a6-4717-4d6d-895f-cdebd649cebd
 # ╟─39ed4568-b971-4cf3-accc-1ad32a44ce3d
@@ -1729,6 +1730,7 @@ version = "1.4.1+1"
 # ╠═cc5576ac-2894-48ef-a7a9-c4c16b589173
 # ╠═d02c07ee-77f2-4317-9692-558323e37b54
 # ╟─6b63d5e1-048a-4a34-98a0-960d28a51a0b
+# ╟─17cc5d87-c680-4ccd-a63d-dd354059bdc5
 # ╠═e87f4cbe-e511-4c78-882b-f86961007932
 # ╠═7427f6e4-337c-4af8-ad59-dfd296b0a453
 # ╟─c498e384-b1a2-40a5-bd72-edabdcd1fc4d

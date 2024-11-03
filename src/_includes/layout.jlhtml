@@ -106,7 +106,7 @@ $(pluto_head)
                         if homework_number === nothing
                             @htl("""<li class=$(class)><a href=$(href) title=$(desc)><span class="entry-number">$(number)</span> $(name)</a></li>""")
                         else
-                            @htl("""<li class=$(class)><a href=$(href) title=$(desc)><span class="entry-number">Exercise $(homework_number):</span> $(name)</a></li>""")
+                            @htl("""<li class=$(class)><a href=$(href) title=$(desc)><span class="entry-number">Exercise $(homework_number)</span></a></li>""")
                         end
                     end for other_page in pages
                 ])
@@ -121,7 +121,7 @@ $(pluto_head)
         </div>
         </nav>
         <div id="pages-content">
-           $(any(contains("lecture"), f("tags", String[])) ? @htl("""
+           $(any(t -> contains(t, "lecture") | contains(t, "homework"), f("tags", String[])) ? @htl("""
            <div class="lecture-header" >
                 <h1>$(
                     f("title", basename(page.input.relative_path))

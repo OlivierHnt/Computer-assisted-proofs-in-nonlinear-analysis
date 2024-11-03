@@ -2,8 +2,8 @@
 # v0.19.46
 
 #> [frontmatter]
-#> homework_number = 1
-#> order = 4
+#> homework_number = 2
+#> order = 2
 #> title = "2D manifold"
 #> tags = ["module5", "homeworks"]
 #> layout = "layout.jlhtml"
