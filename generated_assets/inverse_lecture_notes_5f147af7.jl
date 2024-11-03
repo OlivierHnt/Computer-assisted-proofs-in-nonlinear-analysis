@@ -362,7 +362,7 @@ md"""
 To guarantee that the fixed-point of $T$ is a zero of $F$, we must check that $A$ is injective.
 This property comes as a by-product of the contraction argument.
 Indeed, $\|I - A DF(\bar{x})\| \le Z_1 < 1$ ensures that $A DF(\bar{x})$ is invertible, which implies that $A$ is surjective.
-Since $A DF(\bar{x}) h = \bar{x} * y * h = y * \bar{x} * h = DF(\bar{x}) A$, for all $h \in \ell^1_\mathbb{N}$, it follows that $A$ must also be injective.
+Since $A [DF(\bar{x})] h = \bar{x} * y * h = y * \bar{x} * h = [DF(\bar{x})] A h$, for all $h \in \ell^1_\mathbb{N}$, it follows that $A$ must also be injective.
 
 Therefore, we have proved the existence of a zero $\tilde{x}$ of $F$ such that
 
