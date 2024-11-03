@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.3
+# v0.19.47
 
 #> [frontmatter]
 #> chapter = 4
@@ -11,12 +11,6 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 4b949c9b-4669-4d5a-b74c-0840bf375ddd
-using PlutoTeachingTools, PlutoUI # packages for the notebook
-
-# ╔═╡ db7c8b55-56bf-493c-a4ff-1ba9610a41ed
-using RadiiPolynomial, Plots
-
 # ╔═╡ 044aabf3-b817-4266-93a9-a4cabce1ec4e
 html"""
 <style>
@@ -26,6 +20,12 @@ main {
 }
 </style>
 """
+
+# ╔═╡ 4b949c9b-4669-4d5a-b74c-0840bf375ddd
+using PlutoTeachingTools, PlutoUI # packages for the notebook
+
+# ╔═╡ db7c8b55-56bf-493c-a4ff-1ba9610a41ed
+using RadiiPolynomial, Plots
 
 # ╔═╡ 2ae8d07b-a05e-4136-a121-6317641916fe
 TableOfContents(title = "Table of Contents"; indent = true, depth = 4, aside = true)
@@ -596,7 +596,7 @@ RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
 Plots = "~1.40.8"
-PlutoTeachingTools = "~0.2.15"
+PlutoTeachingTools = "~0.3.1"
 PlutoUI = "~0.7.60"
 RadiiPolynomial = "~0.8.15"
 """
@@ -607,7 +607,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "6fb5d053e7cb7c373ce3bba5c0387c1debc9227f"
+project_hash = "50ac00f186507245d93fbdb4571657e0e99c4371"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1290,10 +1290,10 @@ uuid = "0ff47ea0-7a50-410d-8455-4348d5de0420"
 version = "0.1.6"
 
 [[deps.PlutoTeachingTools]]
-deps = ["Downloads", "HypertextLiteral", "LaTeXStrings", "Latexify", "Markdown", "PlutoLinks", "PlutoUI", "Random"]
-git-tree-sha1 = "5d9ab1a4faf25a62bb9d07ef0003396ac258ef1c"
+deps = ["Downloads", "HypertextLiteral", "Latexify", "Markdown", "PlutoLinks", "PlutoUI"]
+git-tree-sha1 = "8252b5de1f81dc103eb0293523ddf917695adea1"
 uuid = "661c6b06-c737-4d37-b85c-46df65de6f69"
-version = "0.2.15"
+version = "0.3.1"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]

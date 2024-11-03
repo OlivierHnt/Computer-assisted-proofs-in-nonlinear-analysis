@@ -31,5 +31,5 @@ level = getfield(Pkg, Symbol("UPLEVEL_$(ARGS[1])"))
 
 for n in all_notebooks
     @info "Updating" n
-    Pluto.update_notebook_environment(n; backup=false, level)
+    Pluto.update_notebook_environment(n; backup = false, level)
 end

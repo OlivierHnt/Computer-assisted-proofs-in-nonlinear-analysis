@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.3
+# v0.19.47
 
 #> [frontmatter]
 #> order = 2
@@ -9,15 +9,6 @@
 
 using Markdown
 using InteractiveUtils
-
-# ╔═╡ a517be42-d53a-470f-93d6-7a7723eb6ef1
-using Plots
-
-# ╔═╡ 727d1133-f88b-4713-a254-a61e0b6c8f79
-using LinearAlgebra
-
-# ╔═╡ 3f133258-e5b8-4303-a481-e9f4f74614e3
-using RadiiPolynomial
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""
@@ -30,6 +21,9 @@ main {
 }
 </style>
 """
+
+# ╔═╡ a517be42-d53a-470f-93d6-7a7723eb6ef1
+using Plots
 
 # ╔═╡ 800c404b-d415-4a93-a5c4-e2296068a534
 md"### Julia"
@@ -64,6 +58,9 @@ inv([1.0 2.0 ; 3.0 4.0])
 # ╔═╡ 3a1ce528-fefc-4489-86ee-3358d69123cd
 md"### LinearAlgebra"
 
+# ╔═╡ 727d1133-f88b-4713-a254-a61e0b6c8f79
+using LinearAlgebra
+
 # ╔═╡ 848982e9-d97f-4859-b8b0-8f53e9187380
 norm([1.0 ; 2.0], 1)
 
@@ -93,6 +90,9 @@ interval([1.0 2.0 ; 3.0 4.0])
 
 # ╔═╡ 1672e4dd-5f52-4be5-8d5f-2b7a77a6af99
 md"### RadiiPolynomial"
+
+# ╔═╡ 3f133258-e5b8-4303-a481-e9f4f74614e3
+using RadiiPolynomial
 
 # ╔═╡ 86b71145-bf35-4310-9914-78925141a5d1
 x = Sequence(Taylor(1), [1.0, 1.0]) # 1 + t
@@ -217,9 +217,9 @@ version = "0.10.0"
 
 [[deps.Colors]]
 deps = ["ColorTypes", "FixedPointNumbers", "Reexport"]
-git-tree-sha1 = "362a287c3aa50601b0bc359053d5c2468f0e7ce0"
+git-tree-sha1 = "64e15186f0aa277e174aa81798f7eb8598e0157e"
 uuid = "5ae59095-9a9b-59fe-a467-6f913c188581"
-version = "0.12.11"
+version = "0.13.0"
 
 [[deps.Compat]]
 deps = ["TOML", "UUIDs"]
@@ -742,9 +742,9 @@ version = "3.3.0"
 
 [[deps.PlotUtils]]
 deps = ["ColorSchemes", "Colors", "Dates", "PrecompileTools", "Printf", "Random", "Reexport", "StableRNGs", "Statistics"]
-git-tree-sha1 = "650a022b2ce86c7dcfbdecf00f78afeeb20e5655"
+git-tree-sha1 = "3ca9a356cd2e113c420f2c13bea19f8d3fb1cb18"
 uuid = "995b91a9-d308-5afd-9ec6-746e21dbc043"
-version = "1.4.2"
+version = "1.4.3"
 
 [[deps.Plots]]
 deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "JLFzf", "JSON", "LaTeXStrings", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "PrecompileTools", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "RelocatableFolders", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "TOML", "UUIDs", "UnicodeFun", "UnitfulLatexify", "Unzip"]

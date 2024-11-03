@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.3
+# v0.19.47
 
 #> [frontmatter]
 #> homework_number = 3
@@ -10,9 +10,6 @@
 
 using Markdown
 using InteractiveUtils
-
-# ╔═╡ 71e175af-407e-4a0e-9930-0e6d208fa625
-using PlutoTeachingTools # package for the notebook
 
 # ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
 html"""
@@ -25,6 +22,9 @@ main {
 }
 </style>
 """
+
+# ╔═╡ 71e175af-407e-4a0e-9930-0e6d208fa625
+using PlutoTeachingTools # package for the notebook
 
 # ╔═╡ 1a0e2f9c-dd27-4141-97fc-a4ebddb61cb8
 md"""

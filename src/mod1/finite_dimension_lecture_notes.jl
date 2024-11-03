@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.3
+# v0.19.47
 
 #> [frontmatter]
 #> chapter = 1
@@ -11,18 +11,6 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ d0e623ee-b096-4a27-977d-dc32567d6020
-using PlutoTeachingTools, PlutoUI # packages for the notebook
-
-# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using Plots
-
-# ╔═╡ 249bc3fc-3e7a-4dde-b526-06ddd77093aa
-using IntervalArithmetic # not necessary if you did `using RadiiPolynomial`
-
-# ╔═╡ 2698cfa7-5b3c-4f5a-9be4-b2c811e7a4ce
-using RadiiPolynomial
-
 # ╔═╡ a5169b4b-f0d4-4f66-8198-0aec5f8e135a
 html"""
 <style>
@@ -32,6 +20,12 @@ main {
 }
 </style>
 """
+
+# ╔═╡ d0e623ee-b096-4a27-977d-dc32567d6020
+using PlutoTeachingTools, PlutoUI # packages for the notebook
+
+# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
+using Plots
 
 # ╔═╡ b3845641-1537-4a27-8550-1eff30900a6b
 TableOfContents(title = "Table of Contents"; indent = true, depth = 4, aside = true)
@@ -57,6 +51,23 @@ The slider below can be used to vary the value of $\mu$.
 #=╠═╡
 @bind μ Slider(0:0.1:4; default = 3.9)
   ╠═╡ =#
+
+# ╔═╡ da0cd646-614e-436f-9596-853fb3bca36b
+μ
+
+# ╔═╡ 730eeed9-a736-48df-a853-94f45dedd836
+begin
+	x1 = 0.4
+	maxiter = 50
+	xs = zeros(maxiter+1)
+	xs[1] = x1
+	for n = 1:maxiter
+		xs[n+1] = μ*xs[n]*(1-xs[n])
+	end
+	plot(1:maxiter+1, xs; marker = (:circle, 5), legend = false)
+	xlabel!("n")
+	ylims!(-0.1, 1.1)
+end
 
 # ╔═╡ 1d9286fa-647a-4743-806f-9cea5aab6be1
 md"""
@@ -227,6 +238,9 @@ Note that IntervalArithmetic is automatically included when using [RadiiPolynomi
 This library provides standard arithmetic operations as well as implementations of elementary functions (such as `exp`, `log`, `cos`, etc.) that comply with the rules of interval arithmetic.
 """
 
+# ╔═╡ 249bc3fc-3e7a-4dde-b526-06ddd77093aa
+using IntervalArithmetic # not necessary if you did `using RadiiPolynomial`
+
 # ╔═╡ f8eab26f-c893-4d2e-b4e8-6b59f33cbc9c
 a = interval(2, 4)
 
@@ -266,6 +280,9 @@ in_interval(1//10, ix)
 
 # ╔═╡ 68243410-d2df-4606-82a5-53d515403e40
 md"# Back to period-3 implies chaos"
+
+# ╔═╡ 2698cfa7-5b3c-4f5a-9be4-b2c811e7a4ce
+using RadiiPolynomial
 
 # ╔═╡ 9a0e21bd-da27-48e6-9a08-b20b3cb805bd
 md"""
@@ -327,23 +344,6 @@ We apply [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method) to $
 
 # ╔═╡ 80d73a01-4588-4db3-8090-1891f4c7a3ca
 μ = 3.9 # typed by `\mu<tab>`
-
-# ╔═╡ da0cd646-614e-436f-9596-853fb3bca36b
-μ
-
-# ╔═╡ 730eeed9-a736-48df-a853-94f45dedd836
-begin
-	x1 = 0.4
-	maxiter = 50
-	xs = zeros(maxiter+1)
-	xs[1] = x1
-	for n = 1:maxiter
-		xs[n+1] = μ*xs[n]*(1-xs[n])
-	end
-	plot(1:maxiter+1, xs; marker = (:circle, 5), legend = false)
-	xlabel!("n")
-	ylims!(-0.1, 1.1)
-end
 
 # ╔═╡ ef6afc18-f779-4370-8ccc-0a9494341166
 initial_data = [-1.0, 1.0, 1.0]
@@ -511,7 +511,7 @@ RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 [compat]
 IntervalArithmetic = "~0.22.18"
 Plots = "~1.40.8"
-PlutoTeachingTools = "~0.2.15"
+PlutoTeachingTools = "~0.3.1"
 PlutoUI = "~0.7.60"
 RadiiPolynomial = "~0.8.15"
 """
@@ -522,7 +522,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "793b9658854d250ee95f39ee62c84a30d8d3b1c0"
+project_hash = "fb10d4d8cf7fed20e6537e381ddee93a3d7d62f6"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1205,10 +1205,10 @@ uuid = "0ff47ea0-7a50-410d-8455-4348d5de0420"
 version = "0.1.6"
 
 [[deps.PlutoTeachingTools]]
-deps = ["Downloads", "HypertextLiteral", "LaTeXStrings", "Latexify", "Markdown", "PlutoLinks", "PlutoUI", "Random"]
-git-tree-sha1 = "5d9ab1a4faf25a62bb9d07ef0003396ac258ef1c"
+deps = ["Downloads", "HypertextLiteral", "Latexify", "Markdown", "PlutoLinks", "PlutoUI"]
+git-tree-sha1 = "8252b5de1f81dc103eb0293523ddf917695adea1"
 uuid = "661c6b06-c737-4d37-b85c-46df65de6f69"
-version = "0.2.15"
+version = "0.3.1"
 
 [[deps.PlutoUI]]
 deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]

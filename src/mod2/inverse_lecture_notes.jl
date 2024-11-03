@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.20.3
+# v0.19.47
 
 #> [frontmatter]
 #> chapter = 2
@@ -11,12 +11,6 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ de230094-748d-11ef-25e3-ef811ae3bf31
-using PlutoTeachingTools, PlutoUI # packages for the notebook
-
-# ╔═╡ 0b90f400-faef-4a80-9e6d-e16b149151d9
-using RadiiPolynomial, Plots
-
 # ╔═╡ 2af9b21a-2dcf-497f-bd7c-9ebbf80b9428
 html"""
 <style>
@@ -26,6 +20,12 @@ main {
 }
 </style>
 """
+
+# ╔═╡ de230094-748d-11ef-25e3-ef811ae3bf31
+using PlutoTeachingTools, PlutoUI # packages for the notebook
+
+# ╔═╡ 0b90f400-faef-4a80-9e6d-e16b149151d9
+using RadiiPolynomial, Plots
 
 # ╔═╡ 11810156-e8c9-4145-af2a-93e0757a8cc9
 TableOfContents(title = "Table of Contents"; indent = true, depth = 4, aside = true)
