@@ -4,7 +4,7 @@
 #> [frontmatter]
 #> chapter = 2
 #> order = 0.5
-#> title = "Inverse"
+#> title = "Inverse function"
 #> tags = ["lecture", "module2"]
 #> layout = "layout.jlhtml"
 
@@ -389,13 +389,13 @@ begin
 	rigorous_eval(x, r, t) = interval(x(t), r; format = :midpoint)
 
 	ts = LinRange(-1, 1, 101)
-	
+
 	plot([[interval(ts[i], ts[i+1]), rigorous_eval(ix_bar, r, interval(ts[i], ts[i+1]))] for i = 1:length(ts)-1];
 		label = "", color = :palegreen3)
 
 	plot!(ts, t -> x_bar(t);
 		label = "x_bar", color = :royalblue1, linewidth = 3)
-	
+
 	plot!(ts, t -> inv(2+t);
 		label = "1/(2+t)", color = :salmon, linewidth = 3)
 
