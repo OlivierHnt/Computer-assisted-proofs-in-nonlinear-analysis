@@ -34,6 +34,9 @@ md"### Julia"
 # ╔═╡ 2cc0471a-2fb6-44a3-bf3a-91ccbd7b30a9
 v₂⁵ = 1.0 # typed by `v\_2<tab>\^5<tab>`
 
+# ╔═╡ 0d676f02-c414-4141-832b-4d1cee545d55
+[1.0, 2.0]
+
 # ╔═╡ f5f84a05-f4a2-4af9-815b-b77739f0fa2d
 [1.0 ; 2.0]
 
@@ -82,6 +85,9 @@ I + zeros(3, 3)
 # ╔═╡ 55933fb6-6db8-4fad-9753-c317916660e4
 md"### IntervalArithmetic"
 
+# ╔═╡ a8e34042-0132-4134-a1b4-8cda345c4009
+using IntervalArithmetic
+
 # ╔═╡ 24ba79d7-b92c-4f42-a940-24907321104e
 interval([1.0, 2.0])
 
@@ -98,7 +104,7 @@ using RadiiPolynomial
 x = Sequence(Taylor(1), [1.0, 1.0]) # 1 + t
 
 # ╔═╡ 960765e6-2c84-4e91-ace1-191126fc6589
-x*x # (1 + t)^2 = 1 + 2t + t^2
+x * x # (1 + t)^2 = 1 + 2t + t^2
 
 # ╔═╡ f2acf06e-4be5-4a30-b036-e554c0d2ffa4
 Derivative(1)
@@ -133,11 +139,13 @@ norm(interval(x), Ell1(GeometricWeight(ν)))
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
+IntervalArithmetic = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
+IntervalArithmetic = "~0.22.19"
 Plots = "~1.40.8"
 RadiiPolynomial = "~0.8.15"
 """
@@ -148,7 +156,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "6a569534f7f07512612e25ed17cea1956be8d3f5"
+project_hash = "dc12ca8b0abbedf806f9d667185e7c46d0bcb38a"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -1308,6 +1316,7 @@ version = "1.4.1+1"
 # ╟─800c404b-d415-4a93-a5c4-e2296068a534
 # ╠═35f3b473-cfa8-4a89-bb98-e6cdfa7b58fe
 # ╠═2cc0471a-2fb6-44a3-bf3a-91ccbd7b30a9
+# ╠═0d676f02-c414-4141-832b-4d1cee545d55
 # ╠═f5f84a05-f4a2-4af9-815b-b77739f0fa2d
 # ╠═876d8811-24ca-45cb-b4a2-4fbca624d851
 # ╠═8e8d5bca-caf5-4595-88f2-4362acd46340
@@ -1324,6 +1333,7 @@ version = "1.4.1+1"
 # ╠═c3b0849a-f58b-40e5-b3ec-97566eadb27f
 # ╠═9ce060ea-53a4-4854-a53c-b58d29cb4f2b
 # ╟─55933fb6-6db8-4fad-9753-c317916660e4
+# ╠═a8e34042-0132-4134-a1b4-8cda345c4009
 # ╠═24ba79d7-b92c-4f42-a940-24907321104e
 # ╠═3744963a-1f6b-4dbc-b796-83dad65e87f5
 # ╟─1672e4dd-5f52-4be5-8d5f-2b7a77a6af99
