@@ -11,6 +11,16 @@
 using Markdown
 using InteractiveUtils
 
+# This Pluto notebook uses @bind for interactivity. When running this notebook outside of Pluto, the following 'mock version' of @bind gives bound variables a default value (instead of an error).
+macro bind(def, element)
+    quote
+        local iv = try Base.loaded_modules[Base.PkgId(Base.UUID("6e696c72-6542-2067-7265-42206c756150"), "AbstractPlutoDingetjes")].Bonds.initial_value catch; b -> missing; end
+        local el = $(esc(element))
+        global $(esc(def)) = Core.applicable(Base.get, el) ? Base.get(el) : iv(el)
+        el
+    end
+end
+
 # ╔═╡ a5169b4b-f0d4-4f66-8198-0aec5f8e135a
 html"""
 <style>
@@ -46,16 +56,13 @@ where $\mu$ is a parameter in $[0,4]$ and the initial condition $x_1$ is in $[0,
 The slider below can be used to vary the value of $\mu$.
 """
 
-# ╔═╡ 05df1902-b4b8-4fd7-ab91-ad01f4fa413e
-# ╠═╡ disabled = true
-#=╠═╡
+# ╔═╡ 9e0bfed7-7ccc-42b2-9b1a-15420d85c356
 @bind μ Slider(0:0.1:4; default = 3.9)
-  ╠═╡ =#
 
-# ╔═╡ da0cd646-614e-436f-9596-853fb3bca36b
+# ╔═╡ e3ca081f-0e6a-4dcf-9436-ca4f34467379
 μ
 
-# ╔═╡ 730eeed9-a736-48df-a853-94f45dedd836
+# ╔═╡ 79138e2e-6123-4923-8329-e5c17499d785
 begin
 	x1 = 0.4
 	maxiter = 50
@@ -342,11 +349,8 @@ md"""
 We apply [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method) to $F$ using the `newton` function provided in the RadiiPolynomial library.
 """
 
-# ╔═╡ 80d73a01-4588-4db3-8090-1891f4c7a3ca
-μ = 3.9 # typed by `\mu<tab>`
-
 # ╔═╡ ef6afc18-f779-4370-8ccc-0a9494341166
-initial_data = [-1.0, 1.0, 1.0]
+initial_data = [0.5, 1.0, 1.0]
 
 # ╔═╡ a71e7ddf-e4d7-4200-abfb-b248883200e1
 F_DF(x) = (F(x, μ), DF(x, μ)) # returns `F` and `DF` at `μ = 3.9`
@@ -509,7 +513,7 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
-IntervalArithmetic = "~0.22.18"
+IntervalArithmetic = "~0.22.19"
 Plots = "~1.40.8"
 PlutoTeachingTools = "~0.3.1"
 PlutoUI = "~0.7.60"
@@ -522,7 +526,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "fb10d4d8cf7fed20e6537e381ddee93a3d7d62f6"
+project_hash = "1a1b737c05ad4a7fb0176fc3b1dfa13537ea0f84"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -818,9 +822,9 @@ version = "1.11.0"
 
 [[deps.IntervalArithmetic]]
 deps = ["CRlibm_jll", "LinearAlgebra", "MacroTools", "RoundingEmulator"]
-git-tree-sha1 = "c59c57c36683aa17c563be6edaac888163f35285"
+git-tree-sha1 = "24c095b1ec7ee58b936985d31d5df92f9b9cfebb"
 uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-version = "0.22.18"
+version = "0.22.19"
 
     [deps.IntervalArithmetic.extensions]
     IntervalArithmeticDiffRulesExt = "DiffRules"
@@ -1770,9 +1774,9 @@ version = "1.4.1+1"
 # ╟─b3845641-1537-4a27-8550-1eff30900a6b
 # ╟─ed6f44f4-3696-494a-b8e3-b30184f5bb06
 # ╟─c33dc650-3f94-11ef-398a-8bbc4a2b69b8
-# ╟─05df1902-b4b8-4fd7-ab91-ad01f4fa413e
-# ╟─da0cd646-614e-436f-9596-853fb3bca36b
-# ╟─730eeed9-a736-48df-a853-94f45dedd836
+# ╟─9e0bfed7-7ccc-42b2-9b1a-15420d85c356
+# ╠═e3ca081f-0e6a-4dcf-9436-ca4f34467379
+# ╟─79138e2e-6123-4923-8329-e5c17499d785
 # ╟─1d9286fa-647a-4743-806f-9cea5aab6be1
 # ╟─1e56532e-9886-4a41-9ba0-1a619a85e014
 # ╟─8d6c631f-832a-48a9-891f-650f53a0ac6c
@@ -1808,7 +1812,6 @@ version = "1.4.1+1"
 # ╠═8591da5a-0b9a-4bff-8adc-fe1d3d9fca09
 # ╟─fa0be782-c09e-45b7-9cbb-d0b3161c3317
 # ╟─cf53d067-ec00-4c06-b4ae-65ed7aa19d34
-# ╠═80d73a01-4588-4db3-8090-1891f4c7a3ca
 # ╠═ef6afc18-f779-4370-8ccc-0a9494341166
 # ╠═a71e7ddf-e4d7-4200-abfb-b248883200e1
 # ╠═b1ff2f19-31b7-4064-9ac0-e600ccd937d9
