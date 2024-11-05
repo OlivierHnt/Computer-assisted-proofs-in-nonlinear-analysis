@@ -2,143 +2,430 @@
 # v0.19.47
 
 #> [frontmatter]
-#> order = 2
-#> title = "Cheat sheet"
-#> tags = ["welcome"]
+#> chapter = 2
+#> order = 0.5
+#> title = "Inverse function"
+#> tags = ["lecture", "module2"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 7fc40507-eda3-474d-a454-04e9173a7adb
+# ╔═╡ 2af9b21a-2dcf-497f-bd7c-9ebbf80b9428
 html"""
 <style>
 main {
-    max-width: 1000px;
-    margin-left: auto;
     margin-right: auto;
     text-align: justify;
 }
 </style>
 """
 
-# ╔═╡ a517be42-d53a-470f-93d6-7a7723eb6ef1
-using Plots
+# ╔═╡ de230094-748d-11ef-25e3-ef811ae3bf31
+using PlutoTeachingTools, PlutoUI # packages for the notebook
 
-# ╔═╡ 800c404b-d415-4a93-a5c4-e2296068a534
-md"### Julia"
+# ╔═╡ 0b90f400-faef-4a80-9e6d-e16b149151d9
+using RadiiPolynomial, Plots
 
-# ╔═╡ 35f3b473-cfa8-4a89-bb98-e6cdfa7b58fe
-β = 2.0 # typed by `\beta<tab>`
+# ╔═╡ 11810156-e8c9-4145-af2a-93e0757a8cc9
+TableOfContents(title = "Table of Contents"; indent = true, depth = 4, aside = true)
 
-# ╔═╡ 2cc0471a-2fb6-44a3-bf3a-91ccbd7b30a9
-v₂⁵ = 1.0 # typed by `v\_2<tab>\^5<tab>`
+# ╔═╡ 44fc05a5-a0c1-4428-adee-edb5b8b869e3
+md"# Motivating example: the inverse function"
 
-# ╔═╡ f5f84a05-f4a2-4af9-815b-b77739f0fa2d
-[1.0 ; 2.0]
+# ╔═╡ 9162d799-c8a8-44cd-8921-b6fa4c6f291f
+md"""
+Given $v(t) = 2 + t$, consider the problem of finding the function $u : [-1, 1] \to \mathbb{R}$ such that
 
-# ╔═╡ 876d8811-24ca-45cb-b4a2-4fbca624d851
-[1.0 ; [2.0, 3.0]]
+```math
+u(t) v(t) = 1, \qquad t \in [-1, 1].
+```
 
-# ╔═╡ 8e8d5bca-caf5-4595-88f2-4362acd46340
-zeros(2)
+This constitutes the first example of infinite-dimensional problems.
 
-# ╔═╡ b9e52603-8407-44ba-adba-750a6356ecef
-zeros(2, 2)
+We will search for a function $u$ as a power series $u(t) = \sum_{n \ge 0} x_n t^n$, defined for all $t \in [-1, 1]$.
+A numerical plot of $(2+t)^{-1}$ is displayed below.
+"""
 
-# ╔═╡ 11447066-650e-421d-b31d-8abd3be68b75
-zeros(Complex{Float64}, 2, 2)
+# ╔═╡ 37827087-01ad-4fe7-bcb6-df2239ea0bca
+begin
+	plot(LinRange(-1, 1, 51), t -> 2 + t; label = "2+t", linewidth = 3)
+	plot!(LinRange(-1, 1, 51), t -> inv(2 + t); label = "1/(2+t)", linewidth = 3)
+	xlims!(-1, 1)
+	xlabel!("t")
+end
 
-# ╔═╡ d9290871-6a83-4832-81e2-f277cd948dd3
-[1.0 2.0 ; 3.0 4.0]
+# ╔═╡ d794367f-d346-416f-b8f1-1f442f876e20
+md"""
+We follow the same strategy outlined in Module 1, with some key adaptations:
+1. Identify a appropriate Banach space (an additional step compared to the previous module on finite-dimensional problems).
+2. Reformulate the problem as a zero-finding problem $F(x) = 0$.
+3. Compute an approximate zero $\bar{x}$.
+4. Construct an approximate inverse $A$ of $DF(\bar{x})$.
+5. Derive computable formulas for the bounds $Y, Z_1, Z_2$, and verify the radii polynomial inequalities.
+"""
 
-# ╔═╡ ca2a7bbc-cbba-4c67-a739-121e436f0103
-inv([1.0 2.0 ; 3.0 4.0])
+# ╔═╡ f6da61f7-64a3-4c33-b9ba-7917ffb67b2a
+md"## Sequence space"
 
-# ╔═╡ 3a1ce528-fefc-4489-86ee-3358d69123cd
-md"### LinearAlgebra"
+# ╔═╡ 65cebd36-0474-42ee-b983-70c5f9c1614f
+md"""
+The sequence space we are interested in is the one of analytic functions with radius of convergence strictly greater than $1$.
+The first step is to discretize this space as the sequence space
 
-# ╔═╡ 727d1133-f88b-4713-a254-a61e0b6c8f79
-using LinearAlgebra
+```math
+\ell^1_\mathbb{N} \overset{\text{def}}{=} \left\{ x \in \mathbb{R}^\mathbb{N} \, : \, \| x \|_1 \overset{\text{def}}{=} \sum_{n \ge 0} |x_n| < \infty \right\}.
+```
+"""
 
-# ╔═╡ 848982e9-d97f-4859-b8b0-8f53e9187380
-norm([1.0 ; 2.0], 1)
+# ╔═╡ 2dc02de6-f250-44db-b347-7d4d65c61d89
+md"""
+!!! lemma "Lemma"
+	 $x \in \ell^1_\mathbb{N}$ if and only if $\sum_{n \ge 0} x_n t^n$ converges uniformly on $[-1, 1]$.
+"""
 
-# ╔═╡ 4868fa5c-bbdf-4cd8-8751-3d87281438d4
-opnorm([1.0 0.0 ; 2.0 2.0], 1)
+# ╔═╡ f9d764b9-024a-4845-98ad-c3e79a4a5cd9
+md"""
+!!! lemma "Lemma"
+	 $\ell^1_\mathbb{N}$ is a Banach space.
+"""
 
-# ╔═╡ ef9684a1-e6ad-4d99-94ec-19f0d44d1ba7
-norm(interval([1.0, 2.0]), 1)
+# ╔═╡ 56bf8063-cc76-47ee-9074-f6a59466ec60
+md"### Cauchy product"
 
-# ╔═╡ 6f11b2b7-c58c-4796-b9f5-f438b0c86e42
-I
+# ╔═╡ 3cb18cba-18e5-4e6f-8b16-eccd1dcef9fd
+md"""
+!!! lemma "Lemma (Cauchy product)"
+	If $u(t) = \sum_{n \ge 0} x_n t^n$ and $v(t) = \sum_{n \ge 0} y_n t^n$, then $u(t) v(t) = \sum_{n \ge 0} (x * y)_n t^n$ where
 
-# ╔═╡ c3b0849a-f58b-40e5-b3ec-97566eadb27f
-I + zeros(2, 2)
+	```math
+	(x * y)_n \overset{\text{def}}{=} \sum_{l=0}^n x_{n-l} y_l, \qquad n \ge 0.
+	```
+"""
 
-# ╔═╡ 9ce060ea-53a4-4854-a53c-b58d29cb4f2b
-I + zeros(3, 3)
+# ╔═╡ 7390523a-ecf1-4b7e-a3e6-cce50d43083b
+md"""
+The product and the norm play together nicely: they give the space $\ell^1_\mathbb{N}$ the structure of a Banach algebra, as expressed by the following lemma.
+"""
 
-# ╔═╡ 55933fb6-6db8-4fad-9753-c317916660e4
-md"### IntervalArithmetic"
+# ╔═╡ 2a4448c5-e14a-4791-926f-172f3cb6e1f0
+md"""
+!!! lemma "Lemma (Banach algebra property)"
+	For any $x, y \in \ell^1_\mathbb{N}$ we have $\| x * y \|_1 \le \| x \|_1 \| y \|_1$.
+"""
 
-# ╔═╡ 24ba79d7-b92c-4f42-a940-24907321104e
-interval([1.0, 2.0])
+# ╔═╡ faec7172-c732-470c-88a0-8de5d92075b0
+md"### Finite dimensional projection"
 
-# ╔═╡ 3744963a-1f6b-4dbc-b796-83dad65e87f5
-interval([1.0 2.0 ; 3.0 4.0])
+# ╔═╡ 4290872b-923b-45dc-81b0-3e280a5a77c1
+md"""
+We introduce a projection operator on a finite number of modes ($N+1$ coefficients) $\Pi_N : \ell^1_\mathbb{N} \to \ell^1_\mathbb{N}$ given by
 
-# ╔═╡ 1672e4dd-5f52-4be5-8d5f-2b7a77a6af99
-md"### RadiiPolynomial"
+```math
+(\Pi_N x)_n
+\overset{\text{def}}{=}
+\begin{cases}
+x_n, & n \le N, \\
+0, & n > N,
+\end{cases}
+```
 
-# ╔═╡ 3f133258-e5b8-4303-a481-e9f4f74614e3
-using RadiiPolynomial
+together with its complement $\Pi_{> N} \overset{\text{def}}{=} I - \Pi_N$.
 
-# ╔═╡ 86b71145-bf35-4310-9914-78925141a5d1
-x = Sequence(Taylor(1), [1.0, 1.0]) # 1 + t
+The projections let us  break down the problem into two parts: a finite-dimensional part, handled by the computer, and an infinite-dimensional part (often called the *tail*), handled entirely by pen-and-paper analysis.
+"""
 
-# ╔═╡ 960765e6-2c84-4e91-ace1-191126fc6589
-x*x # (1 + t)^2 = 1 + 2t + t^2
+# ╔═╡ 8356c027-ead5-4073-9d0e-b25f41bf9543
+md"""
+###### Why is this so complicated?
 
-# ╔═╡ f2acf06e-4be5-4a30-b036-e554c0d2ffa4
-Derivative(1)
+The strange looking subscript $> N$ is in fact meant to indicate clearly which index values are involved.
+It avoids writing down infinite matrices or formulas with a lot of indices.
+"""
 
-# ╔═╡ 822cc3b2-dcec-46c8-a5c6-726de36f90e7
-Derivative(1) * x
+# ╔═╡ c11ce6e3-4e23-46bc-8bbd-217908d966af
+md"## Zero-finding problem"
 
-# ╔═╡ a9bf21bb-1a92-4942-b76a-aef1ffc98887
-Multiplication(x)
+# ╔═╡ b6655a7c-32d0-473a-ac1d-ddb96e31de81
+md"""
+Writing $v(t) = \sum_{n \ge 0} y_n t^n$ with $y \overset{\text{def}}{=} (2, 1, 0, \dots) \in \ell^1_\mathbb{N}$, and substituting $u(t) = \sum_{n \ge 0} x_n t^n$ into the algebraic equation leads to  the infinite set of equations
 
-# ╔═╡ 0cdf0577-d1b3-4c42-8090-6b3bc198b044
-project(Multiplication(x), Taylor(5), Taylor(5))
+```math
+(x * y)_0 = 1, \qquad (x * y)_n = 0, \quad n \ge 1.
+```
 
-# ╔═╡ 1547e260-583c-41ca-bbbe-29b79707708f
-y = Sequence(Fourier(1, 1.0), [im*0.5, 0.0, -im*0.5]) # sin(t)
+Therefore, the problem of finding the inverse of $v$ corresponds to finding a zero of the mapping $F : \ell^1_\mathbb{N} \to \ell^1_\mathbb{N}$ given by
 
-# ╔═╡ bf2d955d-9d9c-4ad3-85d5-d36696699b9b
-plot(LinRange(-π, π, 101), t -> real(y(t)))
+```math
+F(x) \overset{\text{def}}{=} x * y - 1.
+```
+"""
 
-# ╔═╡ 6c89b8af-6c6c-46da-a441-52f75930b377
-interval(x)
+# ╔═╡ 266d8eb2-fc1f-42ca-802e-90a4a358b313
+md"""
+!!! note "Remark"
+    Here we slightly abuse notation by identifying the constant $1$ with its sequence of Taylor coefficients $(1, 0, \dots) \in \ell^1_\mathbb{N}$.
+    This is consistent with the convention that $1$ denotes the identity element of the algebra $(\ell^1_\mathbb{N}, 1)$.
+"""
 
-# ╔═╡ cdb5640a-2778-4285-a0cc-6c669bed839f
-norm(x, 1)
+# ╔═╡ 0dab4ba7-4ad0-4ea8-a4c9-5892427969e7
+md"""
+An implementation, using the RadiiPolynomial library, of the zero-finding problem $F$ is given below.
+"""
 
-# ╔═╡ 2583c7b4-f78d-47c8-a925-99cbe8ed6103
-ν = interval(1.1)
+# ╔═╡ 4f37b759-371e-4042-82d0-720523718021
+F(x, y) = x * y - 1
 
-# ╔═╡ 57a51438-53d3-4669-b410-c6338165043c
-norm(interval(x), Ell1(GeometricWeight(ν)))
+# ╔═╡ 17013b31-0c79-4dd0-a6e3-5946528d69f6
+md"## Numerical zero"
+
+# ╔═╡ 151f9f5f-65ab-4ccb-94a6-c530d924962f
+md"""
+The map $F$ is affine and satisfies $[DF(x)] x = F(x) + 1$, so Newton's method reduces to solving, in $\ell^1_\mathbb{N}$, the linear system
+
+```math
+\mathcal{M}_y x = 1,
+```
+
+where $\mathcal{M}_y = DF(x) \in \mathscr{B}(\ell^1_\mathbb{N})$ is such that
+
+```math
+\mathcal{M}_y h = y * h, \qquad \forall h \in \ell^1_\mathbb{N}.
+```
+
+In other words, $\mathcal{M}_y$ is the mutliplication operator associated with $y$.
+
+As a bounded linear operator acting on infinite sequences in $\ell^1_\mathbb{N}$, $\mathcal{M}_y$ can be visualized as a matrix with an infinite number of rows and columns:
+
+```math
+\mathcal{M}_y =
+\begin{pmatrix}
+y_0 & 0   & 0 & \cdots \\
+y_1 & y_0 & 0 & \cdots \\
+y_2 & y_1 & y_0 & \ddots \\
+\vdots & \vdots & \vdots & \ddots
+\end{pmatrix}.
+```
+
+Our goal is to find a numerical approximation $\bar{x}$ of the zero of $F$ as an element of the truncated space $\Pi_N \ell^1_\mathbb{N}$.
+We can obtain this approximation by numerically solving the linear system above for a finite number of rows: $\Pi_N \mathcal{M}_b \bar{x} \approx 1$.
+If the truncation dimension $N$ is large enough we may hope that also $\Pi_{> N} F (\bar{x}) \approx 0$, since we expect the coefficients of $\bar{x}$ to decrease for moderately large $n$.
+"""
+
+# ╔═╡ 82c9f85d-f74f-4106-a5b8-35043e2d6119
+y = Sequence(Taylor(1), [2.0, 1.0])
+
+# ╔═╡ 1b058c77-7241-41ac-9a6e-84160b8d79da
+N = 3
+
+# ╔═╡ 82143c8d-7009-4537-975f-c832330caa9e
+M = project(Multiplication(y), Taylor(N), Taylor(N))
+
+# ╔═╡ a3124717-6741-4769-8fb0-2b489f13dc94
+x_bar = M \ Sequence(Taylor(N), [1.0 ; zeros(N)])
+
+# ╔═╡ d2d76ed8-911d-4247-9460-8c7df7669912
+begin
+	plot(LinRange(-1, 1, 101), t -> x_bar(t);
+		color = :royalblue1, linewidth = 3, label = "x_bar")
+	xlims!(-1, 1)
+	xlabel!("t")
+end
+
+# ╔═╡ 2346fe00-da58-4854-b476-6e3570941da2
+md"""
+We can see how close $F(\bar{x})$ is to zero.
+"""
+
+# ╔═╡ 1c61be31-8515-4b32-9d21-9a8910693f5a
+F(x_bar, y)
+
+# ╔═╡ 16e5b184-8d8c-43b9-a226-cdad95830b4f
+md"""
+Of course, in this example, we chose very few Taylor coefficients, so the residue is not as small as one would ideally aim for.
+"""
+
+# ╔═╡ 1d1277bf-2aa3-4c89-b34d-b2a2e5fc6fc5
+md"## Constructing $A$"
+
+# ╔═╡ 8a4513a5-9049-48df-ae9b-ea8c5d5f1076
+md"""
+For $T$ to be a contraction, we want $A$ to be a good approximate inverse of $\mathcal{M}_y$.
+So we want the inverse of $y$ with respect to the Cauchy product $*$.
+Recall that our numerical zero $\bar{x} \in \Pi_N \ell^1_{\mathbb{N}}$ satisfies $\bar{x} * y \approx 1$.
+Thus, we define
+
+```math
+A \overset{\text{def}}{=} \mathcal{M}_{\bar{x}}.
+```
+
+Consequently,
+
+```math
+A [DF(\bar{x})] h = \bar{x} * y * h \approx 1 * h = h.
+```
+"""
+
+# ╔═╡ 7edef822-8f17-4a17-8dc7-f476fd610a29
+md"## Verifying the contraction"
+
+# ╔═╡ 63e93962-935b-4c4a-8d10-04b43411b609
+md"""
+We now verify that $T(x) \overset{\text{def}}{=} x - A F(x)$ is a contraction around $\bar{x} \in \Pi_N \ell^1_\mathbb{N}$.
+To rigorously compute the bounds $Y, Z_1, Z_2$, we enclose all relevant data into intervals.
+"""
+
+# ╔═╡ 5c57ed8e-7bb1-4947-8ebd-f0c59b7ae8d4
+iy = interval(y)
+
+# ╔═╡ bec0f423-5b0a-4dee-bedf-9e3b7fcf5d3d
+ix_bar = interval(x_bar)
+
+# ╔═╡ f1fa7997-684d-443b-a5ed-5377ebcd3aee
+md"##### Computing $Y$"
+
+# ╔═╡ e1dd0737-2db8-4cf3-9cec-bea25648201b
+md"""
+!!! lemma "Lemma"
+	If $x \in \Pi_N \ell^1_\mathbb{N}$ and $y \in \Pi_{N'} \ell^1_\mathbb{N}$, then $x * y \in \Pi_{N+N'} \ell^1_\mathbb{N}$.
+"""
+
+# ╔═╡ 25df704a-3e01-45aa-a3de-ea2cb3f18504
+md"""
+```math
+\| A F(\bar{x}) \|_1 = \| \bar{x} * (\bar{x} * y - 1) \|_1 \le Y.
+```
+
+Since $y \in \Pi_1 \ell^1_\mathbb{N}, \bar{x} \in \Pi_N \ell^1_\mathbb{N}$, we have that $A F(\bar{x}) \in \Pi_{2N + 1} \ell^1_\mathbb{N}$ and the above quantity is computable.
+"""
+
+# ╔═╡ d27d66a6-4717-4d6d-895f-cdebd649cebd
+Y = norm(ix_bar * F(ix_bar, iy), 1)
+
+# ╔═╡ 39ed4568-b971-4cf3-accc-1ad32a44ce3d
+md"##### Computing $Z_1$"
+
+# ╔═╡ d5b89e7d-01bf-433a-a6e0-302951343bcd
+md"""
+!!! lemma "Lemma"
+	For all $x \in \ell^1_\mathbb{N}$ we have that $\| \mathcal{M}_x \|_{\mathscr{B}(\ell^1_\mathbb{N})} = \| x \|_1$.
+"""
+
+# ╔═╡ 5718bc5d-a86f-4907-8d5f-1707c8b51f58
+md"""
+```math
+\| A DF(\bar{x}) - I \|_{\mathscr{B}(\ell^1_\mathbb{N})} = \| \bar{x} * y - 1 \|_1 = \| F(\bar{x}) \|_1 \le Z_1.
+```
+
+The above quantity is computable since $F(\bar{x}) \in \Pi_{N + 1} \ell^1_\mathbb{N}$.
+"""
+
+# ╔═╡ 9d468890-c155-442d-bcbf-6a33bc991f72
+Z₁ = norm(F(ix_bar, iy), 1)
+
+# ╔═╡ 3d9b3db1-ac82-434c-8521-ce5ce89f570d
+md"##### Computing $Z_2$"
+
+# ╔═╡ 2d273b10-b485-49aa-9d06-8485ac166dc8
+md"""
+```math
+\|A(DF(x) - DF(\bar{x}))\|_{\mathscr{B}(\ell^1_\mathbb{N})} = 0, \qquad \forall x \in \ell^1_\mathbb{N}.
+```
+
+So $Z_2 = 0$ is a constant.
+In other words, we have a Lipschitz control for $DF$ on the whole space $\mathbb{R}^3$, and we can freely choose $R = \infty$.
+"""
+
+# ╔═╡ cc5576ac-2894-48ef-a7a9-c4c16b589173
+R = Inf
+
+# ╔═╡ d02c07ee-77f2-4317-9692-558323e37b54
+Z₂ = interval(0)
+
+# ╔═╡ 6b63d5e1-048a-4a34-98a0-960d28a51a0b
+md"##### Finishing the CAP"
+
+# ╔═╡ 17cc5d87-c680-4ccd-a63d-dd354059bdc5
+md"""
+To determine the values of $r$ that satisfy the radii polynomial inequalities, we use the `interval_of_existence` function from RadiiPolynomial.
+This function returns an interval of existence, within which all contained values satisfy the contraction conditions.
+"""
+
+# ╔═╡ e87f4cbe-e511-4c78-882b-f86961007932
+ie = interval_of_existence(Y, Z₁, Z₂, R)
+
+# ╔═╡ 7427f6e4-337c-4af8-ad59-dfd296b0a453
+r = inf(ie)
+
+# ╔═╡ c498e384-b1a2-40a5-bd72-edabdcd1fc4d
+md"""
+To guarantee that the fixed-point of $T$ is a zero of $F$, we must check that $A$ is injective.
+This property comes as a by-product of the contraction argument.
+Indeed, $\|I - A DF(\bar{x})\| \le Z_1 < 1$ ensures that $A DF(\bar{x})$ is invertible, which implies that $A$ is surjective.
+Since $A [DF(\bar{x})] h = \bar{x} * y * h = y * \bar{x} * h = [DF(\bar{x})] A h$, for all $h \in \ell^1_\mathbb{N}$, it follows that $A$ must also be injective.
+
+Therefore, we have proved the existence of a zero $\tilde{x}$ of $F$ such that
+
+```math
+\tilde{x} = \bar{x} + \gamma,
+```
+
+where $\gamma \in \ell^1_\mathbb{N}$ is not known explicitly, but satisfies $\| \gamma \|_1 \le r$.
+Our choice of norm also gives us a $C^0$-error bound for the function
+
+```math
+\begin{aligned}
+\sup_{t \in [-1,1]} | v(t)^{-1} - \sum_{n=0}^N \bar{x}_n t^n |
+&= \sup_{t \in [-1,1]} | \left(\sum_{n \ge 0} y_n t^n \right)^{-1} - \sum_{n=0}^N \bar{x}_n t^n | \\
+&= \sup_{t \in [-1,1]} | \sum_{n \ge 0} (\tilde{x}_n - \bar{x}_n) t^n | \\
+&\le \| \tilde{x} - \bar{x} \|_1 \\
+&\le r.
+\end{aligned}
+```
+"""
+
+# ╔═╡ 04417cef-c3d9-4adb-a449-7b26bbe20056
+begin
+	rigorous_eval(x, r, t) = interval(x(t), r; format = :midpoint)
+
+	ts = LinRange(-1, 1, 101)
+
+	plot([[interval(ts[i], ts[i+1]), rigorous_eval(ix_bar, r, interval(ts[i], ts[i+1]))] for i = 1:length(ts)-1];
+		label = "", color = :palegreen3)
+
+	plot!(ts, t -> x_bar(t);
+		label = "x_bar", color = :royalblue1, linewidth = 3)
+
+	plot!(ts, t -> inv(2+t);
+		label = "1/(2+t)", color = :salmon, linewidth = 3)
+
+	xlims!(-1, 1)
+	xlabel!("t")
+end
+
+# ╔═╡ d61da3a0-ac88-41a4-ae50-86a02ea43cbf
+md"""
+Lastly, this example is simple enough that we can compute by hand both the first 5 terms of $(2+t)^{-1}$
+
+```math
+\frac{1}{2+t} = \frac{1}{2} - \frac{t}{4} + \frac{t^2}{8} - \frac{t^3}{16} + \frac{t^4}{32} - \frac{t^5}{64} + O(t^6),
+```
+
+and compare with the result of our CAP.
+"""
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
+PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
 Plots = "~1.40.8"
+PlutoTeachingTools = "~0.3.1"
+PlutoUI = "~0.7.60"
 RadiiPolynomial = "~0.8.15"
 """
 
@@ -148,7 +435,13 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "6a569534f7f07512612e25ed17cea1956be8d3f5"
+project_hash = "50ac00f186507245d93fbdb4571657e0e99c4371"
+
+[[deps.AbstractPlutoDingetjes]]
+deps = ["Pkg"]
+git-tree-sha1 = "6e1d2a35f2f90a4bc7c2ed98079b2ba09c35b83a"
+uuid = "6e696c72-6542-2067-7265-42206c756150"
+version = "1.3.2"
 
 [[deps.ArgTools]]
 uuid = "0dad84c5-d112-42e6-8d28-ef12dabb789f"
@@ -184,6 +477,12 @@ deps = ["Artifacts", "Bzip2_jll", "CompilerSupportLibraries_jll", "Fontconfig_jl
 git-tree-sha1 = "009060c9a6168704143100f36ab08f06c2af4642"
 uuid = "83423d85-b0ee-5818-9007-b63ccbeb887a"
 version = "1.18.2+1"
+
+[[deps.CodeTracking]]
+deps = ["InteractiveUtils", "UUIDs"]
+git-tree-sha1 = "7eee164f122511d3e4e1ebadb7956939ea7e1c77"
+uuid = "da1fd8a2-8d9e-5ec2-8556-3022fb5608a2"
+version = "1.3.6"
 
 [[deps.CodecZlib]]
 deps = ["TranscodingStreams", "Zlib_jll"]
@@ -274,6 +573,11 @@ deps = ["Mmap"]
 git-tree-sha1 = "9e2f36d3c96a820c678f2f1f1782582fcf685bae"
 uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 version = "1.9.1"
+
+[[deps.Distributed]]
+deps = ["Random", "Serialization", "Sockets"]
+uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
+version = "1.11.0"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -402,6 +706,24 @@ git-tree-sha1 = "401e4f3f30f43af2c8478fc008da50096ea5240f"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
 version = "8.3.1+0"
 
+[[deps.Hyperscript]]
+deps = ["Test"]
+git-tree-sha1 = "179267cfa5e712760cd43dcae385d7ea90cc25a4"
+uuid = "47d2ed2b-36de-50cf-bf87-49c2cf4b8b91"
+version = "0.0.5"
+
+[[deps.HypertextLiteral]]
+deps = ["Tricks"]
+git-tree-sha1 = "7134810b1afce04bbc1045ca1985fbe81ce17653"
+uuid = "ac1192a8-f4b3-4bfe-ba22-af5b92cd3ab2"
+version = "0.9.5"
+
+[[deps.IOCapture]]
+deps = ["Logging", "Random"]
+git-tree-sha1 = "b6d6bfdd7ce25b0f9b2f6b3dd56b2673a66c8770"
+uuid = "b5f81e59-6552-4d32-b1f0-c071b021bf89"
+version = "0.2.5"
+
 [[deps.InteractiveUtils]]
 deps = ["Markdown"]
 uuid = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
@@ -409,9 +731,9 @@ version = "1.11.0"
 
 [[deps.IntervalArithmetic]]
 deps = ["CRlibm_jll", "LinearAlgebra", "MacroTools", "RoundingEmulator"]
-git-tree-sha1 = "c59c57c36683aa17c563be6edaac888163f35285"
+git-tree-sha1 = "24c095b1ec7ee58b936985d31d5df92f9b9cfebb"
 uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-version = "0.22.18"
+version = "0.22.19"
 
     [deps.IntervalArithmetic.extensions]
     IntervalArithmeticDiffRulesExt = "DiffRules"
@@ -453,6 +775,12 @@ deps = ["Artifacts", "JLLWrappers", "Libdl"]
 git-tree-sha1 = "25ee0be4d43d0269027024d75a24c24d6c6e590c"
 uuid = "aacddb02-875f-59d6-b918-886e6ef4fbf8"
 version = "3.0.4+0"
+
+[[deps.JuliaInterpreter]]
+deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
+git-tree-sha1 = "2984284a8abcfcc4784d95a9e2ea4e352dd8ede7"
+uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
+version = "0.9.36"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -606,6 +934,17 @@ deps = ["Dates", "Logging"]
 git-tree-sha1 = "f02b56007b064fbfddb4c9cd60161b6dd0f40df3"
 uuid = "e6f89c97-d47a-5376-807f-9c37f3926c36"
 version = "1.1.0"
+
+[[deps.LoweredCodeUtils]]
+deps = ["JuliaInterpreter"]
+git-tree-sha1 = "260dc274c1bc2cb839e758588c63d9c8b5e639d1"
+uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
+version = "3.0.5"
+
+[[deps.MIMEs]]
+git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
+uuid = "6c6e2e6c-3030-632d-7369-2d6c69616d65"
+version = "0.1.4"
 
 [[deps.MacroTools]]
 deps = ["Markdown", "Random"]
@@ -766,6 +1105,30 @@ version = "1.40.8"
     ImageInTerminal = "d8c32880-2388-543b-8c61-d9f865259254"
     Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 
+[[deps.PlutoHooks]]
+deps = ["InteractiveUtils", "Markdown", "UUIDs"]
+git-tree-sha1 = "072cdf20c9b0507fdd977d7d246d90030609674b"
+uuid = "0ff47ea0-7a50-410d-8455-4348d5de0774"
+version = "0.0.5"
+
+[[deps.PlutoLinks]]
+deps = ["FileWatching", "InteractiveUtils", "Markdown", "PlutoHooks", "Revise", "UUIDs"]
+git-tree-sha1 = "8f5fa7056e6dcfb23ac5211de38e6c03f6367794"
+uuid = "0ff47ea0-7a50-410d-8455-4348d5de0420"
+version = "0.1.6"
+
+[[deps.PlutoTeachingTools]]
+deps = ["Downloads", "HypertextLiteral", "Latexify", "Markdown", "PlutoLinks", "PlutoUI"]
+git-tree-sha1 = "8252b5de1f81dc103eb0293523ddf917695adea1"
+uuid = "661c6b06-c737-4d37-b85c-46df65de6f69"
+version = "0.3.1"
+
+[[deps.PlutoUI]]
+deps = ["AbstractPlutoDingetjes", "Base64", "ColorTypes", "Dates", "FixedPointNumbers", "Hyperscript", "HypertextLiteral", "IOCapture", "InteractiveUtils", "JSON", "Logging", "MIMEs", "Markdown", "Random", "Reexport", "URIs", "UUIDs"]
+git-tree-sha1 = "eba4810d5e6a01f612b948c9fa94f905b49087b0"
+uuid = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
+version = "0.7.60"
+
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
 git-tree-sha1 = "5aa36f7049a63a1528fe8f7c3f2113413ffd4e1f"
@@ -851,6 +1214,12 @@ deps = ["UUIDs"]
 git-tree-sha1 = "838a3a4188e2ded87a4f9f184b4b0d78a1e91cb7"
 uuid = "ae029012-a4dd-5104-9daa-d747884805df"
 version = "1.3.0"
+
+[[deps.Revise]]
+deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "REPL", "Requires", "UUIDs", "Unicode"]
+git-tree-sha1 = "7f4228017b83c66bd6aa4fddeb170ce487e53bc7"
+uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
+version = "3.6.2"
 
 [[deps.RoundingEmulator]]
 git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
@@ -959,6 +1328,11 @@ version = "1.11.0"
 git-tree-sha1 = "0c45878dcfdcfa8480052b6ab162cdd138781742"
 uuid = "3bb67fe8-82b1-5028-8e26-92a6c54297fa"
 version = "0.11.3"
+
+[[deps.Tricks]]
+git-tree-sha1 = "7822b97e99a1672bfb1b49b668a6d46d58d8cbcb"
+uuid = "410a4b4d-49e4-4fbc-ab6d-cb71b17b3775"
+version = "0.1.9"
 
 [[deps.URIs]]
 git-tree-sha1 = "67db6cc7b3821e19ebe75791a9dd19c9b1188f2b"
@@ -1303,42 +1677,64 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╟─7fc40507-eda3-474d-a454-04e9173a7adb
-# ╠═a517be42-d53a-470f-93d6-7a7723eb6ef1
-# ╟─800c404b-d415-4a93-a5c4-e2296068a534
-# ╠═35f3b473-cfa8-4a89-bb98-e6cdfa7b58fe
-# ╠═2cc0471a-2fb6-44a3-bf3a-91ccbd7b30a9
-# ╠═f5f84a05-f4a2-4af9-815b-b77739f0fa2d
-# ╠═876d8811-24ca-45cb-b4a2-4fbca624d851
-# ╠═8e8d5bca-caf5-4595-88f2-4362acd46340
-# ╠═b9e52603-8407-44ba-adba-750a6356ecef
-# ╠═11447066-650e-421d-b31d-8abd3be68b75
-# ╠═d9290871-6a83-4832-81e2-f277cd948dd3
-# ╠═ca2a7bbc-cbba-4c67-a739-121e436f0103
-# ╟─3a1ce528-fefc-4489-86ee-3358d69123cd
-# ╠═727d1133-f88b-4713-a254-a61e0b6c8f79
-# ╠═848982e9-d97f-4859-b8b0-8f53e9187380
-# ╠═4868fa5c-bbdf-4cd8-8751-3d87281438d4
-# ╠═ef9684a1-e6ad-4d99-94ec-19f0d44d1ba7
-# ╠═6f11b2b7-c58c-4796-b9f5-f438b0c86e42
-# ╠═c3b0849a-f58b-40e5-b3ec-97566eadb27f
-# ╠═9ce060ea-53a4-4854-a53c-b58d29cb4f2b
-# ╟─55933fb6-6db8-4fad-9753-c317916660e4
-# ╠═24ba79d7-b92c-4f42-a940-24907321104e
-# ╠═3744963a-1f6b-4dbc-b796-83dad65e87f5
-# ╟─1672e4dd-5f52-4be5-8d5f-2b7a77a6af99
-# ╠═3f133258-e5b8-4303-a481-e9f4f74614e3
-# ╠═86b71145-bf35-4310-9914-78925141a5d1
-# ╠═960765e6-2c84-4e91-ace1-191126fc6589
-# ╠═f2acf06e-4be5-4a30-b036-e554c0d2ffa4
-# ╠═822cc3b2-dcec-46c8-a5c6-726de36f90e7
-# ╠═a9bf21bb-1a92-4942-b76a-aef1ffc98887
-# ╠═0cdf0577-d1b3-4c42-8090-6b3bc198b044
-# ╠═1547e260-583c-41ca-bbbe-29b79707708f
-# ╠═bf2d955d-9d9c-4ad3-85d5-d36696699b9b
-# ╠═6c89b8af-6c6c-46da-a441-52f75930b377
-# ╠═cdb5640a-2778-4285-a0cc-6c669bed839f
-# ╠═2583c7b4-f78d-47c8-a925-99cbe8ed6103
-# ╠═57a51438-53d3-4669-b410-c6338165043c
+# ╟─2af9b21a-2dcf-497f-bd7c-9ebbf80b9428
+# ╠═de230094-748d-11ef-25e3-ef811ae3bf31
+# ╠═0b90f400-faef-4a80-9e6d-e16b149151d9
+# ╟─11810156-e8c9-4145-af2a-93e0757a8cc9
+# ╟─44fc05a5-a0c1-4428-adee-edb5b8b869e3
+# ╟─9162d799-c8a8-44cd-8921-b6fa4c6f291f
+# ╟─37827087-01ad-4fe7-bcb6-df2239ea0bca
+# ╟─d794367f-d346-416f-b8f1-1f442f876e20
+# ╟─f6da61f7-64a3-4c33-b9ba-7917ffb67b2a
+# ╟─65cebd36-0474-42ee-b983-70c5f9c1614f
+# ╟─2dc02de6-f250-44db-b347-7d4d65c61d89
+# ╟─f9d764b9-024a-4845-98ad-c3e79a4a5cd9
+# ╟─56bf8063-cc76-47ee-9074-f6a59466ec60
+# ╟─3cb18cba-18e5-4e6f-8b16-eccd1dcef9fd
+# ╟─7390523a-ecf1-4b7e-a3e6-cce50d43083b
+# ╟─2a4448c5-e14a-4791-926f-172f3cb6e1f0
+# ╟─faec7172-c732-470c-88a0-8de5d92075b0
+# ╟─4290872b-923b-45dc-81b0-3e280a5a77c1
+# ╟─8356c027-ead5-4073-9d0e-b25f41bf9543
+# ╟─c11ce6e3-4e23-46bc-8bbd-217908d966af
+# ╟─b6655a7c-32d0-473a-ac1d-ddb96e31de81
+# ╟─266d8eb2-fc1f-42ca-802e-90a4a358b313
+# ╟─0dab4ba7-4ad0-4ea8-a4c9-5892427969e7
+# ╠═4f37b759-371e-4042-82d0-720523718021
+# ╟─17013b31-0c79-4dd0-a6e3-5946528d69f6
+# ╟─151f9f5f-65ab-4ccb-94a6-c530d924962f
+# ╠═82c9f85d-f74f-4106-a5b8-35043e2d6119
+# ╠═1b058c77-7241-41ac-9a6e-84160b8d79da
+# ╠═82143c8d-7009-4537-975f-c832330caa9e
+# ╠═a3124717-6741-4769-8fb0-2b489f13dc94
+# ╟─d2d76ed8-911d-4247-9460-8c7df7669912
+# ╟─2346fe00-da58-4854-b476-6e3570941da2
+# ╠═1c61be31-8515-4b32-9d21-9a8910693f5a
+# ╟─16e5b184-8d8c-43b9-a226-cdad95830b4f
+# ╟─1d1277bf-2aa3-4c89-b34d-b2a2e5fc6fc5
+# ╟─8a4513a5-9049-48df-ae9b-ea8c5d5f1076
+# ╟─7edef822-8f17-4a17-8dc7-f476fd610a29
+# ╟─63e93962-935b-4c4a-8d10-04b43411b609
+# ╠═5c57ed8e-7bb1-4947-8ebd-f0c59b7ae8d4
+# ╠═bec0f423-5b0a-4dee-bedf-9e3b7fcf5d3d
+# ╟─f1fa7997-684d-443b-a5ed-5377ebcd3aee
+# ╟─e1dd0737-2db8-4cf3-9cec-bea25648201b
+# ╟─25df704a-3e01-45aa-a3de-ea2cb3f18504
+# ╠═d27d66a6-4717-4d6d-895f-cdebd649cebd
+# ╟─39ed4568-b971-4cf3-accc-1ad32a44ce3d
+# ╟─d5b89e7d-01bf-433a-a6e0-302951343bcd
+# ╟─5718bc5d-a86f-4907-8d5f-1707c8b51f58
+# ╠═9d468890-c155-442d-bcbf-6a33bc991f72
+# ╟─3d9b3db1-ac82-434c-8521-ce5ce89f570d
+# ╟─2d273b10-b485-49aa-9d06-8485ac166dc8
+# ╠═cc5576ac-2894-48ef-a7a9-c4c16b589173
+# ╠═d02c07ee-77f2-4317-9692-558323e37b54
+# ╟─6b63d5e1-048a-4a34-98a0-960d28a51a0b
+# ╟─17cc5d87-c680-4ccd-a63d-dd354059bdc5
+# ╠═e87f4cbe-e511-4c78-882b-f86961007932
+# ╠═7427f6e4-337c-4af8-ad59-dfd296b0a453
+# ╟─c498e384-b1a2-40a5-bd72-edabdcd1fc4d
+# ╟─04417cef-c3d9-4adb-a449-7b26bbe20056
+# ╟─d61da3a0-ac88-41a4-ae50-86a02ea43cbf
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

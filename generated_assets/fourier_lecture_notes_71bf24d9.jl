@@ -2,16 +2,16 @@
 # v0.19.47
 
 #> [frontmatter]
-#> chapter = 1
-#> order = 0.5
-#> title = "Finite-dimensional problems"
-#> tags = ["lecture", "module1"]
+#> chapter = 4
+#> order = 1
+#> title = "Periodic orbits"
+#> tags = ["lecture", "module4"]
 #> layout = "layout.jlhtml"
 
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ a5169b4b-f0d4-4f66-8198-0aec5f8e135a
+# ╔═╡ 044aabf3-b817-4266-93a9-a4cabce1ec4e
 html"""
 <style>
 main {
@@ -21,495 +21,580 @@ main {
 </style>
 """
 
-# ╔═╡ d0e623ee-b096-4a27-977d-dc32567d6020
+# ╔═╡ 4b949c9b-4669-4d5a-b74c-0840bf375ddd
 using PlutoTeachingTools, PlutoUI # packages for the notebook
 
-# ╔═╡ 2661bfc9-e398-41ed-87d9-c78f05da64cb
-using Plots
+# ╔═╡ db7c8b55-56bf-493c-a4ff-1ba9610a41ed
+using RadiiPolynomial, Plots
 
-# ╔═╡ b3845641-1537-4a27-8550-1eff30900a6b
+# ╔═╡ 2ae8d07b-a05e-4136-a121-6317641916fe
 TableOfContents(title = "Table of Contents"; indent = true, depth = 4, aside = true)
-
-# ╔═╡ ed6f44f4-3696-494a-b8e3-b30184f5bb06
-md"# Motivating example: a chaotic dynamical system"
 
 # ╔═╡ c33dc650-3f94-11ef-398a-8bbc4a2b69b8
 md"""
-Consider the sequence defined by
-
-$\begin{align}
-x_{n+1} = \mu x_n (1-x_n),
-\end{align}$
-
-where $\mu$ is a parameter in $[0,4]$ and the initial condition $x_1$ is in $[0,1]$.
-
-The slider below can be used to vary the value of $\mu$.
+We continue to do CAPs to find solutions of ODEs, but rather than looking at an initial value problem, we now look for periodic solutions.
+The setting is again infinite dimensional, with some small differences:
+- We use Fourier series rather than Taylor series.
+- The Fourier coefficients are two-sided sequences of complex numbers.
+- The convolution product is given by an infinite series.
+- The problem of finding a closed orbit is global in the sense that there is no equivalent of "short time" integration.
 """
 
-# ╔═╡ 05df1902-b4b8-4fd7-ab91-ad01f4fa413e
-# ╠═╡ disabled = true
-#=╠═╡
-@bind μ Slider(0:0.1:4; default = 3.9)
-  ╠═╡ =#
+# ╔═╡ fa5da4c1-cbcc-413c-8807-b9d2b40d5cc0
+md"# Motivating example: a forced, damped, nonlinear pendulum"
 
-# ╔═╡ da0cd646-614e-436f-9596-853fb3bca36b
-μ
-
-# ╔═╡ 730eeed9-a736-48df-a853-94f45dedd836
-begin
-	x1 = 0.4
-	maxiter = 50
-	xs = zeros(maxiter+1)
-	xs[1] = x1
-	for n = 1:maxiter
-		xs[n+1] = μ*xs[n]*(1-xs[n])
-	end
-	plot(1:maxiter+1, xs; marker = (:circle, 5), legend = false)
-	xlabel!("n")
-	ylims!(-0.1, 1.1)
-end
-
-# ╔═╡ 1d9286fa-647a-4743-806f-9cea5aab6be1
+# ╔═╡ 3674e20c-4c06-4a5d-8d7c-24e408b6d979
 md"""
-As $\mu$ increases, the dynamics become progressively more complex.
-This behaviour arises from a cascade of [period doubling bifurcations](https://en.wikipedia.org/wiki/Period-doubling_bifurcation), ultimately leading to [chaos](https://en.wikipedia.org/wiki/Chaos_theory).
-A well-known result for discrete dynamical systems states that the existence of a period-3 orbit implies chaos.
-"""
-
-# ╔═╡ 1e56532e-9886-4a41-9ba0-1a619a85e014
-md"""
-!!! theorem "Theorem"
-	Let $f : [0,1] \to [0,1]$ be continuous, and consider the dynamical system defined by $x_{n+1} = f(x_n)$.
-	If there exists an orbit of period-3, i.e. $x_1 \in [0,1]$ such that $x_1 \ne x_2 \ne x_3$ and $x_4 = x_1$, then the system is chaotic.
-	In particular, there exist orbits of any period.[^Sha64][^LY75]
-"""
-
-# ╔═╡ 8d6c631f-832a-48a9-891f-650f53a0ac6c
-md"""
-Let us fix a value of $\mu$ for which the dynamics seem complicated, say $\mu = 3.9$.
-Our goal is to demonstrate the existence of a period-3 orbit.
-We will begin by numerically approximating such an orbit and then rigorously establish the existence of a true period-3 orbit nearby.
-
-While there are various methods to prove the existence of a period-3 orbit (both with and without computer assistance), the approach we present will extend naturally to more challenging infinite-dimensional problems.
-"""
-
-# ╔═╡ 429e5261-d7d0-47a3-94b5-8e7905a5bd53
-md"# Contraction mapping and the Newton-Kantorovich theorem"
-
-# ╔═╡ a27b45ca-77d1-408e-98e9-6b5248aca85e
-md"""
-Given a problem and an approximate solution $\bar{x}$, our goal is to define a fixed-point operator $T$ such that
-- the solutions to our problem are in one-to-one correspondence with fixed-points of $T$,
--  $T$ is a contraction on a small neighborhood of $\bar{x}$.
-
-The specific form of $T$ may vary depending on the nature of the problem, but we can outline a general strategy for constructing such an operator.
-First, we provide sufficient conditions that can be verified in practice to demonstrate that an operator $T$ is contracting on a small neighborhood of $\bar{x}$.
-Although this first module focuses on finite-dimentional problems, we state these conditions in the more general setting of a [Banach space](https://en.wikipedia.org/wiki/Banach_space), as they will play an important role in the next modules.
-"""
-
-# ╔═╡ a801e2c7-c907-40d2-9976-bba19c590b2b
-md"""
-!!! theorem "Theorem (Contraction mapping)"
-	Let $\mathcal{X}$ be a Banach space, $\bar{x} \in \mathcal{X}$, and $T : \mathcal{X} \to \mathcal{X}$ a continuously differentiable map.
-	Assume that there exist a constant $Y$ and a non-decreasing map $Z : [0, \infty) \to [0, \infty)$ such that
-
-	```math
-	\begin{align}
-	\| T(\bar{x}) - \bar{x} \| &\le Y, \\
-	\| DT(x) \| &\le Z(\| x-\bar{x} \|), \qquad \forall x \in \mathcal{X}.
-	\end{align}
-	```
-
-	If there exists $r > 0$ such that
-
-	```math
-	\begin{align}
-	Y + \int_0^r Z(s) \, ds &\le r, \\
-	Z(r) &< 1,
-	\end{align}
-	```
-
-	then $T$ has a unique fixed point $\tilde{x}$ such that $\| \tilde{x} - \bar{x} \| \le r$.
-"""
-
-# ╔═╡ 6caaf267-3015-4a66-975f-ec1c3a6f86f8
-md"""
-!!! note "Remark"
-	- The bound $Z$ is actually only needed locally, i.e. we only need $Z(s)$ for $s \le r$.
-	  Therefore, one can fix a priori some $R > 0$, and weaken the assumption by only asking for $Z$ to be defined on $[0, R]$ and to satisfy $\| DT(x) \| \le Z(\| x-\bar{x} \|)$ for all $x \in \mathcal{X}$ such that $\| x-\bar{x} \| \le R$.
-	  Of course, we are then only allowed to consider $r \in (0, R]$.
-	- In practice, studying carefully how $\| DT(x) \|$ depends on $\| x-\bar{x} \|$ helps us to get better bounds.
-	  However, we can sometimes get away with coarser estimates.
-	  Specifically, we derive a constant $Z_*$ such that $\| DT(x) \| \le Z_*$ for all $x \in \mathcal{X}$ such that $\| x-\bar{x} \| \le R$, and then use $Z(s) = Z_*$ for all $s \in [0, R]$.
-	  The conditions on $r$ then simplify, and, if $Z_* < 1$, we can take any $r \ge \frac{Y}{1-Z_*}$.
-"""
-
-# ╔═╡ 77380230-67f2-4794-bb51-39ceeac7bef1
-md"""
-For a dynamical system $x_{n+1} = f(x_n)$, a natural fixed-point operator for period-3 orbits is given by $T(x) \overset{\text{def}}{=} f^3(x)$, which represents $f$ composed with itself three times.
-However, in general such a $T$ has no reason to be contracting.
-
-To develop a more general procedure for constructing a fixed-point problem, one can start by finding a map $F$ whose isolated zeros are solutions to our problem.
-For this example, we consider the mapping $F : \mathbb{R}^3 \to \mathbb{R}^3$ given by
+Consider the second-order ODE
 
 ```math
-F(x_1, x_2, x_3) \overset{\text{def}}{=}
+u''(t) + \beta_1 u'(t) + \beta_2 u(t) - u(t)^2 = \beta_3 \cos(t),
+```
+
+where $\beta_1, \beta_2, \beta_3$ are parameters.
+We aim to find a periodic solution $u(t)$.
+Since the (minimal) period of the forcing term is $2\pi$, we look for a periodic solution of period $2 \pi$ as a Fourier series $u(t) = \sum_{k \in \mathbb{Z}} x_k e^{i k t}$.
+
+We adopt the same strategy as before, organized into the following steps:
+1. Identify a appropriate Banach space.
+2. Reformulate the problem as a zero-finding problem $F(x) = 0$.
+3. Compute an approximate zero $\bar{x}$.
+4. Construct an approximate inverse $A$ of $DF(\bar{x})$.
+5. Derive computable formulas for the bounds $Y, Z_1, Z_2$, and verify the radii polynomial inequalities.
+"""
+
+# ╔═╡ 1bfcc76a-266a-4784-b76b-3871445e603e
+md"""
+###### Why is this a "simple" example?
+
+A more natural problem to look at is to find a periodic orbit in a system of ODEs.
+In such an *autonomous* system of ODEs the period of a periodic solution is unknown a priori, and determining the period $\tau$ is thus part of the problem, in addition to finding the unknown $\tau$-periodic function $u(t)$.
+Furthermore, when $u(t)$ is a periodic solution, so is $u(t-t_0)$ for any time shift $t_0$. In particular, periodic solutions are not isolated unless an additional phase condition is imposed.
+A final complication is that for a *system* of equations the bookkeeping is more involved than for a single equation.
+Although these difficulties can be overcome, the notation can get in the way of understanding.
+Since we want to focus here on how to deal with periodic functions, we choose to look at a scalar, non-autonomous problem where the period is given.
+"""
+
+# ╔═╡ 64fffe67-78ae-4261-a149-61046fcf3bb4
+md"## Sequence space"
+
+# ╔═╡ 8f3e96dc-0cdc-411e-8f94-e9e47488abf3
+md"""
+The space we are interested in is the space of periodic analytic functions.
+THe first step is to discretize this space as the sequence space ($\nu \ge 1$)
+
+```math
+\ell^1_{\nu, \mathbb{Z}}
+\overset{\text{def}}{=}
+\left\{
+x \in \mathbb{C}^\mathbb{Z} \, : \, \| x \|_\nu \overset{\text{def}}{=} \sum_{k \in \mathbb{Z}} |x_k| \nu^{|k|} < \infty
+\right\}.
+```
+
+We will choose the value of $\nu$ later.
+"""
+
+# ╔═╡ 766164f3-eef3-4798-bf7c-afdca52d3ba0
+md"""
+!!! lemma "Lemma"
+	Let $\omega > 0$ and $\nu \ge 1$.
+	If $x \in \ell^1_{\nu, \mathbb{Z}}$, then $\sum_{k \in \mathbb{Z}} x_k e^{i k \omega t}$ converges uniformly.
+	If $\nu > 1$, then term-by-term differentiation up to any order of the Fourier series is justified.
+"""
+
+# ╔═╡ fe626b98-e13b-4af0-8c7b-b1442934d56b
+md"""
+!!! lemma "Lemma"
+	 $\ell^1_{\nu, \mathbb{Z}}$ is a Banach space.
+"""
+
+# ╔═╡ f1cad266-547f-45fb-9391-cc0a45b65137
+md"### Conjugate symmetry"
+
+# ╔═╡ 9ab6ce17-0637-4008-be29-e0bf4fda4287
+md"""
+We denote the complex conjugate of $z \in \mathbb{C}$ by $z^*$.
+For a real-valued periodic function $u$, its Fourier coefficients $x \in \ell^1_{\nu, \mathbb{Z}}$ satisfy $x_{-k} = x_k^*$ for all $k \in \mathbb{Z}$.
+Conversely, if $x_{-k} = x_k^*$ for all $k \in \mathbb{Z}$, then the Fourier series $\sum_{k \in \mathbb{Z}} x_k e^{i k \omega t}$ is real-valued.
+
+For $x \in \ell^1_{\nu, \mathbb{Z}}$, we denote by $x^\dagger \in \ell^1_{\nu, \mathbb{Z}}$ the conjugate given by $(x^\dagger)_k \overset{\text{def}}{=} x_{-k}^*$.
+With this notation, $x = x^\dagger$ is equivalent to the Fourier series $\sum_{k \in \mathbb{Z}} x_k e^{i k \omega t}$ being real-valued.
+"""
+
+# ╔═╡ 069bbc98-d32c-4871-a317-7b44b1e45251
+md"### Convolution product"
+
+# ╔═╡ 47e39d6a-231e-40d1-906e-eeafe1b1f807
+md"""
+!!! lemma "Lemma (Convolution product)"
+	Let $\omega > 0$.
+	If $u(t) = \sum_{k \in \mathbb{Z}} x_k e^{i k \omega t}$ and $v(t) = \sum_{k \in \mathbb{Z}} y_k e^{i k \omega t}$, then $u(t) v(t) = \sum_{k \in \mathbb{Z}} (x * y)_k e^{i k \omega t}$ where
+
+	```math
+	(x * y)_k \overset{\text{def}}{=} \sum_{l \in \mathbb{Z}} x_{k-l} y_l, \qquad k \in \mathbb{Z}.
+	```
+"""
+
+# ╔═╡ f91abfa7-8a8f-4204-95d9-637c622dd720
+md"""
+The product and the norm play together nicely: they give the space $\ell^1_{\nu, \mathbb{Z}}$ the structure of a Banach algebra, as expressed by the following lemma.
+"""
+
+# ╔═╡ 8f6431ed-346c-4c51-83c4-ea7ec12a8d60
+md"""
+!!! lemma "Lemma (Banach algebra property)"
+	For any $\nu \ge 1$ and $x, y \in \ell^1_{\nu, \mathbb{Z}}$ we have $\| x * y \|_\nu \le \| x \|_\nu \| y \|_\nu$.
+"""
+
+# ╔═╡ 7796a035-7ba7-4ad2-b109-e1f1f966eda5
+md"### Finite dimensional projection"
+
+# ╔═╡ c32d9839-7cb7-4018-bab1-b2211f05b71e
+md"""
+We introduce a projection operator on a finite number of modes ($2K+1$ coefficients) $\Pi_K : \ell^1_{\nu, \mathbb{Z}} \to \ell^1_{\nu, \mathbb{Z}}$ given by
+
+```math
+(\Pi_K x)_k
+\overset{\text{def}}{=}
+\begin{cases}
+x_k, & |k| \le K, \\
+0, & |k| > K,
+\end{cases}
+```
+
+together with its complement $\Pi_{> K} \overset{\text{def}}{=} I - \Pi_K$.
+"""
+
+# ╔═╡ 872359fa-dcb9-47da-9612-f46d6291fad5
+md"## Zero-finding problem"
+
+# ╔═╡ 8d7fb15d-32d3-4fbb-9d06-c8ec1ed7d00e
+md"""
+Substituting $u(t) = \sum_{k \in \mathbb{Z}} x_k e^{i k t}$ into the ODE leads to the infinite set of equations
+
+```math
+\lambda_k x_k + (x * x)_k + \beta_3 c_k = 0, \qquad k \in \mathbb{Z},
+```
+
+where
+
+```math
+\lambda_k \overset{\text{def}}{=} k^2 - i \beta_1 k - \beta_2
+```
+
+and $c$ represents the Fourier transform of $\cos(t)$, that is
+
+```math
+c_k
+\overset{\text{def}}{=}
+\begin{cases}
+\frac{1}{2}, & k = \pm 1, \\
+0, & k \ne \pm 1.
+\end{cases}
+```
+
+It is convenient to introduce the diagonal linear operator
+
+```math
+(\Lambda x)_k
+\overset{\text{def}}{=}
+\lambda_k x_k.
+```
+
+When $\beta_1, \beta_2 \ne 0$, then the inverse $\Lambda^{-1}$, given by $(\Lambda^{-1} h)_k = \lambda_k^{-1} h_k$ for all $h \in \ell^1_{\nu, \mathbb{Z}}$, is well-defined as a bounded operator on $\ell^1_{\nu, \mathbb{Z}}$
+
+Therefore, the problem of finding a periodic solution to the ODE corresponds to finding a zero of the mapping $F : \ell^1_{\nu, \mathbb{Z}} \to \ell^1_{\nu, \mathbb{Z}}$ given by
+
+```math
+F(x) \overset{\text{def}}{=} x + \Lambda^{-1} (x * x + \beta_3 c).
+```
+"""
+
+# ╔═╡ ff2ca8bd-00b9-4830-a128-afdb24634896
+md"""
+!!! note "Remark"
+	Dividing by $\lambda_k$ is a choice that simplifies the linear term, which is beneficial for some of the algebra.
+	In terms of estimates it merely shifts the difficulty to the nonlinear term.
+	Working with the alternative zero-finding problem $G(x) \overset{\text{def}}{=} \Lambda x + x*x + \beta_3 c$ is also a perfectly valid choice.
+"""
+
+# ╔═╡ 76961562-23b1-4aae-b761-6f95bdbbbab3
+md"""
+An implementation, using the RadiiPolynomial library, of the truncated zero-finding problem $\Pi_K \circ F \circ \Pi_K$ is given below.
+"""
+
+# ╔═╡ df46f5c1-dbc6-4cf1-8e97-36b22c6b4c51
+function Λ⁻¹(β, space)
+	∂ = project(Derivative(1), space, space) 
+	∂² = ∂ * ∂
+	return -inv(∂² + β[1] * ∂ + β[2]*I)
+end
+
+# ╔═╡ f0e42405-8068-455b-b17c-ede3e259f01d
+F(x, β, c, space) = x + Λ⁻¹(β, space) * (x*x + β[3] * c)
+
+# ╔═╡ f5cc03ca-09eb-4419-9d51-78c956ee73d9
+md"""
+The Fréchet derivative of $F$ reads
+
+```math
+DF(x) = I + \Lambda^{-1} \mathcal{M}_{2x},
+```
+
+where
+
+```math
+\mathcal{M}_{2x} h = 2x * h, \qquad \forall h \in \ell^1_{\nu, \mathbb{Z}}.
+```
+
+In other words, $\mathcal{M}_{2x}$ is the multiplication operator associated with $2x$.
+
+As a bounded linear operator acting on infinite sequences in $\ell^1_{\nu, \mathbb{Z}}$, $\mathcal{M}_{2x}$ can be visualized as a matrix with an infinite number of rows and columns:
+
+```math
+\mathcal{M}_{2x} =
 \begin{pmatrix}
-f(x_1) - x_2 \\
-f(x_2) - x_3 \\
-f(x_3) - x_1
+\ddots & \ddots & \ddots \\
+\ddots & 2x_0    & 2x_{-1} & 2x_{-2} \\
+\ddots & 2x_1    & 2x_0    & 2x_{-1} & \ddots \\
+       & 2x_2    & 2x_1    & 2x_0    & \ddots \\
+       &        & \ddots & \ddots & \ddots
 \end{pmatrix}.
 ```
 
-Given an approximate solution $\bar{x}$, one can consider the Newton-like operator $T(x) \overset{\text{def}}{=} x - DF(\bar{x})^{-1} F(x)$.
-This operator should be contracting in a neighborhood of $\bar{x}$, as $DT(\bar{x}) = 0$.
-
-For finite-dimensional problems of moderate size, computing the inverse of $DF(\bar{x})$ is possible.
-However, in infinite-dimensional problems, working with $DF(\bar{x})^{-1}$ can be challenging.
-To address this, we often consider an approximate inverse $A \approx DF(\bar{x})^{-1}$ and define the fixed-point operator $T(x) \overset{\text{def}}{=} x - AF(x)$.
-In the following results, we will operate under this framework, where $A$ is not specified and could be $DF(\bar{x})^{-1}$ or another suitable approximation.
+An implementation of $\Pi_K \circ DF(\Pi_K x) \circ \Pi_K$ of the truncated problem is given below.
 """
 
-# ╔═╡ 08dab1b4-c78d-4e85-89b6-cf9b485030e0
-md"""
-!!! corollary "Corollary (Newton-Kantorovich)"
-	Let $\mathcal{X}$ and $\mathcal{Y}$ be two Banach spaces, $\bar{x} \in \mathcal{X}$, $F : \mathcal{X} \to \mathcal{Y}$ a continuously differentiable map, $A : \mathcal{Y} \to \mathcal{X}$ am injective linear map, and $R > 0$.
-	Assume that there exist constants $Y$, $Z_1$ and $Z_2$ such that
+# ╔═╡ 58ad1864-9446-489c-b175-bb6bed64b385
+DF(x, β, domain, codomain) = I + Λ⁻¹(β, codomain) * project(Multiplication(2x), domain, codomain)
 
-	```math
-	\begin{align}
-	\| AF(\bar{x}) \| &\le Y, \\
-	\| I-ADF(\bar{x}) \| &\le Z_1, \\
-	\| A(DF(x)-DF(\bar{x})) \| &\le Z_2 \| x-\bar{x} \|, \qquad \forall x \in \mathcal{X} \text{ such that } \| x-\bar{x} \| \le R.
-	\end{align}
-	```
-
-	If there exists $r \in (0,R]$ such that
-
-	```math
-	\begin{align}
-	Y + Z_1 r + \frac{1}{2} Z_2 r^2 &\le r, \\
-	Z_1 + Z_2 r &< 1,
-	\end{align}
-	```
-
-	then $F$ has a unique zero $\tilde{x}$ such that $\| \tilde{x} - \bar{x} \| \le r$.
-"""
-
-# ╔═╡ 3dc209e6-d7c0-464b-a477-0c46ede9483e
-md"""
-This corollary is a simplified version of the [Newton-Kantorovich Theorem](https://en.wikipedia.org/wiki/Kantorovich_theorem) [^Ort68].
-Variations of this result can be found throughout the literature and are commonly used in computer-assisted proofs (CAPs) (see e.g. [^BL15] [^NPW19] and the references therein).
-"""
-
-# ╔═╡ f0d6ab5b-13cf-4408-aaae-93f959ce29c4
-md"# Interval arithmetic"
-
-# ╔═╡ 24ddc2c5-7976-4c67-8525-f6bb5d2e04a5
-md"""
-When we want to apply the contraction mapping theorem with $\bar{x}$ as an approximate solution obtained using the computer, we also need to compute values for the bounds $Y$ and $Z$.
-However, these calculations typically rely on floating-point arithmetic, which introduces rounding errors.
-For instance, if we execute `Y = norm(A * F(x̄), 1)` on the computer, we cannot be certain that $Y$ is an upper bound for $\|A F(\bar{x})\|_1$.
-
-[Interval arithmetic](https://en.wikipedia.org/wiki/Interval_arithmetic) provides a robust method to control rounding errors and ensuring guaranteed results from computer calculations.
-In this section, we offer a brief description of interval arithmetic; for more detailed discussions, please refer to [^Moo79] and [^Tuc11].
-"""
-
-# ╔═╡ 3b123092-1241-4a2a-bb61-36c7f68a0b35
-md"## Overview"
-
-# ╔═╡ 66ca51ad-0f2e-4f3c-8dd0-e66649b224d9
-md"""
-The central concept of interval arithmetic is to represent any real number by an interval, whose endpoints are floating-point numbers.
-More precisely, for $a \in \mathbb{R}$, we define the interval $[\underline{a}, \overline{a}]$ where $\underline{a}, \overline{a}$ are floating-point numbers satisfying $\underline{a} \le a \le \overline{a}$.
-While we give up the hope of representing numbers exactly, we recover guaranteed information: the real number $a$ is contained within the interval stored in the computer.
-
-The rules of interval arithmetic ensure that this containment property is preserved for arithmetic operations.
-For instance, consider two intervals $[a]$ and $[b]$ of the form $[\underline{a}, \overline{a}]$ and $[\underline{b}, \overline{b}]$, which enclose the reals numbers $a$ and $b$ respectively.
-When we perform the operation $[c] = [a] + [b]$, the resulting interval $[c] = [\underline{c}, \overline{c}]$ is computed as follows:
-- for $\underline{c}$, we take $\underline{a} + \underline{b}$ **rounded downward**, and
-- for $\overline{c}$, we take $\overline{a}+\overline{b}$ **rounded upward**.
-In particular, the real number $c = a + b$ is contained within the interval $[c]$.
-
-Similarly, if $[c]$ is an interval $[\underline{c}, \overline{c}]$ and we compute $[d] = e^{[c]}$, the resulting interval $[d]$ contains $e^c$.
-
-In this course, we use the Julia library [IntervalArithmetic](https://github.com/JuliaIntervals/IntervalArithmetic.jl), though many other interval arithmetic libraries are available in different programming languages.
-Note that IntervalArithmetic is automatically included when using [RadiiPolynomial](https://github.com/OlivierHnt/RadiiPolynomial.jl).
-This library provides standard arithmetic operations as well as implementations of elementary functions (such as `exp`, `log`, `cos`, etc.) that comply with the rules of interval arithmetic.
-"""
-
-# ╔═╡ 249bc3fc-3e7a-4dde-b526-06ddd77093aa
-using IntervalArithmetic # not necessary if you did `using RadiiPolynomial`
-
-# ╔═╡ f8eab26f-c893-4d2e-b4e8-6b59f33cbc9c
-a = interval(2, 4)
-
-# ╔═╡ 556163e0-80d2-4f4e-b198-b8e0922438db
-cos(exp(sqrt(a)))
-
-# ╔═╡ 97fadca1-fcf9-46b8-aa07-c615ca0deb7f
-md"""
-!!! note "Remark"
-	Even when doing computer-assisted proofs, it’s not necessary to use interval arithmetic for every computation.
-	For finding an approximate solution $\bar{x}$, floating-point calculations are perfectly fine.
-	It’s only when computing the bounds for the contraction theorem, and verifying the radii polynomial inequalities, that interval arithmetic must be used.
-"""
-
-# ╔═╡ 0bf1cce8-6caf-40d5-93a6-b495b764d943
-md"## Beware of typed-in floating-point numbers"
-
-# ╔═╡ c09b05d4-0325-486a-a433-6b32fbb7dfc7
-md"""
-When you execute a command like `x = 0.1` in Julia, the variable `x` is assigned the closest floating-point number approximating $1/10$.
-Since $1/10$ cannot be represented exactly in base 2, the value stored in `x` is not precisely equal to the typed-in number `0.1`.
-In fact, it turns out to be slightly larger than $1/10$, but it could just as easily have been smaller (as seen with `x = 0.3`).
-For more information on this topic, you can refer to this [webpage](https://0.30000000000000004.com).
-"""
-
-# ╔═╡ 2d68d26d-6e10-407f-8227-515ddadd9599
-x = 0.1
-
-# ╔═╡ 78f17262-7ffc-4d74-835c-f17863817b9a
-x > 1//10
-
-# ╔═╡ c44fd902-7655-43b5-82cc-53c2ecc4f77b
-ix = interval(1)/interval(10)
-
-# ╔═╡ 4c15bb79-2591-4f2a-9243-ff811de70df7
-in_interval(1//10, ix)
-
-# ╔═╡ 68243410-d2df-4606-82a5-53d515403e40
-md"# Back to period-3 implies chaos"
-
-# ╔═╡ 2698cfa7-5b3c-4f5a-9be4-b2c811e7a4ce
-using RadiiPolynomial
-
-# ╔═╡ 9a0e21bd-da27-48e6-9a08-b20b3cb805bd
-md"""
-Let’s recap what we have covered so far:
-- Proving the existence of a period-3 orbit is sufficient to establish chaotic dynamics.
-- We reformulated the task of finding a period-3 orbit as solving an equation $F = 0$.
-- We derived sufficient conditions, in terms of bound estimates $Y, Z_1, Z_2$, to determine the radius of a ball, centered at a numerical approximation $\bar{x}$, that contains a (locally unique) true zero $\tilde{x}$ of $F$.
-- We introduced interval arithmetic to rigorously estimate the bounds $Y$, $Z_1$, and $Z_2$ with computer assistance.
-
-Now, we walk through the implementation of a computer-assisted proof to demonstrate a period-3 orbit for $\mu = 3.9$.
-
-We start by defining the logistic map in Julia:
-"""
-
-# ╔═╡ b3121e23-03c4-46f2-89b7-c6b39f8efdad
-f(x, μ) = μ * x * (1 - x) # logistic map
-
-# ╔═╡ aeda376d-b1d1-4613-9964-05c24daf4b9a
-md"""
-and the zero-finding problem:
-"""
-
-# ╔═╡ c31f9913-0f16-4e74-b395-97038706be3c
-function F(x, μ)
-    v = zeros(eltype(x), 3)
-    v[1] = f(x[1], μ) - x[2]
-	v[2] = f(x[2], μ) - x[3]
-	v[3] = f(x[3], μ) - x[1]
-	return v
-end
-
-# ╔═╡ 129c8b50-1ba3-427e-a306-5be57c9755a3
-md"""
-To apply the Newton-Kantorovich theorem we also need the first derivate:
-"""
-
-# ╔═╡ d2f64f7e-2acb-4bf6-a961-3e2d8a87c409
-Df(x, μ) = μ * (1 - 2x) # derivative of the logistic map w.r.t. x
-
-# ╔═╡ 8591da5a-0b9a-4bff-8adc-fe1d3d9fca09
-function DF(x, μ) # derivative of the zero-finding problem w.r.t. x
-	M = zeros(eltype(x), 3, 3)
-	M[1,1] = Df(x[1], μ)
-	M[1,2] = -1
-	M[2,2] = Df(x[2], μ)
-	M[2,3] = -1
-	M[3,1] = -1
-	M[3,3] = Df(x[3], μ)
-	return M
-end
-
-# ╔═╡ fa0be782-c09e-45b7-9cbb-d0b3161c3317
+# ╔═╡ 4412ca19-ade5-41f1-a178-f65b030e144f
 md"## Numerical zero"
 
-# ╔═╡ cf53d067-ec00-4c06-b4ae-65ed7aa19d34
+# ╔═╡ 4a9daa68-86ed-4327-98fc-03d436885d2e
 md"""
-We apply [Newton's method](https://en.wikipedia.org/wiki/Newton%27s_method) to $F$ using the `newton` function provided in the RadiiPolynomial library.
+We apply Newton's method to $\Pi_K \circ F \circ \Pi_K$ to find $\bar{x} \in \Pi_K \ell^1_{\nu, \mathbb{Z}}$ such that $\Pi_K F (\bar{x}) \approx 0$.
+If the truncation dimension $K$ is large enough we may hope that also $\Pi_{> K} F (\bar{x}) \approx 0$, since we expect the coefficients of $\bar{x}$ to decrease for moderately large $k$.
 """
 
-# ╔═╡ 80d73a01-4588-4db3-8090-1891f4c7a3ca
-μ = 3.9 # typed by `\mu<tab>`
+# ╔═╡ 095cd71f-1df2-4375-b400-9df58b585ea2
+β = [0.1, 4.0, 1.0]
 
-# ╔═╡ ef6afc18-f779-4370-8ccc-0a9494341166
-initial_data = [-1.0, 1.0, 1.0]
+# ╔═╡ 98f5889c-2233-4b7a-b195-2380c1450d13
+c = Sequence(Fourier(1, 1.0), [0.5, 0.0, 0.5])
 
-# ╔═╡ a71e7ddf-e4d7-4200-abfb-b248883200e1
-F_DF(x) = (F(x, μ), DF(x, μ)) # returns `F` and `DF` at `μ = 3.9`
+# ╔═╡ e1f6ef9b-5818-415a-8945-97b65288a433
+K = 10
 
-# ╔═╡ b1ff2f19-31b7-4064-9ac0-e600ccd937d9
+# ╔═╡ 3fdf17d9-f6ac-46ba-a42d-8739a688794d
+initial_data = zeros(ComplexF64, Fourier(K, 1.0));
+
+# ╔═╡ 60a73d6b-b56e-405d-8cda-ad4ac3c57257
+F_DF(x) = (F(x, β, c, space(x)), DF(x, β, space(x), space(x)))
+
+# ╔═╡ f05c0ebc-a3c6-49c6-a131-0eafd00ad098
 x_bar, success = newton(F_DF, initial_data)
 
-# ╔═╡ 8cc5d9d9-6630-43eb-85b7-2e658da6ec03
-md"""
-The `newton` function returns two outputs: the result of the iterations and a value indicating whether the method converged -- `true` if it did (as it does here) and `false` otherwise.
-"""
+# ╔═╡ d5800e45-8809-46d6-9f41-7565e5b1cbfd
+begin
+	plot(LinRange(0, 2π, 201), t -> real(x_bar(t));
+		color = :royalblue1, linewidth = 3, label = "x_bar")
+	xlims!(0, 2π)
+	xlabel!("t")
+end
 
-# ╔═╡ 81d97321-ff79-42d6-adc6-3d66f91c438b
+# ╔═╡ 5f3d91ee-14c2-4b5e-8e2a-a607d086eb51
 md"""
 ###### Initializing Newton's method
 
-Finding a good starting point for Newton's method is not always easy.
-Here we were a bit lucky that a simple guess worked well.
-For other parameter values, however, we may need to take a closer look at the iterations of the map $f$.
+WHere we were a bit lucky that a simple guess sufficed for Newton to converge.
+For other parameter values one may need to study the solutions of the ODE in more detail using numerical integration.
 """
 
-# ╔═╡ a2c9c052-1628-4ccd-8ac6-e2b16e0fc687
+# ╔═╡ a74b307d-20a3-424c-9e65-23b3bae465aa
 md"## Constructing $A$"
 
-# ╔═╡ 32b5d274-3d0f-41aa-b1cf-85dfe40d0f76
+# ╔═╡ 24e1a5af-569e-4ae8-a3d7-19b7962db48b
 md"""
-As mentioned earlier, $A$ doesn’t need to be exactly $DF(\bar{x})^{-1}$; it only needs to be a reasonably close approximation.
-For finite-dimensional problems, this inverse can be efficiently computed using built-in numerical algorithms.
+We use the projection to split $A$, the approximate inverse of $DF(\bar{x})$, into a finite part and a tail part:
+
+```math
+A
+\overset{\text{def}}{=}
+A_K \Pi_K + \Pi_{>K},
+```
+
+where $A_K$ is a linear map (constructed below) on $\Pi_K \ell^1_{\nu, \mathbb{Z}}$.
+By construction, we can write $A$ in the block diagonal form
+
+```math
+A =
+\begin{pmatrix}
+\Pi_K A_K \Pi_K & 0 \\
+0 & \Pi_{>K}
+\end{pmatrix}.
+```
+
+Next, since the operator $\Pi_K DF(\bar{x}) \Pi_K$ is a finite dimensional square matrix, we define $A_K$ to be its numerical inverse.
 """
 
-# ╔═╡ 16ec745d-0353-471f-b177-c25c5440e860
-A = inv(DF(x_bar, μ))
+# ╔═╡ e37811fa-cd67-424e-8707-25ad8534d293
+A_K = inv(DF(x_bar, β, space(x_bar), space(x_bar)))
 
-# ╔═╡ 8ba3efdb-bff7-4211-bcd0-1537ae0420ed
-md"## Verifying the contraction"
-
-# ╔═╡ d9117644-f54f-42ce-94df-5933e57d765c
+# ╔═╡ 0b4e2571-cbec-4a4d-aac6-dd8b32e3f474
 md"""
-We now verify that $T(x) \overset{\text{def}}{=} x - A F(x)$ is a contraction around $\bar{x} \in \mathbb{R}^3$.
+!!! note "Remark"
+	It is not necessary for the truncation dimensions of $\bar{x} \in \Pi_K \ell^1_{\nu, \mathbb{Z}}$ and $A_K$ to be the same.
+	For clarity, we do not introduce two different truncation dimension parameters.
+    Essentially, the truncation dimension for $\bar{x}$ controls the size of the residue, i.e. $Y$, while the truncation dimension for the approximate inverse $A_K$ controls the contractivity of the fixed-point operator, i.e. $Z_1$.
+	In principle, these dimensions can be managed rather independently.
+"""
+
+# ╔═╡ 0d75d077-53c3-4f03-99d3-af796d973d66
+md"""
+## Verifying the contraction
+"""
+
+# ╔═╡ 35df9eed-5f22-4e26-b119-ea7354d2c762
+md"""
+!!! lemma "Lemma"
+	Let $r > 0$, $\bar{x}$, $\tilde{x}$ such that $\tilde{x}$ is the unique zero of $F$ such that $\|\tilde{x} - \bar{x}\| \le r$.
+	If $\bar{x}^\dagger = \bar{x}$, then $\tilde{x}^\dagger = \tilde{x}$.
+"""
+
+# ╔═╡ 34e0b4cb-147e-4959-a19b-6060d9f17bdc
+conjugacy_symmetry!(x_bar)
+
+# ╔═╡ 6df91aa3-ad36-4b9e-ba4a-4dfb46eb1d27
+conj(x_bar[K:-1:-K]) == x_bar[-K:K]
+
+# ╔═╡ 83f772ea-aeec-49a3-baa2-d2fd8771c0a7
+md"""
+We now verify that $T(x) \overset{\text{def}}{=} x - A F(x)$ is a contraction around $\bar{x} \in \Pi_K \ell^1_{\nu, \mathbb{Z}}$.
 To rigorously compute the bounds $Y, Z_1, Z_2$, we enclose all relevant data into intervals.
 """
 
-# ╔═╡ 787a3624-7a81-4f9f-9bca-f28e914a8f07
-# since 39/10 is not representable as a floating-point number
-iμ = interval(39)/interval(10)
+# ╔═╡ d1dc009f-4063-4c50-808e-2c2e5794dbe4
+iβ = [interval(1)/interval(10), interval(4), interval(1)]
 
-# ╔═╡ a182a2c2-2e20-44f5-92ba-e85805050170
+# ╔═╡ ee580d32-f357-4cad-87b6-0798b8423013
+ic = interval(c)
+
+# ╔═╡ aecf22cc-e97a-44ee-b2ea-b9b3f3a0ff42
 ix_bar = interval(x_bar)
 
-# ╔═╡ f6759116-c48c-4a54-b073-8c2a0adc97cf
-iA = interval(A)
+# ╔═╡ 6da19359-b4a6-4e6e-823a-0fc3af25f8d3
+iA_K = interval(A_K)
 
-# ╔═╡ 761a7427-6561-4754-8815-b1bf491a17da
-md"##### Computing $Y$"
-
-# ╔═╡ 7a037025-57ef-4b62-a880-8a2538096a9e
-Y = norm(iA * F(ix_bar, iμ), 1)
-
-# ╔═╡ 7a451708-9427-425a-93e0-0e66cad2c80b
-md"##### Computing $Z_1$"
-
-# ╔═╡ b7d36207-5f2c-41de-b142-7e8ee8700f79
-Z₁ = opnorm(I - iA * DF(ix_bar, iμ), 1)
-
-# ╔═╡ 7c1876f9-ccb7-4084-841f-316b1c1f6308
-md"##### Computing $Z_2$"
-
-# ╔═╡ 1a196987-95f2-48e0-9648-66373dce0ed5
+# ╔═╡ b6cfde9d-357b-43e9-82ec-f88e8cb7ba8e
 md"""
-```math
-\|A(DF(x) - DF(\bar{x}))\|_1 \le \|A\|_1 \|DF(x) - DF(\bar{x})\|_1 = 2 \mu \|A\|_1 \| x - \bar{x} \|_1, \qquad \forall x \in \mathbb{R}^3.
-```
-
-So $Z_2 \ge 2 \mu \|A\|_1$ is a constant.
-In other words, we have a Lipschitz control for $DF$ on the whole space $\mathbb{R}^3$, and we can freely choose $R = \infty$.
+We choose a value for the weight $\nu$ for the Banach space $\ell^1_{\nu, \mathbb{Z}}$.
 """
 
-# ╔═╡ 0b1f112c-d8b0-4903-966c-8ac6f4be69dc
-R = Inf
+# ╔═╡ 16678eaf-9b67-4fe0-ae0b-82f7bbc5e229
+ν = interval(1.1) # does not have to be exactly 1/10
 
-# ╔═╡ 6f38f2e6-170c-4fea-b260-e55ca3fc3849
-Z₂ = interval(2) * iμ * opnorm(iA, 1)
+# ╔═╡ 58eceacb-d59b-4f4d-afdd-f616a241f2ca
+X = Ell1(GeometricWeight(ν))
 
-# ╔═╡ f7db0f90-473b-4265-8918-1b7acb08ebd2
+# ╔═╡ fcd0b92b-9b16-451e-a54a-6ee0158fa67b
+md"""
+We are now in the Newton-Kantorovich context and thus need to derive the appropriate bounds.
+"""
+
+# ╔═╡ 7c04c657-a86b-492f-b317-ace25f5f2f17
+md"##### Computing $Y$"
+
+# ╔═╡ eb2ae1fd-5062-436b-ac50-eb3b169bca42
+md"""
+This concerns the bound on the residue $A F(\bar{x})$.
+Determining the residue requires only a finite computation.
+Indeed, since $(\bar{x} * \bar{x})_k = 0$ for $|k| > 2K$ we infer that $\Pi_{>2K} F(\bar{x}) = 0$, and $F(\bar{x})$ can be computed explicitly.
+In turn, this implies that $A F(\bar{x}) = \Pi_{2K} A \Pi_{2K} F(\bar{x})$.
+We conclude that $\|A F(\bar{x})\|_X = \|\Pi_{2K} A \Pi_{2K} F(\bar{x})\|_X $ requires only a finite computation, which we can perform with interval arithmetic to get a rigorous upper bound $Y \ge \|A F(\bar{x})\|_X$.
+"""
+
+# ╔═╡ 6307aecd-b4f7-49ea-b060-4b9236a5ae10
+function bound_Y(x_bar, β, c, A, X)
+	K = order(x_bar)
+	space = Fourier(2K, frequency(x_bar))
+	
+	Fx = F(x_bar, β, c, space)
+	
+	Id = interval(I)
+	ext_A = complex(project(Id, space, space))
+	ext_A[-K:K,-K:K] = coefficients(A)
+	
+	return norm(ext_A * Fx, X)
+end
+
+# ╔═╡ 9bf0e55e-de5f-4ec9-92e9-5169d3d14302
+Y = bound_Y(ix_bar, iβ, ic, iA_K, X)
+
+# ╔═╡ 0c454883-ff97-4874-99b3-cc4bc86c211f
+md"##### Computing $Z_1$"
+
+# ╔═╡ 907f8fb5-859b-4751-b483-2006ba358d5c
+md"""
+This concerns the bound on the operator $I - A DF(\bar{x})$.
+In the analysis we will split the bound in a part which is computable by "brute force" and an estimate of the tail.
+The triangle inequality is often helpful for such arguments, but in our case the characterization of the operator norm gives an additional tool.
+In particular we will use that for any $K' \in \mathbb{N}$ we have that
+
+```math
+\| M \|_{\mathscr{B}(\ell^1_{\nu, \mathbb{Z}})} = \max \left( \| M \Pi_{K'} \|_{\mathscr{B}(\ell^1_{\nu, \mathbb{Z}})}, \| M \Pi_{>K'} \|_{\mathscr{B}(\ell^1_{\nu, \mathbb{Z}})} \right).
+```
+
+It follows from the expression for $DF(x)$ that $DF(\bar{x})$ is an finite bandwidth operator.
+
+It follows from the block-diagonal structure of $A$ that this implies that
+
+```math
+A DF(\bar{x}) \Pi_{> 2K} =  (A_K \Pi_K + \Pi_{>K}) DF(\bar{x}) \Pi_{>2K} = \Pi_{>K} DF(\bar{x}) \Pi_{>2K},
+```
+
+and we see that this expression does not involve $A_K$.
+
+Furthermore, it also follows from the block-diagonal structure of $A$ and the finite bandwidth of $DF(\bar{x})$ that
+
+```math
+A DF(\bar{x}) \Pi_{2K} = A \Pi_{3K} DF(\bar{x}) \Pi_{2K} = \Pi_{3K} A DF(\bar{x}) \Pi_{2K},
+```
+
+which can be represented as a matrix and requires only a finite computation to evaluate.
+
+By choosing $K' = 2K$ we can thus split the computation of the norm in two parts:
+
+```math
+\begin{aligned}
+\|I-A &DF(\bar{x})\|_{\mathscr{B}(\ell^1_{\nu, \mathbb{Z}})} \\
+&= \max \left( \|\Pi_{3K} [I-A DF(\bar{x})] \Pi_{2K}\|_{\mathscr{B}(\ell^1_{\nu, \mathbb{Z}})}, \| [I-ADF(\bar{x})] \Pi_{>2K} \|_{\mathscr{B}(\ell^1_{\nu, \mathbb{Z}})} \right).
+\end{aligned}
+```
+
+Provided that $K \ge \sqrt{\beta_2}$, we conclude that
+
+```math
+\|I-ADF(\bar{x})\|_{\mathscr{B}(\ell^1_{\nu, \mathbb{Z}})} = \|\Pi_{3K+1}[I-ADF(\bar{x})]\Pi_{2K+1}\|_{\mathscr{B}(\ell^1_{\nu, \mathbb{Z}})}.
+```
+
+The latter operator can be represented by a finite matrix and we can compute the operator norm $\|I-ADF(\bar{x})\|_{\mathscr{B}(\ell^1_{\nu, \mathbb{Z}})}$ using interval arithmetic to obtain the bound $Z_1$.
+"""
+
+# ╔═╡ ac7b5711-b2ef-44dc-a272-c5d3f4e9cb74
+function bound_Z₁(x_bar, β, A, X)
+	K = order(x_bar)
+	domain = Fourier(2K, frequency(x_bar))
+	codomain = Fourier(3K, frequency(x_bar))
+	
+	DFx = DF(x_bar, β, domain, codomain)
+
+	Id = interval(I)
+	ext_A = complex(project(Id, codomain, codomain))
+	ext_A[-K:K,-K:K] = coefficients(A)
+
+	return opnorm(Id - ext_A * DFx, X)
+end
+
+# ╔═╡ 47ef9015-eae8-4b29-807f-d223754701d3
+Z₁ = bound_Z₁(ix_bar, iβ, iA_K, X)
+
+# ╔═╡ 1d43be44-58d5-43a5-a850-791077493097
+md"##### Computing $Z_2$"
+
+# ╔═╡ 6f346c67-879a-4427-afd4-6acdeb17af21
+md"""
+This concerns the bound on the operator $A[DF(x) - DF(\bar{x})]$.
+Since this is a Lipschitz bound on the first derivative, one approach is to bound the second derivative.
+However, here we just do a direct computation to see that $A[DF(x) - DF(\bar{x})]h = 2 A \Lambda^{-1}[(x - \bar{x}) * h]$, hence by the Banach algebra property and the definition of the operator norm we arrive at
+
+```math
+\|A [DF(x) - DF(\bar{x})] h\|_{\mathscr{B}(\ell^1_{\nu, \mathbb{Z}})} \le 2 \|A \Lambda^{-1}\|_{\mathscr{B}(\ell^1_{\nu, \mathbb{Z}})}\|x-\bar{x}\|_{\ell^1_{\nu, \mathbb{Z}}} \|h\|_{\ell^1_{\nu, \mathbb{Z}}}.
+```
+
+We thus need to bound $2 \|A \Lambda^{-1}\|_{\mathscr{B}(\ell^1_{\nu, \mathbb{Z}})}$.
+
+Since the operator $\Lambda^{-1}$ is diagonal, it has a natural restriction to $\Pi_K \ell^1_{\nu, \mathbb{Z}}$.
+Assume $N \ge \sqrt{\beta_2}$.
+Then $\|A \Lambda^{-1}\|_{\mathscr{B}(\ell^1_{\nu, \mathbb{Z}})} = \max\left( \|A_K \Lambda^{-1} \|_{\mathscr{B}(\ell^1_{\nu, \mathbb{Z}})}, |\lambda_{K+1}|^{-1} \right)$ (Hint: consider $\|A \Lambda^{-1} e_k\|_{\mathscr{B}(\ell^1_{\nu, \mathbb{Z}})}$ for $|k|\le K$ and for $|k| > K$ separately).
+"""
+
+# ╔═╡ 271decf5-68cb-4c8f-9452-6354477f6131
+function bound_Z₂(β, A, X)
+	K = order(domain(A))
+	return 2max(opnorm(Λ⁻¹(β, domain(A)) * A, X), abs((K+1)^2 - im * β[1] * (K+1) - β[2]))
+end
+
+# ╔═╡ 0d7146b3-3015-416b-aae8-697ac0850603
+Z₂ = bound_Z₂(iβ, iA_K, X)
+
+# ╔═╡ 27019122-b944-4adc-b453-02af8eb378ac
 md"##### Finishing the CAP"
 
-# ╔═╡ afadd46e-458b-4975-925c-2add34ec75af
+# ╔═╡ 7329dca5-8aca-4112-b950-d9ec6182a0ed
 md"""
 To determine the values of $r$ that satisfy the radii polynomial inequalities, we use the `interval_of_existence` function from RadiiPolynomial.
 This function returns an interval of existence, within which all contained values satisfy the contraction conditions.
 """
 
-# ╔═╡ 980ecce4-f02d-4976-b953-587b31009adb
-ie = interval_of_existence(Y, Z₁, Z₂, R)
+# ╔═╡ 60b43603-9937-4869-b5fc-f74c1c18e710
+ie = interval_of_existence(Y, Z₁, Z₂, Inf)
 
-# ╔═╡ 958265d4-f604-47a4-8195-64ba21275f6d
-md"""
-The largest value in the interval represents the maximum radius of the ball centered at $\bar{x}$ within which the true zero $\tilde{x}$ of $F$ is proven to be unique.
-On the other hand, the smallest value provides the sharpest error bound.
-"""
-
-# ╔═╡ 9eb669e1-f191-46cf-a3cb-b441b7d7f9e5
+# ╔═╡ 238c9111-7dda-40e8-8297-9776fe77f7d9
 r = inf(ie)
 
-# ╔═╡ c1a3ff98-5846-4601-87f7-b94b4f1fdf17
+# ╔═╡ 77b91c27-ddb0-4115-b0d0-a78f2729dadc
 md"""
-In fact, we cannot yet conclude that $\tilde{x}$ is a zero of $F$ since we did not check that $A$ was injective.
-This property actually comes as a by-product of the contraction argument.
+To guarantee that the fixed-point of $T$ is a zero of $F$, we must check that $A$ is injective.
+This property comes as a by-product of the contraction argument.
 Indeed, $\|I - A DF(\bar{x})\| \le Z_1 < 1$ ensures that $A DF(\bar{x})$ is invertible, which implies that $A$ is surjective.
-Since $A$ is a square matrix, it follows that $A$ must also be injective.
+By construction, $A_K$ is surjective and $A$ is injective if and only if $A_K$ is injective.
+Since $A_K$ can be represented by a finite square matrix, it follows that $A$ must also be injective.
 
-Finally, we verify that the true zero $\tilde{x}$ of $F$ is a period-3 orbit, that is $\tilde{x}_1 \ne \tilde{x}_2 \ne \tilde{x}_3$.
-Since we have found $r$ such that $\| \tilde{x} - \bar{x} \|_1 \le r$, it follows that $\tilde{x}_j \in [\bar{x}_j - r, \bar{x}_j + r]$ for $j = 1, 2, 3$.
-We then confirm that the three intervals $[\bar{x}_j - r, \bar{x}_j + r]$, for $j = 1, 2, 3$, are mutually disjoint:
+Therefore, we have proved the existence of a zero $\tilde{x}$ of $F$ such that
+
+```math
+\tilde{x} = \bar{x} + \gamma,
+```
+
+where $\gamma \in \ell^1_{\nu, \mathbb{Z}}$ is not known explicitly, but satisfies $\| \gamma \|_\nu \le r$.
+Our choice of norm also gives us a $C^0$-error bound for the function
+
+```math
+\begin{aligned}
+\max_{t \in [0, 2\pi]} | \sum_{k \in \mathbb{Z}} \tilde{x}_k e^{i k t} - \sum_{|k| \le K} \bar{x}_k e^{i k t} |
+&= \max_{t \in [0, 2\pi]} | \sum_{k \in \mathbb{Z}} (\tilde{x}_k - \bar{x}_k) e^{i k t} | \\
+&\le \| \tilde{x} - \bar{x} \|_\nu \\
+&\le r.
+\end{aligned}
+```
 """
 
-# ╔═╡ 611dc902-dd8d-4ec8-a2c0-1e9ac949a128
-enclosure_x_tilde_1 = interval(ix_bar[1], r; format = :midpoint)
+# ╔═╡ 26d06cfe-24cc-41ec-87d2-8e489865b5b8
+begin
+	rigorous_eval(x, r, t) = interval(real(x(t)), r; format = :midpoint)
 
-# ╔═╡ 61e71daf-8a6d-4c27-bccd-91f5e4db992c
-enclosure_x_tilde_2 = interval(ix_bar[2], r; format = :midpoint)
+	ts = LinRange(0, 2π, 101)
 
-# ╔═╡ 5f7e039e-b1a7-40a2-a076-ee56215da40c
-enclosure_x_tilde_3 = interval(ix_bar[3], r; format = :midpoint)
+	plot([[interval(ts[i], ts[i+1]), rigorous_eval(ix_bar, r, interval(ts[i], ts[i+1]))] for i = 1:length(ts)-1];
+		label = "", color = :palegreen3)
 
-# ╔═╡ 0f3d6fcf-2794-4d09-ae35-9dc5db3d0fa8
-isdisjoint_interval(enclosure_x_tilde_1, enclosure_x_tilde_2, enclosure_x_tilde_3)
+	plot!(ts, t -> real(x_bar(t));
+		label = "x_bar", color = :royalblue1, linewidth = 3)
 
-# ╔═╡ 1a9d9d5b-22bd-4fea-b480-817d80c63f8e
-md"""
-###### A final note on interval arithmetic
-
-In the code provided in this notebook we used the Julia interval arithmetic library [IntervalArithmetic.jl](https://juliaintervals.github.io/IntervalArithmetic.jl/stable/). We took a bit of liberty by taking advantage of automatic conversion of floats and integers to intervals, when variables of these types are combined in elementary operations. The interval arithmetic library is not entirely happy about this:
-"""
-
-# ╔═╡ 26a665d6-77c1-4bb4-b2df-04e05a80ee80
-isguaranteed(Y), isguaranteed(Z₁), isguaranteed(Z₂)
-
-# ╔═╡ 0a2208b6-f90c-4587-978f-33643fd4bdba
-md"# References"
-
-# ╔═╡ b8d56ba6-01da-4604-8dad-3e63ec203fd4
-md"""
-[^BL15]: J. B. van den Berg and J.-P. Lessard. Rigorous numerics in dynamics. *Notices Of The American Mathematical Society*, 62(9), 2015.
-[^LY75]: T.-Y. Li and J. A. Yorke. Period three implies chaos. *The American Mathematical Monthly*, 82(10):985--992, 1975.
-[^Moo79]: R. E. Moore. *Methods and applications of interval analysis*. SIAM, 1979
-[^Ort68]: J. M. Ortega. The Newton-Kantorovich theorem. *The American Mathematical Monthly*, 75(6):658--660, 1968.
-[^NPW19]: M. T. Nakao, M. Plum, and Y. Watanabe. *Numerical Verification Methods and Computer-Assisted Proofs for Partial Differential Equations*. Springer Singapore, 2019.
-[^Sha64]: A. N. Sharkowskii. Co-existence of the cycles of a continuous mapping of the line into itself. *Ukrainian Mathematical Journal*, 16(1), 1964.
-[^Tuc11]: W. Tucker. *Validated numerics: a short introduction to rigorous computations*. Princeton University Press, 2011.
-"""
+	xlims!(0, 2π)
+	xlabel!("t")
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
 [deps]
-IntervalArithmetic = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 PlutoTeachingTools = "661c6b06-c737-4d37-b85c-46df65de6f69"
 PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
-IntervalArithmetic = "~0.22.18"
 Plots = "~1.40.8"
 PlutoTeachingTools = "~0.3.1"
 PlutoUI = "~0.7.60"
@@ -522,7 +607,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "fb10d4d8cf7fed20e6537e381ddee93a3d7d62f6"
+project_hash = "50ac00f186507245d93fbdb4571657e0e99c4371"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -818,9 +903,9 @@ version = "1.11.0"
 
 [[deps.IntervalArithmetic]]
 deps = ["CRlibm_jll", "LinearAlgebra", "MacroTools", "RoundingEmulator"]
-git-tree-sha1 = "c59c57c36683aa17c563be6edaac888163f35285"
+git-tree-sha1 = "24c095b1ec7ee58b936985d31d5df92f9b9cfebb"
 uuid = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
-version = "0.22.18"
+version = "0.22.19"
 
     [deps.IntervalArithmetic.extensions]
     IntervalArithmeticDiffRulesExt = "DiffRules"
@@ -1764,85 +1849,78 @@ version = "1.4.1+1"
 """
 
 # ╔═╡ Cell order:
-# ╟─a5169b4b-f0d4-4f66-8198-0aec5f8e135a
-# ╠═d0e623ee-b096-4a27-977d-dc32567d6020
-# ╠═2661bfc9-e398-41ed-87d9-c78f05da64cb
-# ╟─b3845641-1537-4a27-8550-1eff30900a6b
-# ╟─ed6f44f4-3696-494a-b8e3-b30184f5bb06
+# ╟─044aabf3-b817-4266-93a9-a4cabce1ec4e
+# ╠═4b949c9b-4669-4d5a-b74c-0840bf375ddd
+# ╠═db7c8b55-56bf-493c-a4ff-1ba9610a41ed
+# ╟─2ae8d07b-a05e-4136-a121-6317641916fe
 # ╟─c33dc650-3f94-11ef-398a-8bbc4a2b69b8
-# ╟─05df1902-b4b8-4fd7-ab91-ad01f4fa413e
-# ╟─da0cd646-614e-436f-9596-853fb3bca36b
-# ╟─730eeed9-a736-48df-a853-94f45dedd836
-# ╟─1d9286fa-647a-4743-806f-9cea5aab6be1
-# ╟─1e56532e-9886-4a41-9ba0-1a619a85e014
-# ╟─8d6c631f-832a-48a9-891f-650f53a0ac6c
-# ╟─429e5261-d7d0-47a3-94b5-8e7905a5bd53
-# ╟─a27b45ca-77d1-408e-98e9-6b5248aca85e
-# ╟─a801e2c7-c907-40d2-9976-bba19c590b2b
-# ╟─6caaf267-3015-4a66-975f-ec1c3a6f86f8
-# ╟─77380230-67f2-4794-bb51-39ceeac7bef1
-# ╟─08dab1b4-c78d-4e85-89b6-cf9b485030e0
-# ╟─3dc209e6-d7c0-464b-a477-0c46ede9483e
-# ╟─f0d6ab5b-13cf-4408-aaae-93f959ce29c4
-# ╟─24ddc2c5-7976-4c67-8525-f6bb5d2e04a5
-# ╟─3b123092-1241-4a2a-bb61-36c7f68a0b35
-# ╟─66ca51ad-0f2e-4f3c-8dd0-e66649b224d9
-# ╠═249bc3fc-3e7a-4dde-b526-06ddd77093aa
-# ╠═f8eab26f-c893-4d2e-b4e8-6b59f33cbc9c
-# ╠═556163e0-80d2-4f4e-b198-b8e0922438db
-# ╟─97fadca1-fcf9-46b8-aa07-c615ca0deb7f
-# ╟─0bf1cce8-6caf-40d5-93a6-b495b764d943
-# ╟─c09b05d4-0325-486a-a433-6b32fbb7dfc7
-# ╠═2d68d26d-6e10-407f-8227-515ddadd9599
-# ╠═78f17262-7ffc-4d74-835c-f17863817b9a
-# ╠═c44fd902-7655-43b5-82cc-53c2ecc4f77b
-# ╠═4c15bb79-2591-4f2a-9243-ff811de70df7
-# ╟─68243410-d2df-4606-82a5-53d515403e40
-# ╠═2698cfa7-5b3c-4f5a-9be4-b2c811e7a4ce
-# ╟─9a0e21bd-da27-48e6-9a08-b20b3cb805bd
-# ╠═b3121e23-03c4-46f2-89b7-c6b39f8efdad
-# ╟─aeda376d-b1d1-4613-9964-05c24daf4b9a
-# ╠═c31f9913-0f16-4e74-b395-97038706be3c
-# ╟─129c8b50-1ba3-427e-a306-5be57c9755a3
-# ╠═d2f64f7e-2acb-4bf6-a961-3e2d8a87c409
-# ╠═8591da5a-0b9a-4bff-8adc-fe1d3d9fca09
-# ╟─fa0be782-c09e-45b7-9cbb-d0b3161c3317
-# ╟─cf53d067-ec00-4c06-b4ae-65ed7aa19d34
-# ╠═80d73a01-4588-4db3-8090-1891f4c7a3ca
-# ╠═ef6afc18-f779-4370-8ccc-0a9494341166
-# ╠═a71e7ddf-e4d7-4200-abfb-b248883200e1
-# ╠═b1ff2f19-31b7-4064-9ac0-e600ccd937d9
-# ╟─8cc5d9d9-6630-43eb-85b7-2e658da6ec03
-# ╟─81d97321-ff79-42d6-adc6-3d66f91c438b
-# ╟─a2c9c052-1628-4ccd-8ac6-e2b16e0fc687
-# ╟─32b5d274-3d0f-41aa-b1cf-85dfe40d0f76
-# ╠═16ec745d-0353-471f-b177-c25c5440e860
-# ╟─8ba3efdb-bff7-4211-bcd0-1537ae0420ed
-# ╟─d9117644-f54f-42ce-94df-5933e57d765c
-# ╠═787a3624-7a81-4f9f-9bca-f28e914a8f07
-# ╠═a182a2c2-2e20-44f5-92ba-e85805050170
-# ╠═f6759116-c48c-4a54-b073-8c2a0adc97cf
-# ╟─761a7427-6561-4754-8815-b1bf491a17da
-# ╠═7a037025-57ef-4b62-a880-8a2538096a9e
-# ╟─7a451708-9427-425a-93e0-0e66cad2c80b
-# ╠═b7d36207-5f2c-41de-b142-7e8ee8700f79
-# ╟─7c1876f9-ccb7-4084-841f-316b1c1f6308
-# ╟─1a196987-95f2-48e0-9648-66373dce0ed5
-# ╠═0b1f112c-d8b0-4903-966c-8ac6f4be69dc
-# ╠═6f38f2e6-170c-4fea-b260-e55ca3fc3849
-# ╟─f7db0f90-473b-4265-8918-1b7acb08ebd2
-# ╟─afadd46e-458b-4975-925c-2add34ec75af
-# ╠═980ecce4-f02d-4976-b953-587b31009adb
-# ╟─958265d4-f604-47a4-8195-64ba21275f6d
-# ╠═9eb669e1-f191-46cf-a3cb-b441b7d7f9e5
-# ╟─c1a3ff98-5846-4601-87f7-b94b4f1fdf17
-# ╠═611dc902-dd8d-4ec8-a2c0-1e9ac949a128
-# ╠═61e71daf-8a6d-4c27-bccd-91f5e4db992c
-# ╠═5f7e039e-b1a7-40a2-a076-ee56215da40c
-# ╠═0f3d6fcf-2794-4d09-ae35-9dc5db3d0fa8
-# ╟─1a9d9d5b-22bd-4fea-b480-817d80c63f8e
-# ╠═26a665d6-77c1-4bb4-b2df-04e05a80ee80
-# ╟─0a2208b6-f90c-4587-978f-33643fd4bdba
-# ╟─b8d56ba6-01da-4604-8dad-3e63ec203fd4
+# ╟─fa5da4c1-cbcc-413c-8807-b9d2b40d5cc0
+# ╟─3674e20c-4c06-4a5d-8d7c-24e408b6d979
+# ╟─1bfcc76a-266a-4784-b76b-3871445e603e
+# ╟─64fffe67-78ae-4261-a149-61046fcf3bb4
+# ╟─8f3e96dc-0cdc-411e-8f94-e9e47488abf3
+# ╟─766164f3-eef3-4798-bf7c-afdca52d3ba0
+# ╟─fe626b98-e13b-4af0-8c7b-b1442934d56b
+# ╟─f1cad266-547f-45fb-9391-cc0a45b65137
+# ╟─9ab6ce17-0637-4008-be29-e0bf4fda4287
+# ╟─069bbc98-d32c-4871-a317-7b44b1e45251
+# ╟─47e39d6a-231e-40d1-906e-eeafe1b1f807
+# ╟─f91abfa7-8a8f-4204-95d9-637c622dd720
+# ╟─8f6431ed-346c-4c51-83c4-ea7ec12a8d60
+# ╟─7796a035-7ba7-4ad2-b109-e1f1f966eda5
+# ╟─c32d9839-7cb7-4018-bab1-b2211f05b71e
+# ╟─872359fa-dcb9-47da-9612-f46d6291fad5
+# ╟─8d7fb15d-32d3-4fbb-9d06-c8ec1ed7d00e
+# ╟─ff2ca8bd-00b9-4830-a128-afdb24634896
+# ╟─76961562-23b1-4aae-b761-6f95bdbbbab3
+# ╠═df46f5c1-dbc6-4cf1-8e97-36b22c6b4c51
+# ╠═f0e42405-8068-455b-b17c-ede3e259f01d
+# ╟─f5cc03ca-09eb-4419-9d51-78c956ee73d9
+# ╟─58ad1864-9446-489c-b175-bb6bed64b385
+# ╟─4412ca19-ade5-41f1-a178-f65b030e144f
+# ╟─4a9daa68-86ed-4327-98fc-03d436885d2e
+# ╠═095cd71f-1df2-4375-b400-9df58b585ea2
+# ╠═98f5889c-2233-4b7a-b195-2380c1450d13
+# ╠═e1f6ef9b-5818-415a-8945-97b65288a433
+# ╠═3fdf17d9-f6ac-46ba-a42d-8739a688794d
+# ╠═60a73d6b-b56e-405d-8cda-ad4ac3c57257
+# ╠═f05c0ebc-a3c6-49c6-a131-0eafd00ad098
+# ╟─d5800e45-8809-46d6-9f41-7565e5b1cbfd
+# ╟─5f3d91ee-14c2-4b5e-8e2a-a607d086eb51
+# ╟─a74b307d-20a3-424c-9e65-23b3bae465aa
+# ╟─24e1a5af-569e-4ae8-a3d7-19b7962db48b
+# ╠═e37811fa-cd67-424e-8707-25ad8534d293
+# ╟─0b4e2571-cbec-4a4d-aac6-dd8b32e3f474
+# ╟─0d75d077-53c3-4f03-99d3-af796d973d66
+# ╟─35df9eed-5f22-4e26-b119-ea7354d2c762
+# ╠═34e0b4cb-147e-4959-a19b-6060d9f17bdc
+# ╠═6df91aa3-ad36-4b9e-ba4a-4dfb46eb1d27
+# ╟─83f772ea-aeec-49a3-baa2-d2fd8771c0a7
+# ╠═d1dc009f-4063-4c50-808e-2c2e5794dbe4
+# ╠═ee580d32-f357-4cad-87b6-0798b8423013
+# ╠═aecf22cc-e97a-44ee-b2ea-b9b3f3a0ff42
+# ╠═6da19359-b4a6-4e6e-823a-0fc3af25f8d3
+# ╟─b6cfde9d-357b-43e9-82ec-f88e8cb7ba8e
+# ╠═16678eaf-9b67-4fe0-ae0b-82f7bbc5e229
+# ╠═58eceacb-d59b-4f4d-afdd-f616a241f2ca
+# ╟─fcd0b92b-9b16-451e-a54a-6ee0158fa67b
+# ╟─7c04c657-a86b-492f-b317-ace25f5f2f17
+# ╟─eb2ae1fd-5062-436b-ac50-eb3b169bca42
+# ╠═6307aecd-b4f7-49ea-b060-4b9236a5ae10
+# ╠═9bf0e55e-de5f-4ec9-92e9-5169d3d14302
+# ╟─0c454883-ff97-4874-99b3-cc4bc86c211f
+# ╟─907f8fb5-859b-4751-b483-2006ba358d5c
+# ╠═ac7b5711-b2ef-44dc-a272-c5d3f4e9cb74
+# ╠═47ef9015-eae8-4b29-807f-d223754701d3
+# ╟─1d43be44-58d5-43a5-a850-791077493097
+# ╟─6f346c67-879a-4427-afd4-6acdeb17af21
+# ╠═271decf5-68cb-4c8f-9452-6354477f6131
+# ╠═0d7146b3-3015-416b-aae8-697ac0850603
+# ╟─27019122-b944-4adc-b453-02af8eb378ac
+# ╟─7329dca5-8aca-4112-b950-d9ec6182a0ed
+# ╠═60b43603-9937-4869-b5fc-f74c1c18e710
+# ╠═238c9111-7dda-40e8-8297-9776fe77f7d9
+# ╟─77b91c27-ddb0-4115-b0d0-a78f2729dadc
+# ╟─26d06cfe-24cc-41ec-87d2-8e489865b5b8
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
