@@ -33,114 +33,407 @@ TableOfContents(title = "Table of Contents"; indent = true, depth = 4, aside = t
 # ╔═╡ 3e086655-fc49-42bb-803e-27b82c7a7577
 md"""
 In this lecture we will learn how to solve initial value problems for ODEs using Taylor series.
+"""
 
-# Solving the logistic equation
+# ╔═╡ 86c84f47-a64b-43f9-a7e0-2eeb78b0d41c
+md"# Motivating example: solving the logistic equation"
+
+# ╔═╡ ab841d58-1385-4d5b-89aa-7df1e9667978
+md"""
+Consider the [initial value problem](https://en.wikipedia.org/wiki/Initial_value_problem) (IVP) for the [logistic equation](https://en.wikipedia.org/wiki/Logistic_function#Logistic_differential_equation):
+
+```math
+\begin{cases}
+u'(t) = u(t) (1 - u(t)), & t \ge 0, \\
+u(0) = ϕ.
+\end{cases}
+```
+
+Given the initial condition $\phi = 1/2$ and $\nu > 0$, we will search for a function $u$ as a power series $u(t) = \sum_{n \ge 0} x_n t^n$, defined for all $t \in [-\nu, \nu]$.
+
+Of course, this ODE is simple enough to be solvable by hand.
+One can verify that $u(t) = 1/(1 + e^{-t})$ is the exact solution.
+A numerical plot is displayed below.
+"""
+
+# ╔═╡ 5fe08415-9185-4054-8dec-a657cfb4484b
+begin
+	plot(LinRange(-2.5, 2.5, 51), t -> 1/(1+exp(-t)); label = "1/(1+exp(-t))", linewidth = 3)
+	xlims!(-2.5, 2.5)
+	xlabel!("t")
+end
+
+# ╔═╡ 7cd532e8-f370-47e2-a2c1-3a5004cb8e8c
+md"""
+We adopt the contraction strategy:
+1. Identify an appropriate Banach space.
+2. Reformulate the problem as a zero-finding problem $F(x) = 0$.
+3. Compute an approximate zero $\bar{x}$.
+4. Construct an approximate inverse $A$ of $DF(\bar{x})$.
+5. Derive computable formulas for the bounds $Y, Z_1, Z_2$, and verify the radii polynomial inequalities.
+"""
+
+# ╔═╡ 2be11063-c9dd-4c36-af2b-2d80fad17fcb
+md"## Sequence space"
+
+# ╔═╡ 529d0a8a-c650-4b70-bd1c-bdd0621e06df
+md"""
+We are interested in the space of analytic functions with a radius of convergence strictly greater than some fixed $\nu > 0$.
+If $\nu$ is chosen too large, the computer-assisted proof (CAP) will fail.
+
+The first step is to discretize this space as a sequence space.
+However, if the radius of convergence of the function lies in the interval $(0, 1)$, the coefficients of the series grow, which leads to numerical instability.
+To mitigate this, it is good practice to re-scale the problem so that the radius of convergence is at least $1$, and we may as well scale it to $1$.
+We rescale the time variable by introducing
+
+```math
+w(s) = u(\nu s), \qquad \text{for all } s \in [-1, 1].
+```
+
+Then, the sequence space we use is
+
+```math
+\ell^1_\mathbb{N} \overset{\text{def}}{=} \left\{ x \in \mathbb{R}^\mathbb{N} \, : \, \| x \|_1 \overset{\text{def}}{=} \sum_{n \ge 0} |x_n| < \infty \right\}.
+```
+
+The properties of this space were discussed in Module 2.
+Here, we briefly recall them.
+Suppose $u(t) = \sum_{n \ge 0} x_n t^n$ and $v(t) = \sum_{n \ge 0} y_n t^n$.
+Their product is given by
+
+```math
+u(t) v(t) = \sum_{n \ge 0} (x * y)_n t^n,
+```
+
+where the convolution operation $x * y$ is given by
+
+```math
+(x * y)_n \overset{\text{def}}{=} \sum_{l=0}^n x_{n-l} y_l, \qquad n \ge 0.
+```
+
+Moreover, the convolution satisfies the inequality
+
+```math
+\| x * y \|_1 \leq \| x \|_1 \| y \|_1.
+```
+"""
+
+# ╔═╡ 42e2418b-55bc-4e17-8cb7-445f8eee2cc6
+md"""
+As discussed in Module 2, infinite-dimensional problems are addressed by decomposing the sequence space into a finite-dimensional subspace and the complementary infinite-dimensional space.
+To formalize this, we define the projection operator $\Pi_N : \ell^1_\mathbb{N} \to \ell^1_\mathbb{N}$ which extracts the first $N+1$ coefficients of a sequence.
+Specifically, for all $x \in \ell^1_\mathbb{N}$, we have
+
+```math
+(\Pi_N x)_n
+\overset{\text{def}}{=}
+\begin{cases}
+x_n, & n \le N, \\
+0, & n > N.
+\end{cases}
+```
+
+The complementary projection, which removes the first $N+1$ modes, is defined as $\Pi_{> N} \overset{\text{def}}{=} I - \Pi_N$, where $I$ is the identity operator.
+"""
+
+# ╔═╡ c454f8a4-5553-494a-8d08-7c7d756805a0
+md"## Zero-finding problem"
+
+# ╔═╡ 0691e2f7-110c-42f7-95f6-056699578782
+md"""
+Substituting $w(t) = \sum_{n \ge 0} x_n t^n$ into the ODE, with initial condition $w(0) = \phi$, leads to the recurrence relation
+
+```math
+x_0 = \phi, \qquad x_n = \frac{\nu}{n} (x_{n-1} - (x * x)_{n-1}), \quad n \ge 1.
+```
+
+We can re-write this set of equations more concisely as
+
+```math
+x = \phi + \nu \Lambda (x - x * x),
+```
+
+where
+
+```math
+\Lambda x \overset{\text{def}}{=}
+\begin{cases}
+0, & n = 0, \\
+\displaystyle \frac{1}{n} x_{n-1}, & n \ge 1.
+\end{cases}
+```
+
+We slightly abuse notation and identify $\phi$ with its sequence of Taylor coefficients $(\phi, 0, \dots) \in \ell^1_\mathbb{N}$.
+
+Therefore, the problem of finding the solution $u$ corresponds to finding a zero of the mapping $F : \ell^1_\mathbb{N} \to \ell^1_\mathbb{N}$ given by
+
+```math
+F(x) \overset{\text{def}}{=}
+x - \phi - \nu \Lambda (x - x * x).
+```
+"""
+
+# ╔═╡ 4ee023ac-e513-41f8-bfde-9d2daec71c57
+md"""
+This zero-finding problem is of course identical to integrating first the ODE $u(t) = \phi + \int_0^t u(s)(1-u(s)) \, ds$, and plugging the power series ansatz into it.
+In this sense, $\Lambda$ is nothing more than the representation of the integral operator in $\ell^1_\mathbb{N}$.
+
+An implementation, using the RadiiPolynomial library, of the zero-finding problem $F$ is given below.
 """
 
 # ╔═╡ 4e6473ec-02c6-4ed5-ab05-8f0086853313
 f(x) = x * (1 - x)
 
+# ╔═╡ d53d988f-da50-4839-aae6-d7bdac46d4ac
+F(x, ϕ, ν, space) = x - ϕ - ν * project(integrate(f(x)), space)
+
+# ╔═╡ 9516114e-de9b-4705-9197-52737d050602
+md"""
+The Fréchet derivative is given by
+
+```math
+DF(x) = I - \nu \Lambda \circ (I - \mathcal{M}_{2x}).
+```
+"""
+
 # ╔═╡ abc4b3dd-518c-4239-87bb-e9688b34a8db
 Df(x) = 1 - 2x
 
-# ╔═╡ c454f8a4-5553-494a-8d08-7c7d756805a0
+# ╔═╡ 7e5be3bf-ea25-4269-b05f-8263d5ede515
+DF(x, ν, domain, codomain) = I -
+    ν * project(Integral(1), domain, codomain) * project(Multiplication(Df(x)), domain, codomain)
+
+# ╔═╡ e6b00d47-adf6-4935-b3c8-5b30ece1e2f7
 md"""
-## Zero-finding problem: Taylor integration
+###### An other contraction argument
+
+We can actually take advantage of the explicit recurrence relation to solve the IVP.
+Using interval arithmetic, it’s possible to compute the Taylor coefficients $\tilde{x}_0, \dots, \tilde{x}_N$ exactly, up to any desired order $N > 0$.
+Once we have these, we can define the truncated sequence $\hat{x} = (\tilde{x}_0, \dots, \tilde{x}_N, 0, \dots)$, where the terms beyond $N$ are set to zero.
+To estimate the truncation error, observe that the recurrence relation naturally leads to a fixed-point operator $T$.
+By focusing on the complementary subspace $\Pi_{> N} \ell^1_\mathbb{N}$, we can define $G : \Pi_{> N} \ell^1_\mathbb{N} \to \Pi_{> N} \ell^1_\mathbb{N}$ by
+
+```math
+G(h) \overset{\text{def}}{=} T(\hat{x} + h).
+```
+
+Intuitively, $h$ represents the correction to the tail of $\hat{x}$.
+The key idea is that, for a sufficiently large $N$, this operator $G$ becomes contracting around $0 \in \Pi_{> N} \ell^1_\mathbb{N}$.
+
+There are two main differences with the CAPs done so far:
+- we do not construct a Newton-like fixed-point operator, and
+- we must solve **exactly** a finite number of equations.
+
+That said, we do not pursue this approach in this lecture, as it is specific to power series.
+Our broader goal is to develop techniques that can be applied to other kinds of series.
+In particular, [Chebyshev polynomials](https://en.wikipedia.org/wiki/Chebyshev_polynomials) are especially relevant in the context of IVPs.
 """
 
-# ╔═╡ d53d988f-da50-4839-aae6-d7bdac46d4ac
-F(x, x0, τ, N) = project(x - x0 - τ * integrate(f(x)), Taylor(N))
+# ╔═╡ 3a6bae8b-933e-4384-81a8-e3d3bb5459c7
+md"## Numerical zero"
 
-# ╔═╡ 7e5be3bf-ea25-4269-b05f-8263d5ede515
-DF(x, τ, N, M) = project(I -
-    τ * (Integral(1) * project(Multiplication(Df(x)), Taylor(N), Taylor(N))),
-    Taylor(N), Taylor(M))
+# ╔═╡ eef70ab3-fb71-4cfe-bca6-4ab0d578aca3
+N = 20 # order of the Taylor series
 
-# ╔═╡ 8c99fd06-bea2-462e-ba47-aaa9da05d740
-begin
-# Numerical approximation
+# ╔═╡ 4a173aa3-1672-4a21-a9d0-e64a9336144a
+ϕ = 0.5 # initial condition
 
-N = 140 # order of the Taylor series
+# ╔═╡ 8ead7dda-965c-4540-a77d-d37ed4d8aea9
+ν = 2.5 # time rescaling
 
-x0 = 0.5 # initial condition
+# ╔═╡ 5266d1d6-45c5-497b-9d2a-22a6f4423efa
+initial_guess = zeros(Taylor(N));
 
-τ = 2.5 # time rescaling
+# ╔═╡ fc74e5bf-ccfa-460b-a69c-29c50d9400e7
+F_DF(x) = (F(x, ϕ, ν, Taylor(N)), DF(x, ν, Taylor(N), Taylor(N)))
 
-initialguess = ones(Taylor(N))
-
-bx, success = newton(x -> (F(x, x0, τ, N), DF(x, τ, N, N)), initialguess)
-end
+# ╔═╡ 6edbe03d-77b5-4c8f-884a-fe008a061228
+x_bar, success = newton(F_DF, initial_guess)
 
 # ╔═╡ 25e484d2-e228-45a8-9a8f-53ec54326fd9
 begin
-	plot(LinRange(-τ, τ, 101), t -> bx(t/τ); legend = false)
+	plot(LinRange(-ν, ν, 101), t -> x_bar(t/ν); linewidth = 3, label = "x_bar")
+	xlims!(-ν, ν)
 	xlabel!("t")
-	ylabel!("u")
-	xlims!(-τ, τ)
 end
 
-# ╔═╡ 641caade-ff17-4484-af95-988b92977bb5
+# ╔═╡ 3395bf15-3e17-4039-bba1-839933a9f481
 md"""
-## The Newton-Kantorovich proof
+###### Initializing Newton's method
+
+In this example, Newton converged with a simple guess.
+In general, however, we need to study the solutions of the ODE in more detail using numerical integration.
 """
 
-# ╔═╡ c4254d37-06d5-4502-9136-717f9404a7ff
-function tail(x, N)
-    # get the tail of a Taylor series
-    y = zeros(eltype(x), space(x))
-    for n = N+1:order(x)
-        y[n] = x[n]
-    end
-    return y
-end
+# ╔═╡ 641caade-ff17-4484-af95-988b92977bb5
+md"## Constructing $A$"
 
-# ╔═╡ 84d0a349-66a1-45e4-887f-2bd19b5ccf4a
-begin
-	#- approximate inverse
+# ╔═╡ d55fb36b-a0a8-41cd-a50f-9495ede7f2ad
+md"""
+We use the projection to split $A$, the approximate inverse of $DF(\bar{x})$, into a finite part and a tail part:
 
-A_finite = interval.( inv(DF(bx, τ, N, N)) )
-opnormA_finite = opnorm(A_finite, 1)
-opnormA_tail = interval(1)
-opnormA = max(opnormA_finite, opnormA_tail)
+```math
+A
+\overset{\text{def}}{=}
+A_N \Pi_N + \Pi_{>N},
+```
+
+where $A_N$ is a linear map (constructed below) on $\Pi_N \ell^1_\mathbb{N}$.
+By construction, we can write $A$ in the block diagonal form
+
+```math
+A =
+\begin{pmatrix}
+A_N & 0 \\
+0 & \Pi_{>N}
+\end{pmatrix}.
+```
+
+Next, since the operator $\Pi_N DF(\bar{x}) \Pi_N$ is a finite-dimensional square matrix, we define $A_N$ to be its numerical inverse.
+"""
+
+# ╔═╡ 29ce245e-e838-42f1-a524-6f8059b0291b
+A_N = inv(DF(x_bar, ν, Taylor(N), Taylor(N)))
+
+# ╔═╡ 97e52e3e-fd1c-4dff-8102-fd8b509d45f6
+md"## Verifying the contraction"
+
+# ╔═╡ 43ec73f0-778b-4571-a04f-56832939194e
+md"""
+We now verify that $T(x) \overset{\text{def}}{=} x - A F(x)$ is a contraction around $\bar{x} \in \Pi_N \ell^1_\mathbb{N}$.
+To rigorously compute the bounds $Y, Z_1, Z_2$, we enclose all relevant data into intervals.
+"""
+
+# ╔═╡ 9ec0cbd7-e74d-42b4-b911-9b164a0c7abc
+iϕ = interval(0.5) # 0.5 is exactly representable as a Float64
+
+# ╔═╡ ddcbee38-f3ec-47ff-81fd-7cae07482929
+iν = interval(2.5) # 2.5 is exactly representable as a Float64
+
+# ╔═╡ bc8c3312-e7d8-413e-9c4c-95bf46ba802e
+ix_bar = interval(x_bar)
+
+# ╔═╡ 5b83f453-55a7-4a38-8e74-aea6af53a837
+iA_N = interval(A_N)
+
+# ╔═╡ 2e0c0dc6-031a-46a8-9c37-27ffab80db2c
+md"##### Computing $Y$"
+
+# ╔═╡ 10898ff1-2a1f-4369-8f3f-0f096eca6b75
+function bound_Y(x_bar, ϕ, ν, A)
+	N = order(x_bar)
+	space = Taylor(2N+1)
+
+	Fx = F(x_bar, ϕ, ν, space)
+
+	Id = interval(I)
+	ext_A = project(Id, space, space)
+	ext_A[0:N,0:N] = coefficients(A)
+
+	return norm(ext_A * Fx, 1)
 end
 
 # ╔═╡ 34152734-45ff-4dfe-bc25-3d60ba4c9d19
-begin
-	#- Y bound
+Y = bound_Y(ix_bar, iϕ, iν, iA_N)
 
-full_F = F(interval.(bx), interval(x0), interval(τ), 2N+1) # the order of F is 2N+1
-Y = norm(A_finite * project(full_F, Taylor(N)), 1) + norm(tail(full_F, N), 1)
+# ╔═╡ e3ae92f8-e06e-4931-b424-38c893001471
+md"##### Computing $Z_1$"
+
+# ╔═╡ 82b4d717-835e-4577-b4bd-410f5fecab41
+function bound_Z₁(x_bar, ν, A)
+	N = order(x_bar)
+	space = Taylor(N+1)
+
+	DFx = DF(x_bar, ν, space, space)
+
+	Id = interval(I)
+	ext_A = project(Id, space, space)
+	ext_A[0:N,0:N] = coefficients(A)
+
+	return opnorm(Id - ext_A * DFx, 1)
 end
 
 # ╔═╡ 4bce0a13-ca2f-46c4-9ef3-12f07d525fbf
-begin
-#- Z₁ bound
+Z₁ = bound_Z₁(ix_bar, iν, iA_N)
 
-Df_bx = Df(interval.(bx))
+# ╔═╡ 765ee153-3a73-4f0e-81ff-a9852461e4ef
+md"##### Computing $Z_2$"
 
-Z₁ = opnorm(I - A_finite * DF(interval.(bx), τ, N, N), 1) +
-    τ * norm(Df_bx, 1) / (interval(N + 1))
+# ╔═╡ 09c77d32-4541-458e-86a0-e4fb3c324e93
+R = Inf
 
+# ╔═╡ b2d7aa0e-f9aa-4dc4-aff7-4474e9a6c9b1
+function bound_Z₂(ν, A)
+	N = order(domain(A))
+	Λ = project(Integral(1), domain(A), domain(A), Interval{Float64})
+	return 2ν * max(opnorm(A * Λ, 1), inv(interval(N)))
 end
 
 # ╔═╡ 031ab1e8-d479-4197-919c-20416f19aa9f
-begin
-	#- Z₂ bound
+Z₂ = bound_Z₂(iν, iA_N)
 
-Z₂ = 2 * τ * opnormA
-end
+# ╔═╡ 7b38e714-75bf-4a56-87f1-f8db5db517e3
+md"##### Finishing the CAP"
+
+# ╔═╡ b53f9f0a-c4d8-4102-ac55-0bc4cea3cbdf
+md"""
+To determine the values of $r$ that satisfy the radii polynomial inequalities, we use the `interval_of_existence` function from RadiiPolynomial.
+This function returns an interval of existence, within which all contained values satisfy the contraction conditions.
+"""
 
 # ╔═╡ 7fc34159-4b00-4e5e-b969-b4550b38ab53
-#- interval of existence (cf. Radii Polynomial Theorem)
-# r_star = Inf # since the second-order derivative is constant
-r = interval_of_existence(Y, Z₁, Z₂, Inf)
+ie = interval_of_existence(Y, Z₁, Z₂, R)
 
-# ╔═╡ a618d08d-3f68-4a84-ac24-f6fbd2d93818
+# ╔═╡ 67008bc9-20ae-435b-9228-438c022fa9f2
+r = inf(ie)
+
+# ╔═╡ 559d9d44-3501-4a7c-ad4c-f81d633f1a15
 md"""
-# Next steps and further reading
+To guarantee that the fixed-point of $T$ is a zero of $F$, we must check that $A$ is injective.
+This property comes as a by-product of the contraction argument.
+Indeed, $\|I - A DF(\bar{x})\| \le Z_1 < 1$ ensures that $A DF(\bar{x})$ is invertible, which implies that $A$ is surjective.
+By construction, $A_N$ is surjective and $A$ is injective if and only if $A_N$ is injective.
+Since $A_N$ can be represented by a finite square matrix, it follows that $A$ must also be injective.
 
-We remark that we need a large number of Taylor coefficients for our proof to succeed despite a relatively small length of integration ($N = 140$ to have last Taylor coefficient of order $10^{-14}$). One should consider using Chebyshev series instead.
+Therefore, we have proved the existence of a zero $\tilde{x}$ of $F$ such that
+
+```math
+\tilde{x} = \bar{x} + \gamma,
+```
+
+where $\gamma \in \ell^1_\mathbb{N}$ is not known explicitly, but satisfies $\| \gamma \|_1 \le r$.
+Our choice of norm also gives us a $C^0$-error bound for the function
+
+```math
+\begin{aligned}
+\sup_{t \in [-\nu,\nu]} | u(t) - \sum_{n=0}^N \bar{x}_n (t/\nu)^n |
+&= \sup_{t \in [-1,1]} | w(t) - \sum_{n=0}^N \bar{x}_n t^n | \\
+&= \sup_{t \in [-1,1]} | \sum_{n \ge 0} \tilde{x}_n t^n - \sum_{n=0}^N \bar{x}_n t^n | \\
+&= \sup_{t \in [-1,1]} | \sum_{n \ge 0} (\tilde{x}_n - \bar{x}_n) t^n | \\
+&\le \| \tilde{x} - \bar{x} \|_1 \\
+&\le r.
+\end{aligned}
+```
 """
+
+# ╔═╡ fb6bd3c5-6622-457f-b57f-bdd0d395d7ab
+begin
+	rigorous_eval(x, r, t) = interval(x(t), r; format = :midpoint)
+
+	ts = LinRange(-ν, ν, 101)
+
+	plot([[interval(ts[i], ts[i+1]), rigorous_eval(ix_bar, r, interval(ts[i]/ν, ts[i+1]/ν))] for i = 1:length(ts)-1];
+		label = "", color = :palegreen3)
+
+	plot!(ts, t -> 1/(1+exp(-t));
+		label = "1/(1+exp(-t))", color = :salmon, linewidth = 3)
+
+	plot!(ts, t -> x_bar(t/ν);
+		label = "x_bar", color = :royalblue1, linewidth = 3, linestyle = :dash)
+
+	xlims!(-ν, ν)
+	xlabel!("t")
+end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
 PLUTO_PROJECT_TOML_CONTENTS = """
@@ -151,7 +444,7 @@ PlutoUI = "7f904dfe-b85e-4ff6-b463-dae2292396a8"
 RadiiPolynomial = "f2081a94-c849-46b6-8dc9-07bb90ed72a9"
 
 [compat]
-Plots = "~1.40.8"
+Plots = "~1.40.9"
 PlutoTeachingTools = "~0.3.1"
 PlutoUI = "~0.7.60"
 RadiiPolynomial = "~0.8.13"
@@ -163,7 +456,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "b7ff9acf5880a7313b4c5c9d007db38c60827ca9"
+project_hash = "ca5a11d9ce64f34ca8a3fc9b5d5457f0ee3dff36"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -220,9 +513,9 @@ version = "0.7.6"
 
 [[deps.ColorSchemes]]
 deps = ["ColorTypes", "ColorVectorSpace", "Colors", "FixedPointNumbers", "PrecompileTools", "Random"]
-git-tree-sha1 = "13951eb68769ad1cd460cdb2e64e5e95f1bf123d"
+git-tree-sha1 = "c785dfb1b3bfddd1da557e861b919819b82bbe5b"
 uuid = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
-version = "3.27.0"
+version = "3.27.1"
 
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
@@ -326,15 +619,15 @@ version = "0.0.20230411+0"
 
 [[deps.ExceptionUnwrapping]]
 deps = ["Test"]
-git-tree-sha1 = "dcb08a0d93ec0b1cdc4af184b26b591e9695423a"
+git-tree-sha1 = "d36f682e590a83d63d1c7dbd287573764682d12a"
 uuid = "460bff9d-24e4-43bc-9d9f-a8973cb893f4"
-version = "0.1.10"
+version = "0.1.11"
 
 [[deps.Expat_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "1c6317308b9dc757616f0b5cb379db10494443a7"
+git-tree-sha1 = "cc5231d52eb1771251fbd37171dbc408bcc8a1b6"
 uuid = "2e619515-83b5-522b-bb60-26c02a35a201"
-version = "2.6.2+0"
+version = "2.6.4+0"
 
 [[deps.FFMPEG]]
 deps = ["FFMPEG_jll"]
@@ -371,9 +664,9 @@ version = "1.3.7"
 
 [[deps.FreeType2_jll]]
 deps = ["Artifacts", "Bzip2_jll", "JLLWrappers", "Libdl", "Zlib_jll"]
-git-tree-sha1 = "5c1d8ae0efc6c2e7b1fc502cbe25def8f661b7bc"
+git-tree-sha1 = "fa8e19f44de37e225aa0f1695bc223b05ed51fb4"
 uuid = "d7e528f0-a631-5988-bf34-fe36492bcfd7"
-version = "2.13.2+0"
+version = "2.13.3+0"
 
 [[deps.FriBidi_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -407,15 +700,15 @@ version = "0.21.0+0"
 
 [[deps.Glib_jll]]
 deps = ["Artifacts", "Gettext_jll", "JLLWrappers", "Libdl", "Libffi_jll", "Libiconv_jll", "Libmount_jll", "PCRE2_jll", "Zlib_jll"]
-git-tree-sha1 = "674ff0db93fffcd11a3573986e550d66cd4fd71f"
+git-tree-sha1 = "b36c7e110080ae48fdef61b0c31e6b17ada23b33"
 uuid = "7746bdde-850d-59dc-9ae8-88ece973131d"
-version = "2.80.5+0"
+version = "2.82.2+0"
 
 [[deps.Graphite2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
-git-tree-sha1 = "344bf40dcab1073aca04aa0df4fb092f920e4011"
+git-tree-sha1 = "01979f9b37367603e2848ea225918a3b3861b606"
 uuid = "3b182d85-2403-5c21-9c21-1e1f0cc25472"
-version = "1.3.14+0"
+version = "1.3.14+1"
 
 [[deps.Grisu]]
 git-tree-sha1 = "53bb909d1151e57e2484c3d1b53e19552b887fb2"
@@ -423,10 +716,10 @@ uuid = "42e2da0e-8278-4e71-bc24-59509adca0fe"
 version = "1.0.2"
 
 [[deps.HTTP]]
-deps = ["Base64", "CodecZlib", "ConcurrentUtilities", "Dates", "ExceptionUnwrapping", "Logging", "LoggingExtras", "MbedTLS", "NetworkOptions", "OpenSSL", "Random", "SimpleBufferStream", "Sockets", "URIs", "UUIDs"]
-git-tree-sha1 = "bc3f416a965ae61968c20d0ad867556367f2817d"
+deps = ["Base64", "CodecZlib", "ConcurrentUtilities", "Dates", "ExceptionUnwrapping", "Logging", "LoggingExtras", "MbedTLS", "NetworkOptions", "OpenSSL", "PrecompileTools", "Random", "SimpleBufferStream", "Sockets", "URIs", "UUIDs"]
+git-tree-sha1 = "6c4d6a1babbbee6f283b3da64ac895f0a3bfbc96"
 uuid = "cd3eb016-35fb-5094-929b-558a96fad6f3"
-version = "1.10.9"
+version = "1.10.11"
 
 [[deps.HarfBuzz_jll]]
 deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll", "Graphite2_jll", "JLLWrappers", "Libdl", "Libffi_jll"]
@@ -482,9 +775,9 @@ version = "0.2.2"
 
 [[deps.JLFzf]]
 deps = ["Pipe", "REPL", "Random", "fzf_jll"]
-git-tree-sha1 = "39d64b09147620f5ffbf6b2d3255be3c901bec63"
+git-tree-sha1 = "71b48d857e86bf7a1838c4736545699974ce79a2"
 uuid = "1019f520-868f-41f5-a6de-eb00f4b6a39c"
-version = "0.1.8"
+version = "0.1.9"
 
 [[deps.JLLWrappers]]
 deps = ["Artifacts", "Preferences"]
@@ -506,9 +799,9 @@ version = "3.0.4+0"
 
 [[deps.JuliaInterpreter]]
 deps = ["CodeTracking", "InteractiveUtils", "Random", "UUIDs"]
-git-tree-sha1 = "2984284a8abcfcc4784d95a9e2ea4e352dd8ede7"
+git-tree-sha1 = "10da5154188682e5c0726823c2b5125957ec3778"
 uuid = "aa1ae85d-cabe-5617-a682-6adf51b2e16a"
-version = "0.9.36"
+version = "0.9.38"
 
 [[deps.LAME_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
@@ -616,9 +909,9 @@ version = "1.17.0+1"
 
 [[deps.Libmount_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "0c4f9c4f1a50d8f35048fa0532dabbadf702f81e"
+git-tree-sha1 = "84eef7acd508ee5b3e956a2ae51b05024181dee0"
 uuid = "4b2f31a3-9ecc-558c-b454-b3730dcb73e9"
-version = "2.40.1+0"
+version = "2.40.2+0"
 
 [[deps.Libtiff_jll]]
 deps = ["Artifacts", "JLLWrappers", "JpegTurbo_jll", "LERC_jll", "Libdl", "XZ_jll", "Zlib_jll", "Zstd_jll"]
@@ -628,9 +921,9 @@ version = "4.7.0+0"
 
 [[deps.Libuuid_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "5ee6203157c120d79034c748a2acba45b82b8807"
+git-tree-sha1 = "edbf5309f9ddf1cab25afc344b1e8150b7c832f9"
 uuid = "38a345b3-de98-5d2b-a5d3-14cd9215e700"
-version = "2.40.1+0"
+version = "2.40.2+0"
 
 [[deps.LinearAlgebra]]
 deps = ["Libdl", "OpenBLAS_jll", "libblastrampoline_jll"]
@@ -665,9 +958,9 @@ version = "1.1.0"
 
 [[deps.LoweredCodeUtils]]
 deps = ["JuliaInterpreter"]
-git-tree-sha1 = "260dc274c1bc2cb839e758588c63d9c8b5e639d1"
+git-tree-sha1 = "688d6d9e098109051ae33d126fcfc88c4ce4a021"
 uuid = "6f1432cf-f94c-5a45-995e-cdbf5db27b0b"
-version = "3.0.5"
+version = "3.1.0"
 
 [[deps.MIMEs]]
 git-tree-sha1 = "65f28ad4b594aebe22157d6fac869786a255b7eb"
@@ -815,9 +1108,9 @@ version = "1.4.3"
 
 [[deps.Plots]]
 deps = ["Base64", "Contour", "Dates", "Downloads", "FFMPEG", "FixedPointNumbers", "GR", "JLFzf", "JSON", "LaTeXStrings", "Latexify", "LinearAlgebra", "Measures", "NaNMath", "Pkg", "PlotThemes", "PlotUtils", "PrecompileTools", "Printf", "REPL", "Random", "RecipesBase", "RecipesPipeline", "Reexport", "RelocatableFolders", "Requires", "Scratch", "Showoff", "SparseArrays", "Statistics", "StatsBase", "TOML", "UUIDs", "UnicodeFun", "UnitfulLatexify", "Unzip"]
-git-tree-sha1 = "45470145863035bb124ca51b320ed35d071cc6c2"
+git-tree-sha1 = "dae01f8c2e069a683d3a6e17bbae5070ab94786f"
 uuid = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
-version = "1.40.8"
+version = "1.40.9"
 
     [deps.Plots.extensions]
     FileIOExt = "FileIO"
@@ -945,9 +1238,9 @@ version = "1.3.0"
 
 [[deps.Revise]]
 deps = ["CodeTracking", "Distributed", "FileWatching", "JuliaInterpreter", "LibGit2", "LoweredCodeUtils", "OrderedCollections", "REPL", "Requires", "UUIDs", "Unicode"]
-git-tree-sha1 = "7f4228017b83c66bd6aa4fddeb170ce487e53bc7"
+git-tree-sha1 = "470f48c9c4ea2170fd4d0f8eb5118327aada22f5"
 uuid = "295af30f-e4ad-537b-8983-00126c2a3abe"
-version = "3.6.2"
+version = "3.6.4"
 
 [[deps.RoundingEmulator]]
 git-tree-sha1 = "40b9edad2e5287e05bd413a38f61a8ff55b9557b"
@@ -1127,9 +1420,9 @@ version = "1.31.0+0"
 
 [[deps.XML2_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libiconv_jll", "Zlib_jll"]
-git-tree-sha1 = "6a451c6f33a176150f315726eba8b92fbfdb9ae7"
+git-tree-sha1 = "a2fccc6559132927d4c5dc183e3e01048c6dcbd6"
 uuid = "02c8fc9c-b97f-50b9-bbe4-9be30ff0a78a"
-version = "2.13.4+0"
+version = "2.13.5+0"
 
 [[deps.XSLT_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libgcrypt_jll", "Libgpg_error_jll", "Libiconv_jll", "XML2_jll", "Zlib_jll"]
@@ -1163,9 +1456,9 @@ version = "1.8.6+0"
 
 [[deps.Xorg_libXau_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "6035850dcc70518ca32f012e46015b9beeda49d8"
+git-tree-sha1 = "2b0e27d52ec9d8d483e2ca0b72b3cb1a8df5c27a"
 uuid = "0c0b7dd1-d40b-584c-a123-a41640f87eec"
-version = "1.0.11+0"
+version = "1.0.11+1"
 
 [[deps.Xorg_libXcursor_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg", "Xorg_libXfixes_jll", "Xorg_libXrender_jll"]
@@ -1175,9 +1468,9 @@ version = "1.2.0+4"
 
 [[deps.Xorg_libXdmcp_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "34d526d318358a859d7de23da945578e8e8727b7"
+git-tree-sha1 = "02054ee01980c90297412e4c809c8694d7323af3"
 uuid = "a3789734-cfe1-5b06-b2d0-1dd0d9d62d05"
-version = "1.1.4+0"
+version = "1.1.4+1"
 
 [[deps.Xorg_libXext_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Xorg_libX11_jll"]
@@ -1217,9 +1510,9 @@ version = "0.9.11+0"
 
 [[deps.Xorg_libpthread_stubs_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "8fdda4c692503d44d04a0603d9ac0982054635f9"
+git-tree-sha1 = "fee57a273563e273f0f53275101cd41a8153517a"
 uuid = "14d82f49-176c-5ed1-bb49-ad3f5cbd8c74"
-version = "0.1.1+0"
+version = "0.1.1+1"
 
 [[deps.Xorg_libxcb_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "XSLT_jll", "Xorg_libXau_jll", "Xorg_libXdmcp_jll", "Xorg_libpthread_stubs_jll"]
@@ -1283,9 +1576,9 @@ version = "2.39.0+0"
 
 [[deps.Xorg_xtrans_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "e92a1a012a10506618f10b7047e478403a046c77"
+git-tree-sha1 = "b9ead2d2bdb27330545eb14234a2e300da61232e"
 uuid = "c5fb5394-a638-5e4d-96e5-b29de1b5cf10"
-version = "1.5.0+0"
+version = "1.5.0+1"
 
 [[deps.Zlib_jll]]
 deps = ["Libdl"]
@@ -1306,9 +1599,9 @@ version = "3.2.9+0"
 
 [[deps.fzf_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl"]
-git-tree-sha1 = "936081b536ae4aa65415d869287d43ef3cb576b2"
+git-tree-sha1 = "6e50f145003024df4f5cb96c7fce79466741d601"
 uuid = "214eeab7-80f7-51ab-84ad-2988db7cef09"
-version = "0.53.0+0"
+version = "0.56.3+0"
 
 [[deps.gperf_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1410,20 +1703,55 @@ version = "1.4.1+1"
 # ╠═4dfe3d7f-aed8-487b-952c-8d8d502a7e46
 # ╟─5ed309bf-dc26-4008-b199-f1de5078130e
 # ╟─3e086655-fc49-42bb-803e-27b82c7a7577
-# ╠═4e6473ec-02c6-4ed5-ab05-8f0086853313
-# ╠═abc4b3dd-518c-4239-87bb-e9688b34a8db
+# ╟─86c84f47-a64b-43f9-a7e0-2eeb78b0d41c
+# ╟─ab841d58-1385-4d5b-89aa-7df1e9667978
+# ╟─5fe08415-9185-4054-8dec-a657cfb4484b
+# ╟─7cd532e8-f370-47e2-a2c1-3a5004cb8e8c
+# ╟─2be11063-c9dd-4c36-af2b-2d80fad17fcb
+# ╟─529d0a8a-c650-4b70-bd1c-bdd0621e06df
+# ╟─42e2418b-55bc-4e17-8cb7-445f8eee2cc6
 # ╟─c454f8a4-5553-494a-8d08-7c7d756805a0
+# ╟─0691e2f7-110c-42f7-95f6-056699578782
+# ╟─4ee023ac-e513-41f8-bfde-9d2daec71c57
+# ╠═4e6473ec-02c6-4ed5-ab05-8f0086853313
 # ╠═d53d988f-da50-4839-aae6-d7bdac46d4ac
+# ╟─9516114e-de9b-4705-9197-52737d050602
+# ╠═abc4b3dd-518c-4239-87bb-e9688b34a8db
 # ╠═7e5be3bf-ea25-4269-b05f-8263d5ede515
-# ╠═8c99fd06-bea2-462e-ba47-aaa9da05d740
+# ╟─e6b00d47-adf6-4935-b3c8-5b30ece1e2f7
+# ╟─3a6bae8b-933e-4384-81a8-e3d3bb5459c7
+# ╠═eef70ab3-fb71-4cfe-bca6-4ab0d578aca3
+# ╠═4a173aa3-1672-4a21-a9d0-e64a9336144a
+# ╠═8ead7dda-965c-4540-a77d-d37ed4d8aea9
+# ╠═5266d1d6-45c5-497b-9d2a-22a6f4423efa
+# ╠═fc74e5bf-ccfa-460b-a69c-29c50d9400e7
+# ╠═6edbe03d-77b5-4c8f-884a-fe008a061228
 # ╟─25e484d2-e228-45a8-9a8f-53ec54326fd9
+# ╟─3395bf15-3e17-4039-bba1-839933a9f481
 # ╟─641caade-ff17-4484-af95-988b92977bb5
-# ╠═c4254d37-06d5-4502-9136-717f9404a7ff
-# ╠═84d0a349-66a1-45e4-887f-2bd19b5ccf4a
+# ╟─d55fb36b-a0a8-41cd-a50f-9495ede7f2ad
+# ╠═29ce245e-e838-42f1-a524-6f8059b0291b
+# ╟─97e52e3e-fd1c-4dff-8102-fd8b509d45f6
+# ╟─43ec73f0-778b-4571-a04f-56832939194e
+# ╠═9ec0cbd7-e74d-42b4-b911-9b164a0c7abc
+# ╠═ddcbee38-f3ec-47ff-81fd-7cae07482929
+# ╠═bc8c3312-e7d8-413e-9c4c-95bf46ba802e
+# ╠═5b83f453-55a7-4a38-8e74-aea6af53a837
+# ╟─2e0c0dc6-031a-46a8-9c37-27ffab80db2c
+# ╠═10898ff1-2a1f-4369-8f3f-0f096eca6b75
 # ╠═34152734-45ff-4dfe-bc25-3d60ba4c9d19
+# ╟─e3ae92f8-e06e-4931-b424-38c893001471
+# ╠═82b4d717-835e-4577-b4bd-410f5fecab41
 # ╠═4bce0a13-ca2f-46c4-9ef3-12f07d525fbf
-# ╟─031ab1e8-d479-4197-919c-20416f19aa9f
+# ╟─765ee153-3a73-4f0e-81ff-a9852461e4ef
+# ╠═09c77d32-4541-458e-86a0-e4fb3c324e93
+# ╠═b2d7aa0e-f9aa-4dc4-aff7-4474e9a6c9b1
+# ╠═031ab1e8-d479-4197-919c-20416f19aa9f
+# ╟─7b38e714-75bf-4a56-87f1-f8db5db517e3
+# ╟─b53f9f0a-c4d8-4102-ac55-0bc4cea3cbdf
 # ╠═7fc34159-4b00-4e5e-b969-b4550b38ab53
-# ╟─a618d08d-3f68-4a84-ac24-f6fbd2d93818
+# ╠═67008bc9-20ae-435b-9228-438c022fa9f2
+# ╟─559d9d44-3501-4a7c-ad4c-f81d633f1a15
+# ╟─fb6bd3c5-6622-457f-b57f-bdd0d395d7ab
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
