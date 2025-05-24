@@ -181,20 +181,13 @@ md"## Numerical zero"
 
 # ╔═╡ 151f9f5f-65ab-4ccb-94a6-c530d924962f
 md"""
-The map $F$ is affine and satisfies $[DF(x)] x = F(x) + 1$, so Newton's method reduces to solving, in $\ell^1_\mathbb{N}$, the linear system
+The map $F$ is affine and its Fréchet derivative $DF(x) \in \mathscr{B}(\ell^1_\mathbb{N})$, at some $x \in \ell^1_\mathbb{N}$, reads
 
 ```math
-\mathcal{M}_y x = 1,
+[DF(x)]h = y * h, \qquad \forall h \in \ell^1_\mathbb{N}.
 ```
 
-where $\mathcal{M}_y = DF(x) \in \mathscr{B}(\ell^1_\mathbb{N})$ is such that
-
-```math
-\mathcal{M}_y h = y * h, \qquad \forall h \in \ell^1_\mathbb{N}.
-```
-
-In other words, $\mathcal{M}_y$ is the mutliplication operator associated with $y$.
-
+In other words, $DF(x) = \mathcal{M}_y$, where $\mathcal{M}_y$ denotes the multiplication operator associated with $y$.
 As a bounded linear operator acting on infinite sequences in $\ell^1_\mathbb{N}$, $\mathcal{M}_y$ can be visualized as a matrix with an infinite number of rows and columns:
 
 ```math
@@ -208,7 +201,24 @@ y_2 & y_1 & y_0 & \ddots \\
 ```
 
 Our goal is to find a numerical approximation $\bar{x}$ of the zero of $F$ as an element of the truncated space $\Pi_N \ell^1_\mathbb{N}$.
-We can obtain this approximation by numerically solving the linear system above for a finite number of rows: $\Pi_N \mathcal{M}_b \bar{x} \approx 1$.
+The general idea is to apply Newton's method on $\Pi_N \circ F \circ \Pi_N$, whose iterates are given by
+
+```math
+x \in \Pi_N\ell^1_\mathbb{N} \mapsto x - (\Pi_N DF(\Pi_N x) \Pi_N)^{-1} \Pi_N F(\Pi_N x) \in \Pi_N\ell^1_\mathbb{N}.
+```
+
+For our map $F$, these reduce to solving the following linear system in $\ell^1_\mathbb{N}$
+
+```math
+\Pi_N \mathcal{M}_y \Pi_N x = 1,
+```
+
+so that we seek $\bar{x}$ such that
+
+```math
+\Pi_N \mathcal{M}_y \Pi_N \bar{x} \approx 1.
+```
+
 If the truncation dimension $N$ is large enough we may hope that also $\Pi_{> N} F (\bar{x}) \approx 0$, since we expect the coefficients of $\bar{x}$ to decrease for moderately large $n$.
 """
 
@@ -250,19 +260,21 @@ md"## Constructing $A$"
 # ╔═╡ 8a4513a5-9049-48df-ae9b-ea8c5d5f1076
 md"""
 For $T$ to be a contraction, we want $A$ to be a good approximate inverse of $\mathcal{M}_y$.
-So we want the inverse of $y$ with respect to the Cauchy product $*$.
-Recall that our numerical zero $\bar{x} \in \Pi_N \ell^1_{\mathbb{N}}$ satisfies $\bar{x} * y \approx 1$.
-Thus, we define
+Recall that our numerical zero $\bar{x} \in \Pi_N \ell^1_\mathbb{N}$ satisfies $\bar{x} * y \approx 1$.
+Thus, by taking
 
 ```math
-A \overset{\text{def}}{=} \mathcal{M}_{\bar{x}}.
+A \overset{\text{def}}{=} \mathcal{M}_{\bar{x}},
 ```
 
-Consequently,
+we have that $A DF(\bar{x}) \approx I$ as desired:
 
 ```math
 A [DF(\bar{x})] h = \bar{x} * y * h \approx 1 * h = h.
 ```
+
+!!! note "Remark"
+    In general, for an invertible function $w(t) = \sum_{n \ge 0} z_n t^n$, with its sequence of coefficients $z \in \ell^1_\mathbb{N}$, we have that $\mathcal{M}_z^{-1} = \mathcal{M}_{z^{-1}$}.
 """
 
 # ╔═╡ 7edef822-8f17-4a17-8dc7-f476fd610a29
@@ -410,7 +422,7 @@ Lastly, this example is simple enough that we can compute by hand both the first
 \frac{1}{2+t} = \frac{1}{2} - \frac{t}{4} + \frac{t^2}{8} - \frac{t^3}{16} + \frac{t^4}{32} - \frac{t^5}{64} + O(t^6),
 ```
 
-and compare with the result of our CAP.
+and compare with the result of our CAP: the approximate finite coefficients $\bar{x}$ and the error $r$.
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001

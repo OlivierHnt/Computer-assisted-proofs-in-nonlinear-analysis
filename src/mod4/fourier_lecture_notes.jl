@@ -225,7 +225,7 @@ An implementation, using the RadiiPolynomial library, of the truncated zero-find
 
 # ╔═╡ df46f5c1-dbc6-4cf1-8e97-36b22c6b4c51
 function Λ⁻¹(β, space)
-	∂ = project(Derivative(1), space, space) 
+	∂ = project(Derivative(1), space, space)
 	∂² = ∂ * ∂
 	return -inv(∂² + β[1] * ∂ + β[2]*I)
 end
@@ -483,8 +483,8 @@ The latter operator can be represented by a finite matrix and we can compute the
 # ╔═╡ ac7b5711-b2ef-44dc-a272-c5d3f4e9cb74
 function bound_Z₁(x_bar, β, A, X)
 	K = order(x_bar)
-	domain = Fourier(2K, frequency(x_bar))
-	codomain = Fourier(3K, frequency(x_bar))
+	domain = Fourier(2K+1, frequency(x_bar))
+	codomain = Fourier(3K+1, frequency(x_bar))
 
 	DFx = DF(x_bar, β, domain, codomain)
 
