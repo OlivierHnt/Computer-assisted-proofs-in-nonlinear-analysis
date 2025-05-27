@@ -37,10 +37,10 @@ Similarly to the case of Taylor series, we discretize the function space of (abs
 # ╔═╡ 4c9f56dd-b79d-4e7e-8b1d-38e91f6632df
 md"""
 **1.** Let $\omega > 0$.
-If $u(t) = \sum_{k \in \mathbb{Z}} x_k e^{i k \omega t}$ and $v(t) = \sum_{k \in \mathbb{Z}} y_k e^{i k \omega t}$, then $u(t) v(t) = \sum_{k \in \mathbb{Z}} (a*b)_k e^{i k \omega t}$ where
+If $u(t) = \sum_{k \in \mathbb{Z}} x_k e^{i k \omega t}$ and $v(t) = \sum_{k \in \mathbb{Z}} y_k e^{i k \omega t}$, then $u(t) v(t) = \sum_{k \in \mathbb{Z}} (x*y)_k e^{i k \omega t}$ where
 
 ```math
-(a*b)_k \overset{\text{def}}{=} \sum_{l \in \mathbb{Z}} x_{k-l} y_l, \qquad k \in \mathbb{Z}.
+(x*y)_k \overset{\text{def}}{=} \sum_{l \in \mathbb{Z}} x_{k-l} y_l, \qquad k \in \mathbb{Z}.
 ```
 
 Prove that $\ell^1_{\mathbb{Z}}$ together with $*$ satisfies the unital Banach algebra property $\|x * y\|_1 \le \|x\|_1 \|y\|_1$.
